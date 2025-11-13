@@ -12,6 +12,10 @@ Perfect for collaborative problem-solving, coding tasks, and exploring complex t
 - 📝 Generate formatted debate transcripts
 - 💻 Handle coding tasks with collaborative agent solutions
 - 🎯 Simple command-line interface
+- 📊 **Token usage tracking** - Monitor API costs for all agent interactions
+- 🤝 **Consensus generation** - Synthesize agent perspectives into unified answers
+- 📝 **MMLU testing** - Test debate system on multiple-choice questions
+- 🎨 **ArtifactsBench integration** - Generate visual/interactive code artifacts
 - ✅ Comprehensive test suite included
 
 ## Prerequisites
@@ -73,16 +77,22 @@ python main.py --topic "Your debate topic here"
 
 #### Command-Line Arguments
 
-- `--topic` (required): The debate topic for agents to discuss
+- `--topic` (required): The debate topic, "MMLU" for MMLU tests, or "ARTIFACTS" for code generation tasks
 - `--agents` (optional): Number of agents to participate (default: 3)
 - `--rounds` (optional): Number of debate rounds (default: 2)
 - `--model` (optional): OpenAI model to use (default: gpt-4)
+- `--consensus` (optional): Generate consensus after debate (flag, default: disabled)
 
 #### Examples
 
 **Basic debate** with default settings (3 agents, 2 rounds):
 ```bash
 python main.py --topic "Should AI systems be open source?"
+```
+
+**Debate with consensus generation**:
+```bash
+python main.py --topic "What are the benefits of renewable energy?" --consensus
 ```
 
 **Coding task** - agents collaborate on writing code:
@@ -98,6 +108,26 @@ python main.py --topic "What is the future of renewable energy?" --agents 5 --ro
 **Use a cheaper model** for faster/cheaper responses:
 ```bash
 python main.py --topic "How can we improve education?" --model gpt-4o-mini
+```
+
+**Run MMLU test suite** - test on multiple-choice questions:
+```bash
+python main.py --topic MMLU --model gpt-4o-mini
+```
+
+**MMLU with consensus** - get synthesized answers:
+```bash
+python main.py --topic MMLU --consensus --agents 3 --rounds 2
+```
+
+**ArtifactsBench code generation** - generate visual/interactive code:
+```bash
+python main.py --topic ARTIFACTS --model gpt-4o-mini
+```
+
+**ArtifactsBench with more rounds** - deeper implementation discussion:
+```bash
+python main.py --topic ARTIFACTS --agents 5 --rounds 3 --model gpt-4
 ```
 
 ### Test Scripts
@@ -193,8 +223,12 @@ The result is a collaborative, well-thought-out solution with multiple iteration
 
 ```
 OpenAIMultiAgentDebate/
-├── main.py                    # CLI entry point
+├── main.py                    # CLI entry point (with MMLU & Artifacts support)
 ├── debate_system.py           # Core DebateSystem class
+├── token_tracking.py          # Token usage tracking system
+├── consensus_system.py        # Consensus/merging functionality
+├── test_mmlu.py              # MMLU testing framework
+├── artifacts_debate.py        # ArtifactsBench code generation
 ├── test_live.py              # Live API test script
 ├── test_coding.py            # Coding task test script
 ├── requirements.txt          # Python dependencies
@@ -230,6 +264,16 @@ This system is perfect for:
 - 🔬 **Research brainstorming** - Generate diverse ideas and approaches
 - 🤔 **Problem-solving** - Break down complex problems with multi-agent analysis
 - 📊 **Decision-making** - Evaluate options from different viewpoints
+- 📝 **MMLU evaluation** - Test model accuracy on multiple-choice questions with debate
+- 🎨 **Code artifact generation** - Create interactive visualizations and web apps
+
+## Output Files
+
+The system generates JSON output files for different modes:
+
+- **`mmlu_debate_results.json`** - MMLU test results with accuracy scores and full transcripts
+- **`artifacts_results.json`** - Generated code artifacts with evaluation scores
+- Both include complete debate transcripts, consensus, and token usage statistics
 
 ## Future Enhancements
 
