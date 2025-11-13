@@ -3,7 +3,7 @@ Token Tracking System - Usage Monitoring for Multi-Agent Debates
 
 This module provides token usage tracking functionality using the OpenAI Agents SDK
 usage API. It tracks input tokens, output tokens, total tokens, and costs across
-all agents in a debate.
+all agents in a debate. Maintains persistent statistics across runs in a JSON file.
 """
 
 from typing import List, Dict, Any
@@ -11,6 +11,12 @@ from dataclasses import dataclass, field
 from agents import Agent, Runner
 from debate_system import DebateSystem, InMemorySession
 import time
+import json
+import os
+from datetime import datetime
+
+# File to store persistent token usage across runs
+TOKEN_USAGE_FILE = "token_usage_history.json"
 
 
 @dataclass
@@ -61,6 +67,79 @@ class DebateUsage:
         }
 
 
+def load_token_history(filename: str = TOKEN_USAGE_FILE) -> Dict[str, Any]:
+    """
+    Load token usage history from JSON file.
+    
+    Args:
+        filename: Path to JSON file
+        
+    Returns:
+        Dictionary of model statistics
+    """
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return {}
+    return {}
+
+
+def save_token_history(history: Dict[str, Any], filename: str = TOKEN_USAGE_FILE):
+    """
+    Save token usage history to JSON file.
+    
+    Args:
+        history: Dictionary of model statistics
+        filename: Path to JSON file
+    """
+    with open(filename, 'w') as f:
+        json.dump(history, f, indent=2)
+
+
+def update_model_statistics(model: str, input_tokens: int, output_tokens: int, total_tokens: int) -> Dict[str, Any]:
+    """
+    Update persistent statistics for a specific model.
+    
+    This function loads existing statistics, adds the current run's tokens to the
+    cumulative totals for the model, and saves back to the JSON file.
+    
+    Args:
+        model: Model name (e.g., 'gpt-4', 'gpt-4o-mini')
+        input_tokens: Input tokens from current run
+        output_tokens: Output tokens from current run
+        total_tokens: Total tokens from current run
+        
+    Returns:
+        Updated statistics for the model
+    """
+    # Load existing history
+    history = load_token_history()
+    
+    # Initialize model entry if doesn't exist
+    if model not in history:
+        history[model] = {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "total_tokens": 0,
+            "total_runs": 0,
+            "last_updated": None
+        }
+    
+    # Add current run's tokens to cumulative totals
+    history[model]["input_tokens"] += input_tokens
+    history[model]["output_tokens"] += output_tokens
+    history[model]["total_tokens"] += total_tokens
+    history[model]["total_runs"] += 1
+    history[model]["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Save updated history
+    save_token_history(history)
+    
+    return history[model]
+
+
 class TokenTrackingDebateSystem:
     """
     Enhanced DebateSystem with token usage tracking.
@@ -91,7 +170,7 @@ class TokenTrackingDebateSystem:
             num_rounds: Number of debate rounds
             
         Returns:
-            Dictionary with 'transcript' and 'usage' keys
+            Dictionary with 'transcript', 'usage', 'responses', and 'persistent_stats' keys
         """
         # Reset usage data for new debate
         self.usage_data = DebateUsage()
@@ -111,10 +190,19 @@ class TokenTrackingDebateSystem:
         # Format transcript
         transcript = self._format_transcript(all_responses)
         
+        # Update persistent statistics for this model
+        persistent_stats = update_model_statistics(
+            model=self.model,
+            input_tokens=self.usage_data.total_input_tokens,
+            output_tokens=self.usage_data.total_output_tokens,
+            total_tokens=self.usage_data.total_tokens
+        )
+        
         return {
             "transcript": transcript,
             "usage": self.usage_data,
-            "responses": all_responses
+            "responses": all_responses,
+            "persistent_stats": persistent_stats
         }
     
     def _create_agents(self) -> List[Agent]:
@@ -219,13 +307,19 @@ class TokenTrackingDebateSystem:
         
         return "\n".join(transcript_lines)
     
-    def print_usage_summary(self):
-        """Print a formatted summary of token usage."""
+    def print_usage_summary(self, show_history: bool = True):
+        """
+        Print a formatted summary of token usage.
+        
+        Args:
+            show_history: Whether to display cumulative statistics from persistent file
+        """
         summary = self.usage_data.get_summary()
         
         print("\n" + "=" * 80)
-        print("TOKEN USAGE SUMMARY")
+        print("TOKEN USAGE SUMMARY (CURRENT RUN)")
         print("=" * 80)
+        print(f"Model: {self.model}")
         print(f"Total Requests: {summary['total_requests']}")
         print(f"Total Input Tokens: {summary['total_input_tokens']:,}")
         print(f"Total Output Tokens: {summary['total_output_tokens']:,}")
@@ -240,9 +334,31 @@ class TokenTrackingDebateSystem:
         print(f"Rounds: {summary['num_rounds']}")
         print(f"Average Tokens per Agent Response: {summary['total_tokens'] // summary['total_requests'] if summary['total_requests'] > 0 else 0:,}")
         
+        # Show persistent cumulative history
+        if show_history:
+            history = load_token_history()
+            if history and self.model in history:
+                print("\n" + "=" * 80)
+                print(f"CUMULATIVE STATISTICS FOR {self.model}")
+                print("=" * 80)
+                model_stats = history[self.model]
+                print(f"Total Runs: {model_stats['total_runs']}")
+                print(f"Cumulative Input Tokens: {model_stats['input_tokens']:,}")
+                print(f"Cumulative Output Tokens: {model_stats['output_tokens']:,}")
+                print(f"Cumulative Total Tokens: {model_stats['total_tokens']:,}")
+                print(f"Last Updated: {model_stats['last_updated']}")
+                
+                # Show all models if there are multiple
+                if len(history) > 1:
+                    print("\n" + "-" * 80)
+                    print("ALL MODELS SUMMARY")
+                    print("-" * 80)
+                    for model_name, stats in sorted(history.items()):
+                        print(f"{model_name}: {stats['total_tokens']:,} tokens ({stats['total_runs']} runs)")
+        
         # Detailed breakdown by agent and round
         print("\n" + "-" * 80)
-        print("DETAILED BREAKDOWN BY AGENT AND ROUND")
+        print("DETAILED BREAKDOWN BY AGENT AND ROUND (CURRENT RUN)")
         print("-" * 80)
         for usage in self.usage_data.agent_usages:
             print(f"{usage.agent_name} (Round {usage.round}): {usage.total_tokens:,} tokens "

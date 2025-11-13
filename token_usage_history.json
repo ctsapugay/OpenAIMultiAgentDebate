@@ -1,0 +1,9 @@
+{
+  "gpt-4o-mini": {
+    "input_tokens": 10902,
+    "output_tokens": 3756,
+    "total_tokens": 14658,
+    "total_runs": 1,
+    "last_updated": "2025-11-12 20:30:08"
+  }
+}
