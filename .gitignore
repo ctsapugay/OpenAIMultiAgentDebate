@@ -50,3 +50,7 @@ htmlcov/
 *.db
 *.sqlite
 *.sqlite3
+
+# Large dataset files (can be downloaded)
+synthbio/SynthBio.json
+synthbio/results/
