@@ -7,7 +7,9 @@ Tests the multi-agent debate system on a small sample of SynthBio data.
 Usage:
     python pilot_test.py          # Normal mode (2 rounds, consensus enabled)
     python pilot_test.py --fast   # Fast mode (1 round, no consensus, ~2x faster)
+    python pilot_test.py --dev    # Dev mode (uses small 20-entry dev set, instant loading)
     python pilot_test.py -f       # Short form for fast mode
+    python pilot_test.py -d       # Short form for dev mode
 """
 
 import os
@@ -57,6 +59,7 @@ def main():
     # Configuration
     import sys
     fast_mode = "--fast" in sys.argv or "-f" in sys.argv
+    dev_mode = "--dev" in sys.argv or "-d" in sys.argv
     
     # Simple experiment: just 1 example for quick timing test
     num_test_examples = 1
@@ -65,32 +68,67 @@ def main():
     use_consensus = not fast_mode  # Disable consensus in fast mode
     model = "gpt-4o-mini"  # Use cheaper model for testing
     
+    # Dev mode uses small pre-extracted dataset for instant loading
+    use_dev_set = dev_mode
+    dev_set_file = Path(__file__).parent / "SynthBio_dev.json"
+    
     print(f"Configuration:")
     print(f"  Test examples: {num_test_examples}")
     print(f"  Agents: {num_agents}")
     print(f"  Rounds: {num_rounds}")
     print(f"  Consensus: {'enabled' if use_consensus else 'disabled (fast mode)'}")
     print(f"  Model: {model}")
+    print(f"  Dataset: {'Dev set (20 entries, instant load)' if use_dev_set else 'Full set (2237 entries, ~2s load)'}")
     if fast_mode:
         print(f"  ⚡ FAST MODE: Reduced rounds and no consensus for faster testing")
+    if dev_mode:
+        print(f"  🚀 DEV MODE: Using small dev dataset for instant loading")
     print()
     
     try:
         # Load dataset
         step_start = time.time()
-        print("Loading SynthBio dataset...")
-        loader = SynthBioLoader()
-        data = loader.load()
-        dataset_time = time.time() - step_start
-        print(f"✓ Loaded {len(data)} entries ({dataset_time:.1f}s)")
-        print()
+        print("Initializing SynthBio dataset loader...")
         
-        # Get sample
-        step_start = time.time()
-        print(f"Sampling {num_test_examples} examples...")
-        sample = loader.sample(num_test_examples, seed=42)
-        sample_time = time.time() - step_start
-        print(f"✓ Sampled {len(sample)} examples ({sample_time:.1f}s)")
+        if use_dev_set:
+            # Dev mode: Use pre-extracted small dataset for instant loading
+            if not dev_set_file.exists():
+                print(f"✗ Dev set not found: {dev_set_file}")
+                print("  Run: python synthbio/create_dev_set.py --size 20")
+                sys.exit(1)
+            
+            print(f"  Loading dev set from {dev_set_file.name}...")
+            loader = SynthBioLoader()
+            loader.cache_file = dev_set_file
+            loader.count_cache_file = dev_set_file.with_suffix('.count')
+            loader.load(lazy=False)  # Load all (only 20 entries, instant)
+            dataset_init_time = time.time() - step_start
+            print(f"✓ Dev set loaded: {len(loader.data)} entries ({dataset_init_time:.2f}s)")
+            print()
+            
+            # Sample from dev set
+            step_start = time.time()
+            print(f"Sampling {num_test_examples} examples from dev set...")
+            sample = loader.sample(num_test_examples, seed=42, lazy=False)
+            sample_time = time.time() - step_start
+            print(f"✓ Sampled {len(sample)} examples ({sample_time:.2f}s)")
+        else:
+            # Normal mode: Lazy load from full dataset
+            print("  [DEBUG] Creating SynthBioLoader instance...")
+            loader = SynthBioLoader()
+            print("  [DEBUG] Calling load(lazy=True)...")
+            loader.load(lazy=True)  # Don't load all entries, use lazy loading
+            dataset_init_time = time.time() - step_start
+            print(f"✓ Dataset loader ready ({dataset_init_time:.1f}s)")
+            print()
+            
+            # Get sample (lazy loading - only loads sampled entries)
+            step_start = time.time()
+            print(f"Sampling {num_test_examples} examples (lazy loading)...")
+            print("  [DEBUG] Calling sample()...")
+            sample = loader.sample(num_test_examples, seed=42, lazy=True)
+            sample_time = time.time() - step_start
+            print(f"✓ Sampled {len(sample)} examples ({sample_time:.1f}s)")
         print()
         
         # Initialize systems
@@ -228,7 +266,7 @@ def main():
                 print(f"   Average per example: {avg_time:.1f}s ({avg_time/60:.1f} minutes)")
             
             # Breakdown
-            setup_time = dataset_time + sample_time + init_time + eval_init_time
+            setup_time = dataset_init_time + sample_time + init_time + eval_init_time
             example_time = sum(r.get('time_seconds', 0) for r in results)
             overhead = total_elapsed - setup_time - example_time
             print(f"\n   Time breakdown:")

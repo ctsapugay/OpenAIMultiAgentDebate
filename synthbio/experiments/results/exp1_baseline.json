@@ -1,0 +1,134 @@
+{
+  "config": {
+    "name": "baseline",
+    "num_agents": 1,
+    "num_rounds": 1,
+    "consensus": false,
+    "model": "gpt-4o-mini",
+    "num_examples": 2,
+    "seed": 42
+  },
+  "results": [
+    {
+      "name": "Louis Deschamps",
+      "biography": "### Louis Deschamps\n\n**Born:** 02 June 1925, Paris, France  \n**Died:** 14 June 1995, Avignon, France (stomach cancer)  \n**Resting Place:** P\u00e8re Lachaise Cemetery, Paris, France  \n\nLouis Deschamps was a French novelist, film director, and art historian, recognized for his contributions to the fields of history, art history, film studies, and photography. He was born in Paris but grew up in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps pursued higher education at the \u00c9cole des hautes etudes en sciences sociales, where he focused on historical and social sciences. He completed his thesis in 1982, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art',\" under the advisement of Michel Poivert.\n\nThroughout his career, Deschamps produced notable works such as *The Last Day*, the \"In Search of Dinosaurs\" series, and *A Time of Dragons*. He held positions at various institutions, including the Centre des Etudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nDeschamps was influenced by prominent thinkers such as Jacques Derrida, Jean-Fran\u00e7ois Lyotard, and Michel Foucault, and he left an indelible mark on his disciplines. His contributions were recognized through several awards, including the Prix des lettres Aga Khan in 1981, the Prix France-Italy in 1989, and he was honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nDespite his significant impact on literature and academia, Deschamps did not have any children and is remembered as a prominent figure in French cultural history.",
+      "evaluation": {
+        "rouge_l": 0.2849740932642487,
+        "faithfulness": {
+          "score": 0.5833333333333334,
+          "found_attributes": 14,
+          "total_attributes": 24,
+          "details": {
+            "name": true,
+            "gender": false,
+            "birth_date": true,
+            "birth_place": true,
+            "death_date": true,
+            "death_place": true,
+            "death_cause": true,
+            "resting_place": true,
+            "occupation": true,
+            "fields": true,
+            "known_for": false,
+            "hometown": true,
+            "nationality": true,
+            "citizenship": true,
+            "alma_mater": false,
+            "thesis_title": false,
+            "thesis_year": true,
+            "doctoral_advisor": true,
+            "awards": false,
+            "institutions": false,
+            "notable_students": false,
+            "influences": false,
+            "father": false,
+            "children": false
+          }
+        },
+        "hallucination_score": {
+          "score": 0.0,
+          "sentences_with_attributes": 10,
+          "total_sentences": 10,
+          "potential_hallucinations": []
+        },
+        "attribute_coverage": {
+          "coverage_ratio": 0.5833333333333334,
+          "covered_attributes": 14,
+          "total_attributes": 24,
+          "missing_attributes": [
+            "gender",
+            "known_for",
+            "alma_mater",
+            "thesis_title",
+            "awards",
+            "institutions",
+            "notable_students",
+            "influences",
+            "father",
+            "children"
+          ]
+        }
+      },
+      "time": 8.90315580368042
+    },
+    {
+      "name": "Sonia Mabwe",
+      "biography": "'''Sonia Mabwe''' (01 January 1974 \u2013 29 May 2009) was a Congolese theologian, activist, and professor known for her contributions to political theology and church-state relations within the framework of Pan-Africanism and Ubuntu-Contributionism.\n\nBorn in Kinshasa, Republic of the Congo, Mabwe pursued her education at the University of Kinshasa, followed by further studies at Sorbonne Panth\u00e9on-Sorbonne University and Harvard University. Throughout her career, she engaged deeply with issues at the intersection of faith and politics, establishing herself as a prominent figure in her fields of interest.\n\nMabwe was the child of Rose Mabwe and had a significant partnership with Andr\u00e9 Tassi. She did not have any children. Her life came to an untimely end on 29 May 2009 in Brussels, Belgium, due to multiple organ failure. She was laid to rest in her hometown of Kinshasa, leaving behind a legacy of scholarship and activism that continues to influence discussions on theology and social justice.",
+      "evaluation": {
+        "rouge_l": 0.3324705882352941,
+        "faithfulness": {
+          "score": 0.75,
+          "found_attributes": 12,
+          "total_attributes": 16,
+          "details": {
+            "name": true,
+            "gender": false,
+            "nationality": true,
+            "birth_date": true,
+            "birth_place": true,
+            "death_date": true,
+            "death_place": true,
+            "death_cause": true,
+            "resting_place": true,
+            "alma_mater": false,
+            "occupation": true,
+            "tradition_movement": false,
+            "main_interests": true,
+            "mother": true,
+            "partner": true,
+            "children": false
+          }
+        },
+        "hallucination_score": {
+          "score": 0.2857142857142857,
+          "sentences_with_attributes": 5,
+          "total_sentences": 7,
+          "potential_hallucinations": []
+        },
+        "attribute_coverage": {
+          "coverage_ratio": 0.75,
+          "covered_attributes": 12,
+          "total_attributes": 16,
+          "missing_attributes": [
+            "gender",
+            "alma_mater",
+            "tradition_movement",
+            "children"
+          ]
+        }
+      },
+      "time": 4.223155975341797
+    }
+  ],
+  "summary": {
+    "num_examples": 2,
+    "avg_rouge_l": 0.3087223407497714,
+    "avg_faithfulness": 0.6666666666666667,
+    "avg_hallucination": 0.14285714285714285,
+    "avg_coverage": 0.6666666666666667,
+    "avg_time": 6.563155889511108,
+    "total_time": 13.126311779022217
+  },
+  "total_time": 13.14130711555481,
+  "timestamp": "2025-11-18T19:32:44.091736"
+}
