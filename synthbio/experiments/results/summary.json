@@ -1,0 +1,111 @@
+{
+  "experiments": [
+    {
+      "name": "baseline",
+      "config": {
+        "name": "baseline",
+        "num_agents": 1,
+        "num_rounds": 1,
+        "consensus": false,
+        "model": "gpt-4o-mini",
+        "num_examples": 2,
+        "seed": 42
+      },
+      "summary": {
+        "num_examples": 2,
+        "avg_rouge_l": 0.3087223407497714,
+        "avg_faithfulness": 0.6666666666666667,
+        "avg_hallucination": 0.14285714285714285,
+        "avg_coverage": 0.6666666666666667,
+        "avg_time": 6.563155889511108,
+        "total_time": 13.126311779022217
+      }
+    },
+    {
+      "name": "2agents_no_consensus",
+      "config": {
+        "name": "2agents_no_consensus",
+        "num_agents": 2,
+        "num_rounds": 2,
+        "consensus": false,
+        "model": "gpt-4o-mini",
+        "num_examples": 2,
+        "seed": 42
+      },
+      "summary": {
+        "num_examples": 2,
+        "avg_rouge_l": 0.30431988637236873,
+        "avg_faithfulness": 0.6458333333333333,
+        "avg_hallucination": 0.10989010989010989,
+        "avg_coverage": 0.6458333333333333,
+        "avg_time": 32.09718465805054,
+        "total_time": 64.19436931610107
+      }
+    },
+    {
+      "name": "3agents_no_consensus",
+      "config": {
+        "name": "3agents_no_consensus",
+        "num_agents": 3,
+        "num_rounds": 2,
+        "consensus": false,
+        "model": "gpt-4o-mini",
+        "num_examples": 2,
+        "seed": 42
+      },
+      "summary": {
+        "num_examples": 2,
+        "avg_rouge_l": 0.3026496239669445,
+        "avg_faithfulness": 0.625,
+        "avg_hallucination": 0.07142857142857145,
+        "avg_coverage": 0.625,
+        "avg_time": 43.062471866607666,
+        "total_time": 86.12494373321533
+      }
+    },
+    {
+      "name": "2agents_with_consensus",
+      "config": {
+        "name": "2agents_with_consensus",
+        "num_agents": 2,
+        "num_rounds": 2,
+        "consensus": true,
+        "model": "gpt-4o-mini",
+        "num_examples": 2,
+        "seed": 42
+      },
+      "summary": {
+        "num_examples": 2,
+        "avg_rouge_l": 0.29042125397673524,
+        "avg_faithfulness": 0.6979166666666667,
+        "avg_hallucination": 0.11309523809523814,
+        "avg_coverage": 0.6979166666666667,
+        "avg_time": 34.527076959609985,
+        "total_time": 69.05415391921997
+      }
+    },
+    {
+      "name": "3agents_with_consensus",
+      "config": {
+        "name": "3agents_with_consensus",
+        "num_agents": 3,
+        "num_rounds": 2,
+        "consensus": true,
+        "model": "gpt-4o-mini",
+        "num_examples": 2,
+        "seed": 42
+      },
+      "summary": {
+        "num_examples": 2,
+        "avg_rouge_l": 0.28362244975069417,
+        "avg_faithfulness": 0.7083333333333333,
+        "avg_hallucination": 0.0625,
+        "avg_coverage": 0.7083333333333333,
+        "avg_time": 46.672489523887634,
+        "total_time": 93.34497904777527
+      }
+    }
+  ],
+  "total_time": 325.9695568084717,
+  "completed": "2025-11-18T19:37:56.919965"
+}
