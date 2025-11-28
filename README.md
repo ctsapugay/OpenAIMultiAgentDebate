@@ -15,7 +15,7 @@ Perfect for collaborative problem-solving, coding tasks, and exploring complex t
 - 📊 **Token usage tracking** - Monitor API costs for all agent interactions
 - 🤝 **Consensus generation** - Synthesize agent perspectives into unified answers
 - 📝 **MMLU testing** - Test debate system on multiple-choice questions
-- 🎨 **ArtifactsBench integration** - Generate visual/interactive code artifacts
+- 🎨 **ArtifactsBench integration** - Generate visual/interactive code artifacts (automatically pulls “easy” tasks from the Tencent dataset on Hugging Face when available)
 - ✅ Comprehensive test suite included
 
 ## Prerequisites

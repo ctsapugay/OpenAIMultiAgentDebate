@@ -12,8 +12,16 @@ import sys
 from token_tracking import TokenTrackingDebateSystem
 from consensus_system import ConsensusSystem
 from test_mmlu import MMLUDebateTest, SAMPLE_MMLU_QUESTIONS
-from artifacts_debate import ArtifactsDebateSystem, SAMPLE_ARTIFACTS_TASKS
+from artifacts_debate import (
+    ArtifactsDebateSystem,
+    SAMPLE_ARTIFACTS_TASKS,
+    load_artifacts_dataset,
+    load_sample_dataset_one_per_difficulty,
+)
 
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv())
 
 def parse_arguments():
     """
@@ -38,6 +46,14 @@ Example usage:
   
   # Run ArtifactsBench task (code generation)
   python main.py --topic ARTIFACTS --agents 3 --rounds 2
+  
+  # Run ArtifactsBench with specific difficulty
+  python main.py --topic ARTIFACTS --difficulty easy
+  python main.py --topic ARTIFACTS --difficulty medium
+  python main.py --topic ARTIFACTS --difficulty hard
+  
+  # Run all difficulties (default for ARTIFACTS)
+  python main.py --topic ARTIFACTS
   
   # MMLU or Artifacts with consensus
   python main.py --topic MMLU --consensus
@@ -77,6 +93,14 @@ Example usage:
         type=str,
         default="gpt-4",
         help="OpenAI model to use (default: gpt-4)"
+    )
+    
+    parser.add_argument(
+        "--difficulty",
+        type=str,
+        choices=["easy", "medium", "hard", "all"],
+        default=None,
+        help='For ARTIFACTS mode: select difficulty level ("easy", "medium", "hard") or "all" for all three. Default: "all"'
     )
     
     return parser.parse_args()
@@ -119,22 +143,77 @@ def run_artifacts_mode(args):
         model=args.model
     )
     
-    # Run single task demo (bouncing ball - simplest example)
-    result = system.run_artifacts_task(
-        SAMPLE_ARTIFACTS_TASKS[1],  # Bouncing ball task
-        generate_code=True,
-        evaluate_code=True
-    )
+    # Determine which difficulty to load
+    difficulty = args.difficulty
+    if difficulty is None or difficulty == "all":
+        # Load one task from each difficulty level
+        print("Loading sample dataset (one task per difficulty: easy, medium, hard)...")
+        try:
+            sample_tasks = load_sample_dataset_one_per_difficulty()
+            if not sample_tasks:
+                raise ValueError("No tasks loaded from dataset")
+            print(f"✓ Successfully loaded {len(sample_tasks)} tasks from ArtifactsBench dataset\n")
+        except Exception as e:
+            print(f"Warning: Unable to load Hugging Face dataset ({e}).")
+            print("Using built-in sample tasks instead.\n")
+            # Use first 3 tasks from fallback (should cover different difficulties)
+            sample_tasks = SAMPLE_ARTIFACTS_TASKS[:3]
+    else:
+        # Load tasks for specific difficulty
+        print(f"Loading tasks with difficulty: {difficulty.upper()}...")
+        try:
+            sample_tasks = load_artifacts_dataset(difficulty=difficulty, limit=1)
+            if not sample_tasks:
+                raise ValueError(f"No tasks found for difficulty: {difficulty}")
+            print(f"✓ Successfully loaded 1 task ({difficulty.upper()}) from ArtifactsBench dataset\n")
+        except Exception as e:
+            print(f"Warning: Unable to load Hugging Face dataset ({e}).")
+            print("Using built-in sample tasks instead.\n")
+            # Find a task with matching difficulty from fallback
+            sample_tasks = [t for t in SAMPLE_ARTIFACTS_TASKS if t.get('difficulty', '').lower() == difficulty.lower()]
+            if not sample_tasks:
+                # If no match, use first task
+                sample_tasks = SAMPLE_ARTIFACTS_TASKS[:1]
+    
+    # Run all tasks in the sample dataset
+    results = []
+    for i, task in enumerate(sample_tasks, 1):
+        print(f"\n{'='*80}")
+        if len(sample_tasks) == 1:
+            print(f"TASK: {task['difficulty'].upper()} - {task['category']}")
+        else:
+            print(f"TASK {i}/{len(sample_tasks)}: {task['difficulty'].upper()} - {task['category']}")
+        print(f"{'='*80}")
+        
+        try:
+            result = system.run_artifacts_task(
+                task,
+                generate_code=True,
+                evaluate_code=True
+            )
+            results.append(result)
+        except Exception as e:
+            print(f"Error processing task: {e}")
+            results.append({
+                "task": task,
+                "error": str(e)
+            })
+    
+    # Calculate summary statistics
+    total_tokens = sum(r.get('token_usage', {}).get('total_tokens', 0) for r in results if 'token_usage' in r)
+    avg_scores = [r.get('evaluation', {}).get('average_score', 0) for r in results if 'evaluation' in r]
+    avg_score = sum(avg_scores) / len(avg_scores) if avg_scores else 0
+    
+    summary = {
+        "total_tasks": len(sample_tasks),
+        "successful_tasks": len([r for r in results if 'error' not in r]),
+        "total_tokens": total_tokens,
+        "average_evaluation_score": avg_score,
+        "results": results
+    }
     
     # Save results
-    single_result_summary = {
-        "total_tasks": 1,
-        "successful_tasks": 1,
-        "total_tokens": result['token_usage']['total_tokens'],
-        "average_evaluation_score": result.get('evaluation', {}).get('average_score', 0),
-        "results": [result]
-    }
-    system.save_results(single_result_summary, "artifacts_results.json")
+    system.save_results(summary, "artifacts_results.json")
     
     print(f"\n✓ Results saved to artifacts_results.json")
 
@@ -230,6 +309,9 @@ def main():
         
         print(f"Mode: {mode}")
         print(f"Topic: {args.topic}")
+        if topic_upper == 'ARTIFACTS':
+            difficulty_display = args.difficulty if args.difficulty else "all"
+            print(f"Difficulty: {difficulty_display.upper()}")
         print(f"Agents: {args.agents}")
         print(f"Rounds: {args.rounds}")
         print(f"Model: {args.model}")

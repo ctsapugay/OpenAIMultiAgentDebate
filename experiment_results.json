@@ -1,0 +1,188 @@
+{
+  "voting_systems": {
+    "SimpleMajorityVoting": {
+      "experiment_name": "VotingSystem_SimpleMajorityVoting",
+      "timestamp": "2025-11-19T11:41:22.932982",
+      "config": {
+        "num_judges": 5,
+        "num_artifacts": 3,
+        "voting_system": "SimpleMajorityVoting"
+      },
+      "rankings": {
+        "hf_2": 3,
+        "hf_3": 2
+      },
+      "stability_metrics": {
+        "average_std_dev": 0.13693063937629152,
+        "max_std_dev": 0.27386127875258304,
+        "min_std_dev": 0.0,
+        "artifact_stds": {
+          "hf_2": 0.0,
+          "hf_3": 0.27386127875258304
+        }
+      },
+      "fairness_metrics": {
+        "average_judge_agreement": 0.7,
+        "num_judge_pairs": 10
+      },
+      "volatility_metrics": {
+        "score_range": 1,
+        "score_std": 0.7071067811865476,
+        "score_variance": 0.5
+      },
+      "raw_data": {
+        "judge_scores": {
+          "Judge_1": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_2": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.0
+          },
+          "Judge_3": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.5
+          },
+          "Judge_4": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_5": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          }
+        }
+      }
+    },
+    "BordaCountVoting": {
+      "experiment_name": "VotingSystem_BordaCountVoting",
+      "timestamp": "2025-11-19T11:41:22.933479",
+      "config": {
+        "num_judges": 5,
+        "num_artifacts": 3,
+        "voting_system": "BordaCountVoting"
+      },
+      "rankings": {
+        "hf_2": 8.0,
+        "hf_3": 7.0,
+        "hf_5": 0.0
+      },
+      "stability_metrics": {
+        "average_std_dev": 0.16582269216752066,
+        "max_std_dev": 0.27386127875258304,
+        "min_std_dev": 0.0,
+        "artifact_stds": {
+          "hf_2": 0.0,
+          "hf_3": 0.27386127875258304,
+          "hf_5": 0.22360679774997896
+        }
+      },
+      "fairness_metrics": {
+        "average_judge_agreement": 0.7,
+        "num_judge_pairs": 10
+      },
+      "volatility_metrics": {
+        "score_range": 8.0,
+        "score_std": 4.358898943540674,
+        "score_variance": 19.0
+      },
+      "raw_data": {
+        "judge_scores": {
+          "Judge_1": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_2": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.0
+          },
+          "Judge_3": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.5
+          },
+          "Judge_4": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_5": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          }
+        }
+      }
+    },
+    "AverageScoreVoting": {
+      "experiment_name": "VotingSystem_AverageScoreVoting",
+      "timestamp": "2025-11-19T11:41:22.934027",
+      "config": {
+        "num_judges": 5,
+        "num_artifacts": 3,
+        "voting_system": "AverageScoreVoting"
+      },
+      "rankings": {
+        "hf_2": 8.5,
+        "hf_3": 8.7,
+        "hf_5": 8.4
+      },
+      "stability_metrics": {
+        "average_std_dev": 0.16582269216752066,
+        "max_std_dev": 0.27386127875258304,
+        "min_std_dev": 0.0,
+        "artifact_stds": {
+          "hf_2": 0.0,
+          "hf_3": 0.27386127875258304,
+          "hf_5": 0.22360679774997896
+        }
+      },
+      "fairness_metrics": {
+        "average_judge_agreement": 0.7,
+        "num_judge_pairs": 10
+      },
+      "volatility_metrics": {
+        "score_range": 0.29999999999999893,
+        "score_std": 0.15275252316519414,
+        "score_variance": 0.023333333333333168
+      },
+      "raw_data": {
+        "judge_scores": {
+          "Judge_1": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_2": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.0
+          },
+          "Judge_3": {
+            "hf_2": 8.5,
+            "hf_3": 9.0,
+            "hf_5": 8.5
+          },
+          "Judge_4": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          },
+          "Judge_5": {
+            "hf_2": 8.5,
+            "hf_3": 8.5,
+            "hf_5": 8.5
+          }
+        }
+      }
+    }
+  }
+}

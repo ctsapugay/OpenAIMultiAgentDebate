@@ -9,14 +9,232 @@ then generate consensus-based code.
 from typing import Dict, Any, List
 import re
 import json
+from datasets import load_dataset
 from token_tracking import TokenTrackingDebateSystem
 from consensus_system import ConsensusSystem
 from agents import Agent, Runner
 from debate_system import InMemorySession
 
 
-# Sample ArtifactsBench-style tasks
+
+def _extract_requirements_from_question(question_text: str) -> List[str]:
+    """
+    Convert the verbose question text from the dataset into a list of requirements.
+
+    Args:
+        question_text: Raw task description from the dataset
+
+    Returns:
+        List of cleaned requirement strings
+    """
+    if not question_text:
+        return []
+
+    requirements: List[str] = []
+    bullet_markers = ("- ", "* ", "• ")
+
+    for raw_line in question_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        for marker in bullet_markers:
+            if line.startswith(marker):
+                line = line[len(marker):].strip()
+                break
+        if line:
+            requirements.append(line)
+
+    if not requirements:
+        requirements = [question_text.strip()]
+
+    return requirements
+
+
+def load_artifacts_dataset(
+    difficulty: str = "easy",
+    limit: int | None = None,
+    dataset_name: str = "tencent/ArtifactsBenchmark",
+    split: str = "train"
+) -> List[Dict[str, Any]]:
+    """
+    Load tasks from the Tencent ArtifactsBenchmark dataset hosted on Hugging Face.
+
+    Args:
+        difficulty: Difficulty level to filter on (e.g., "easy", "medium", "hard")
+        limit: Optional maximum number of tasks to return
+        dataset_name: Hugging Face dataset identifier
+        split: Dataset split to load
+
+    Returns:
+        List of task dictionaries compatible with ArtifactsDebateSystem
+    """
+    dataset = load_dataset(dataset_name, split=split)
+    target_difficulty = difficulty.lower() if difficulty else None
+
+    tasks: List[Dict[str, Any]] = []
+
+    for row in dataset:
+        row_difficulty = (row.get("difficulty") or "").lower()
+        if target_difficulty and row_difficulty != target_difficulty:
+            continue
+
+        question_text = row.get("question", "").strip()
+        requirements = _extract_requirements_from_question(question_text)
+
+        evaluation_criteria = {}
+        checklist_items = row.get("checklist") or []
+        for idx, item in enumerate(checklist_items):
+            title = (item.get("title") or f"criterion_{idx}").strip()
+            key = re.sub(r"\s+", "_", title.lower())
+            evaluation_criteria[key] = item.get("description", "").strip()
+
+        if not evaluation_criteria:
+            evaluation_criteria = {
+                "overall_quality": "Evaluate the overall quality of the generated artifact."
+            }
+
+        task_id = row.get("index")
+        if task_id is None:
+            task_id = len(tasks)
+
+        tasks.append(
+            {
+                "id": f"hf_{task_id}",
+                "category": row.get("class", "Unknown"),
+                "difficulty": row.get("difficulty", "unknown"),
+                "task": question_text,
+                "requirements": requirements,
+                "evaluation_criteria": evaluation_criteria,
+            }
+        )
+
+        if limit and len(tasks) >= limit:
+            break
+
+    return tasks
+
+
+def load_sample_dataset_one_per_difficulty(
+    dataset_name: str = "tencent/ArtifactsBenchmark",
+    split: str = "train"
+) -> List[Dict[str, Any]]:
+    """
+    Load a sample dataset with exactly one task from each difficulty level.
+    
+    This function fetches one task from "easy", one from "medium", and one from "hard"
+    difficulty levels from the ArtifactsBench dataset.
+    
+    Args:
+        dataset_name: Hugging Face dataset identifier
+        split: Dataset split to load
+        
+    Returns:
+        List of exactly 3 task dictionaries (one per difficulty level)
+    """
+    try:
+        from datasets import load_dataset
+    except ImportError:
+        print("Warning: datasets library not available. Using fallback sample tasks.")
+        return SAMPLE_ARTIFACTS_TASKS[:3]  # Return first 3 from fallback
+    
+    try:
+        dataset = load_dataset(dataset_name, split=split)
+        
+        # Track which difficulties we've found
+        found_difficulties = {"easy": False, "medium": False, "hard": False}
+        sample_tasks = []
+        
+        for row in dataset:
+            difficulty = (row.get("difficulty") or "").lower()
+            
+            # Skip if we already have this difficulty or it's not one we want
+            if difficulty not in found_difficulties or found_difficulties[difficulty]:
+                continue
+            
+            question_text = row.get("question", "").strip()
+            if not question_text:
+                continue
+            
+            requirements = _extract_requirements_from_question(question_text)
+            
+            evaluation_criteria = {}
+            checklist_items = row.get("checklist") or []
+            for idx, item in enumerate(checklist_items):
+                title = (item.get("title") or f"criterion_{idx}").strip()
+                key = re.sub(r"\s+", "_", title.lower())
+                evaluation_criteria[key] = item.get("description", "").strip()
+            
+            if not evaluation_criteria:
+                evaluation_criteria = {
+                    "overall_quality": "Evaluate the overall quality of the generated artifact."
+                }
+            
+            task_id = row.get("index")
+            if task_id is None:
+                task_id = len(sample_tasks)
+            
+            sample_tasks.append({
+                "id": f"hf_{task_id}_{difficulty}",
+                "category": row.get("class", "Unknown"),
+                "difficulty": difficulty,
+                "task": question_text,
+                "requirements": requirements,
+                "evaluation_criteria": evaluation_criteria,
+            })
+            
+            found_difficulties[difficulty] = True
+            
+            # Stop when we have all three difficulties
+            if all(found_difficulties.values()):
+                break
+        
+        # Sort by difficulty: easy, medium, hard
+        difficulty_order = {"easy": 0, "medium": 1, "hard": 2}
+        sample_tasks.sort(key=lambda x: difficulty_order.get(x["difficulty"], 99))
+        
+        print(f"Loaded sample dataset: {len(sample_tasks)} tasks")
+        for task in sample_tasks:
+            print(f"  - {task['difficulty'].upper()}: {task['category']} (ID: {task['id']})")
+        
+        return sample_tasks
+        
+    except Exception as e:
+        print(f"Error loading dataset: {e}")
+        print("Using fallback sample tasks.")
+        return SAMPLE_ARTIFACTS_TASKS[:3]
+
+
+# Sample ArtifactsBench-style tasks (used as fallback when dataset loading fails)
 SAMPLE_ARTIFACTS_TASKS = [
+    {
+        "id": "svg_earth_continents",
+        "category": "SVG Generation-SVG Images",
+        "difficulty": "easy",
+        "task": "Please help me implement this SVG image using code. The earth has seven continents, including South America, which is part of the Americas.",
+        "requirements": [
+            "SVG element properly set up with appropriate viewBox, width, height attributes and correct namespaces",
+            "All seven continents (Asia, Africa, North America, South America, Antarctica, Europe, and Australia) properly represented",
+            "South America clearly defined as part of the Americas",
+            "Each continent has appropriate fill colors/patterns that make them distinguishable from each other and from oceans",
+            "Appropriate map projection used (e.g., Mercator, Robinson, equirectangular) with recognizable continent shapes",
+            "Well-structured SVG code using proper nesting, grouping related elements with <g> tags, and proper path commands",
+            "SVG handles different viewport sizes properly and maintains crisp edges when scaled",
+            "Professional color scheme with good contrast (no more than 3-4 primary colors)",
+            "Clean visual hierarchy with appropriate stroke weights and fills",
+            "Code structure supports adding interactions later if needed"
+        ],
+        "evaluation_criteria": {
+            "basic_svg_structure": "SVG element is properly set up with appropriate viewBox, width, height attributes. Verify that namespaces are correctly declared. Score 0 if SVG is not implemented at all, 5 if basic structure exists but with errors, 10 if properly set up with correct dimensions and namespaces.",
+            "earth_representation": "Evaluate whether all seven continents (Asia, Africa, North America, South America, Antarctica, Europe, and Australia) are properly represented on the SVG map. Check continent shapes for reasonable accuracy. Deduct 2 points for each missing continent. Deduct 3 points if South America is not clearly defined as part of the Americas. The full score is 10 points.",
+            "continent_coloring": "Review whether each continent has appropriate fill colors/patterns that make them distinguishable from each other and from oceans. Check if South America has a distinct visual representation while still maintaining a visual relationship with North America. Score 0 if continents are not visually distinct, 5 if basic differentiation exists, 10 if professional color schemes are applied with good contrast.",
+            "map_projection": "Assess whether an appropriate map projection is used (e.g., Mercator, Robinson, equirectangular). Check if the projection handles distortion reasonably and maintains recognizable continent shapes. Deduct 5 points for severe distortions that make continents unrecognizable, 3 points for inappropriate projection choice. The full score is 10 points.",
+            "code_robustness": "Evaluate whether the SVG code is well-structured, uses proper nesting, and follows best practices (e.g., grouping related elements with <g> tags, using proper path commands). Check if the SVG handles different viewport sizes properly. Code with strong robustness should gracefully handle browser variations, giving 10 points. If the robustness is average, give 5 points, and if it breaks easily in different contexts, give 0 points.",
+            "scalability": "Judge whether the SVG properly scales across different display sizes and resolutions: 1) Maintains crisp edges when scaled up 2) Preserves all details when scaled down 3) Responds appropriately to container constraints. Deduct 5 points if the logo blurs or pixelates at larger sizes, 3 points if small details are lost at smaller sizes, and 5 points if the aspect ratio distorts during scaling. The full score is 10 points.",
+            "code_quality": "Review modular organization (such as separating continent definitions, styling, and any interactive components), code comments, and optimization for file size. Deduct 5 points if global attributes are inconsistently applied; deduct 5 points if there's significant duplicated path data or styling; deduct 5 points if the SVG is not optimized for rendering performance. The full score is 10 points.",
+            "design_standards": "Evaluate whether the overall design follows modern visualization principles: 1) Harmonious color matching for continents and oceans (no more than 3-4 primary colors) 2) Clean visual hierarchy with appropriate stroke weights and fills 3) Professional presentation of labels or legends if included. Deduct 3 points for each cluttered visual element, 5 points for jarring color combinations, and 5 points for poor visual balance. The full score is 10 points.",
+            "interaction_smoothness": "Judge whether any interactive elements (if implemented) conform to user expectations: 1) Responsive hover/click states ≤ 100ms 2) Smooth transitions between states 3) Intuitive interaction patterns. For static SVGs without interaction, evaluate whether the code structure would easily support adding interactions later. Deduct 5 points for each broken interaction, 3 points for laggy animations, and 5 points for confusing interaction patterns. The full score is 10 points."
+        }
+    },
     {
         "id": "svg_solar_system",
         "category": "SVG Generation",
@@ -507,10 +725,10 @@ def main():
         model="gpt-4o-mini"  # Using mini for cost efficiency
     )
     
-    # Run a single task (bouncing ball - simplest example)
+    # Run a single task (Earth SVG - actual ArtifactsBench dataset task)
     print("Running single artifacts task demo...")
     result = system.run_artifacts_task(
-        SAMPLE_ARTIFACTS_TASKS[1],  # Bouncing ball task
+        SAMPLE_ARTIFACTS_TASKS[0],  # Earth continents SVG task from ArtifactsBench dataset
         generate_code=True,
         evaluate_code=True
     )

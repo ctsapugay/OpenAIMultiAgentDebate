@@ -1,9 +1,16 @@
 {
   "gpt-4o-mini": {
-    "input_tokens": 10902,
-    "output_tokens": 3756,
-    "total_tokens": 14658,
-    "total_runs": 1,
-    "last_updated": "2025-11-12 20:30:08"
+    "input_tokens": 28063,
+    "output_tokens": 9825,
+    "total_tokens": 37888,
+    "total_runs": 4,
+    "last_updated": "2025-11-19 11:40:44"
+  },
+  "gpt-4.1": {
+    "input_tokens": 15672,
+    "output_tokens": 6800,
+    "total_tokens": 22472,
+    "total_runs": 3,
+    "last_updated": "2025-11-19 09:28:51"
   }
 }
