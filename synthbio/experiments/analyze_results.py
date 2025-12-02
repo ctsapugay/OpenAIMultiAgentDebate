@@ -14,14 +14,44 @@ def load_results(results_dir: Path) -> List[Dict]:
     """Load all experiment result files."""
     results = []
     
-    # Load experiments in order
-    for i in range(1, 6):
+    # Load experiments in order (1-11: baseline, consensus, and voting experiments)
+    for i in range(1, 12):
         result_files = list(results_dir.glob(f"exp{i}_*.json"))
         if result_files:
             with open(result_files[0]) as f:
                 results.append(json.load(f))
     
     return results
+
+
+def format_config_name(config: Dict) -> str:
+    """Format configuration name with voting and consensus info."""
+    if config['name'] == 'baseline':
+        return "Baseline (1 agent)"
+    
+    parts = [f"{config['num_agents']} agents, {config['num_rounds']} rounds"]
+    
+    # Add voting info if present
+    if config.get('voting'):
+        voting_mode = config.get('voting_mode', 'unknown')
+        if voting_mode == 'select_best':
+            parts.append("✓ voting (select)")
+        elif voting_mode == 'filter':
+            top_n = config.get('top_n_voted')
+            if top_n:
+                parts.append(f"✓ voting (filter top {top_n})")
+            else:
+                parts.append("✓ voting (filter)")
+        else:
+            parts.append("✓ voting")
+    
+    # Add consensus info
+    if config.get('consensus'):
+        parts.append("✓ consensus")
+    else:
+        parts.append("no consensus")
+    
+    return ", ".join(parts)
 
 
 def print_comparison_table(results: List[Dict]):
@@ -45,8 +75,7 @@ def print_comparison_table(results: List[Dict]):
             config_str = "Baseline (1 agent)"
             baseline_rouge = summary['avg_rouge_l']
         else:
-            consensus_str = "✓ consensus" if config['consensus'] else "no consensus"
-            config_str = f"{config['num_agents']} agents, {config['num_rounds']} rounds, {consensus_str}"
+            config_str = format_config_name(config)
         
         # Calculate improvement over baseline
         if baseline_rouge and config['name'] != 'baseline':
@@ -88,11 +117,7 @@ def print_best_configs(results: List[Dict]):
         config = best['config']
         value = best['summary'][metric_key]
         
-        if config['name'] == 'baseline':
-            config_str = "Baseline (1 agent)"
-        else:
-            consensus_str = "with consensus" if config['consensus'] else "no consensus"
-            config_str = f"{config['num_agents']} agents, {config['num_rounds']} rounds, {consensus_str}"
+        config_str = format_config_name(config)
         
         if metric_key == 'avg_time':
             value_str = f"{value:.1f}s"
@@ -122,11 +147,11 @@ def print_key_findings(results: List[Dict]):
     
     print(f"\n1. Multi-Agent vs Baseline:")
     config = best_multi['config']
-    consensus_str = "with consensus" if config['consensus'] else "no consensus"
+    config_str = format_config_name(config)
     improvement_rouge = best_multi['summary']['avg_rouge_l'] - baseline_rouge
     improvement_faith = best_multi['summary']['avg_faithfulness'] - baseline_faith
     
-    print(f"   Best multi-agent: {config['num_agents']} agents, {consensus_str}")
+    print(f"   Best multi-agent: {config_str}")
     print(f"   ROUGE-L improvement: {improvement_rouge:+.4f} ({improvement_rouge/baseline_rouge*100:+.1f}%)")
     print(f"   Faithfulness improvement: {improvement_faith:+.4f} ({improvement_faith/baseline_faith*100:+.1f}%)")
     
@@ -135,7 +160,7 @@ def print_key_findings(results: List[Dict]):
     agents_3_no = next((r for r in results if r['config']['name'] == '3agents_no_consensus'), None)
     
     if agents_2_no and agents_3_no:
-        print(f"\n2. Effect of Number of Agents (no consensus):")
+        print(f"\n2. Effect of Number of Agents (no consensus, no voting):")
         diff = agents_3_no['summary']['avg_rouge_l'] - agents_2_no['summary']['avg_rouge_l']
         print(f"   2 agents: {agents_2_no['summary']['avg_rouge_l']:.4f}")
         print(f"   3 agents: {agents_3_no['summary']['avg_rouge_l']:.4f}")
@@ -146,7 +171,7 @@ def print_key_findings(results: List[Dict]):
     agents_2_yes = next((r for r in results if r['config']['name'] == '2agents_with_consensus'), None)
     
     if agents_2_no and agents_2_yes:
-        print(f"\n3. Effect of Consensus (2 agents):")
+        print(f"\n3. Effect of Consensus (2 agents, no voting):")
         diff = agents_2_yes['summary']['avg_rouge_l'] - agents_2_no['summary']['avg_rouge_l']
         print(f"   Without consensus: {agents_2_no['summary']['avg_rouge_l']:.4f}")
         print(f"   With consensus: {agents_2_yes['summary']['avg_rouge_l']:.4f}")
@@ -157,11 +182,57 @@ def print_key_findings(results: List[Dict]):
     agents_3_yes = next((r for r in results if r['config']['name'] == '3agents_with_consensus'), None)
     
     if agents_3_no and agents_3_yes:
-        print(f"\n4. Effect of Consensus (3 agents):")
+        print(f"\n4. Effect of Consensus (3 agents, no voting):")
         diff = agents_3_yes['summary']['avg_rouge_l'] - agents_3_no['summary']['avg_rouge_l']
         print(f"   Without consensus: {agents_3_no['summary']['avg_rouge_l']:.4f}")
         print(f"   With consensus: {agents_3_yes['summary']['avg_rouge_l']:.4f}")
         print(f"   Difference: {diff:+.4f} ({'consensus helps' if diff > 0 else 'consensus hurts'})")
+    
+    # Compare voting-only vs consensus-only (2 agents)
+    voting_2_select = next((r for r in results if r['config'].get('name') == '2agents_voting_select'), None)
+    consensus_2 = next((r for r in results if r['config'].get('name') == '2agents_with_consensus'), None)
+    
+    if voting_2_select and consensus_2:
+        print(f"\n5. Voting-only vs Consensus-only (2 agents):")
+        print(f"   Voting (select): ROUGE-L={voting_2_select['summary']['avg_rouge_l']:.4f}, Faith={voting_2_select['summary']['avg_faithfulness']:.4f}")
+        print(f"   Consensus: ROUGE-L={consensus_2['summary']['avg_rouge_l']:.4f}, Faith={consensus_2['summary']['avg_faithfulness']:.4f}")
+        rouge_diff = voting_2_select['summary']['avg_rouge_l'] - consensus_2['summary']['avg_rouge_l']
+        faith_diff = voting_2_select['summary']['avg_faithfulness'] - consensus_2['summary']['avg_faithfulness']
+        print(f"   Difference: ROUGE-L {rouge_diff:+.4f}, Faithfulness {faith_diff:+.4f}")
+    
+    # Compare voting-only vs consensus-only (3 agents)
+    voting_3_select = next((r for r in results if r['config'].get('name') == '3agents_voting_select'), None)
+    consensus_3 = next((r for r in results if r['config'].get('name') == '3agents_with_consensus'), None)
+    
+    if voting_3_select and consensus_3:
+        print(f"\n6. Voting-only vs Consensus-only (3 agents):")
+        print(f"   Voting (select): ROUGE-L={voting_3_select['summary']['avg_rouge_l']:.4f}, Faith={voting_3_select['summary']['avg_faithfulness']:.4f}")
+        print(f"   Consensus: ROUGE-L={consensus_3['summary']['avg_rouge_l']:.4f}, Faith={consensus_3['summary']['avg_faithfulness']:.4f}")
+        rouge_diff = voting_3_select['summary']['avg_rouge_l'] - consensus_3['summary']['avg_rouge_l']
+        faith_diff = voting_3_select['summary']['avg_faithfulness'] - consensus_3['summary']['avg_faithfulness']
+        print(f"   Difference: ROUGE-L {rouge_diff:+.4f}, Faithfulness {faith_diff:+.4f}")
+    
+    # Compare voting+consensus vs consensus-only (2 agents)
+    voting_consensus_2 = next((r for r in results if r['config'].get('name') == '2agents_voting_consensus'), None)
+    
+    if voting_consensus_2 and consensus_2:
+        print(f"\n7. Voting+Consensus vs Consensus-only (2 agents):")
+        print(f"   Voting+Consensus: ROUGE-L={voting_consensus_2['summary']['avg_rouge_l']:.4f}, Faith={voting_consensus_2['summary']['avg_faithfulness']:.4f}")
+        print(f"   Consensus-only: ROUGE-L={consensus_2['summary']['avg_rouge_l']:.4f}, Faith={consensus_2['summary']['avg_faithfulness']:.4f}")
+        rouge_diff = voting_consensus_2['summary']['avg_rouge_l'] - consensus_2['summary']['avg_rouge_l']
+        faith_diff = voting_consensus_2['summary']['avg_faithfulness'] - consensus_2['summary']['avg_faithfulness']
+        print(f"   Difference: ROUGE-L {rouge_diff:+.4f}, Faithfulness {faith_diff:+.4f}")
+    
+    # Compare voting+consensus vs consensus-only (3 agents)
+    voting_consensus_3 = next((r for r in results if r['config'].get('name') == '3agents_voting_consensus'), None)
+    
+    if voting_consensus_3 and consensus_3:
+        print(f"\n8. Voting+Consensus vs Consensus-only (3 agents):")
+        print(f"   Voting+Consensus: ROUGE-L={voting_consensus_3['summary']['avg_rouge_l']:.4f}, Faith={voting_consensus_3['summary']['avg_faithfulness']:.4f}")
+        print(f"   Consensus-only: ROUGE-L={consensus_3['summary']['avg_rouge_l']:.4f}, Faith={consensus_3['summary']['avg_faithfulness']:.4f}")
+        rouge_diff = voting_consensus_3['summary']['avg_rouge_l'] - consensus_3['summary']['avg_rouge_l']
+        faith_diff = voting_consensus_3['summary']['avg_faithfulness'] - consensus_3['summary']['avg_faithfulness']
+        print(f"   Difference: ROUGE-L {rouge_diff:+.4f}, Faithfulness {faith_diff:+.4f}")
     
     print("\n" + "=" * 100)
 

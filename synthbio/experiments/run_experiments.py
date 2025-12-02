@@ -102,62 +102,62 @@ class ExperimentRunner:
                 
                 print(f"    {'─' * 76}\n")
             
-                    elif data['type'] == 'consensus_input':
-                        biographies = data['biographies']
-                        count = data['count']
-                        voting_info = data.get('voting_info', '')
-                        
-                        print(f"\n    {'─' * 76}")
-                        title = f"Consensus Input ({count} biographies)"
-                        if voting_info:
-                            title += f" - {voting_info}"
-                        print(f"    [INTERMEDIATE OUTPUT - {title}]")
-                        print(f"    {'─' * 76}")
-                        
-                        for idx, bio in enumerate(biographies, 1):
-                            agent = bio['agent']
-                            content = bio['content']
-                            
-                            print(f"\n    Source {idx} (by {agent}):")
-                            print(f"    {'─' * 72}")
-                            
-                            if self.show_full:
-                                # Show full content with proper indentation
-                                for line in content.split('\n'):
-                                    print(f"    {line}")
-                            else:
-                                preview = content[:200]
-                                if len(content) > 200:
-                                    preview += "..."
-                                # Handle multi-line preview
-                                for line in preview.split('\n'):
-                                    print(f"    {line}")
-                                print(f"    [Preview: {len(content)} chars total]")
-                        
-                        print(f"    {'─' * 76}\n")
+            elif data['type'] == 'consensus_input':
+                biographies = data['biographies']
+                count = data['count']
+                voting_info = data.get('voting_info', '')
+                
+                print(f"\n    {'─' * 76}")
+                title = f"Consensus Input ({count} biographies)"
+                if voting_info:
+                    title += f" - {voting_info}"
+                print(f"    [INTERMEDIATE OUTPUT - {title}]")
+                print(f"    {'─' * 76}")
+                
+                for idx, bio in enumerate(biographies, 1):
+                    agent = bio['agent']
+                    content = bio['content']
                     
-                    elif data['type'] == 'vote_output':
-                        agent = data['agent']
-                        content = data['content']
-                        
-                        print(f"\n    {'─' * 76}")
-                        print(f"    [INTERMEDIATE OUTPUT - Vote from {agent}]")
-                        print(f"    {'─' * 76}")
-                        
-                        if self.show_full:
-                            # Show full content with proper indentation
-                            for line in content.split('\n'):
-                                print(f"    {line}")
-                        else:
-                            preview = content[:300]
-                            if len(content) > 300:
-                                preview += "..."
-                            # Handle multi-line preview
-                            for line in preview.split('\n'):
-                                print(f"    {line}")
-                            print(f"    [Preview: {len(content)} chars total]")
-                        
-                        print(f"    {'─' * 76}\n")
+                    print(f"\n    Source {idx} (by {agent}):")
+                    print(f"    {'─' * 72}")
+                    
+                    if self.show_full:
+                        # Show full content with proper indentation
+                        for line in content.split('\n'):
+                            print(f"    {line}")
+                    else:
+                        preview = content[:200]
+                        if len(content) > 200:
+                            preview += "..."
+                        # Handle multi-line preview
+                        for line in preview.split('\n'):
+                            print(f"    {line}")
+                        print(f"    [Preview: {len(content)} chars total]")
+                
+                print(f"    {'─' * 76}\n")
+            
+            elif data['type'] == 'vote_output':
+                agent = data['agent']
+                content = data['content']
+                
+                print(f"\n    {'─' * 76}")
+                print(f"    [INTERMEDIATE OUTPUT - Vote from {agent}]")
+                print(f"    {'─' * 76}")
+                
+                if self.show_full:
+                    # Show full content with proper indentation
+                    for line in content.split('\n'):
+                        print(f"    {line}")
+                else:
+                    preview = content[:300]
+                    if len(content) > 300:
+                        preview += "..."
+                    # Handle multi-line preview
+                    for line in preview.split('\n'):
+                        print(f"    {line}")
+                    print(f"    [Preview: {len(content)} chars total]")
+                
+                print(f"    {'─' * 76}\n")
         
         return intermediate_callback
     
@@ -440,6 +440,118 @@ class ExperimentRunner:
         print("=" * 80 + "\n")
         
         return all_results
+    
+    def run_voting_experiments_only(self):
+        """Run only voting experiments (6-11)."""
+        print("\n" + "=" * 80)
+        print("STARTING VOTING EXPERIMENTS")
+        print("=" * 80)
+        print(f"Model: {self.model}")
+        print(f"Examples per experiment: {self.num_examples}")
+        print(f"Seed: {self.seed}")
+        print(f"Results directory: {self.results_dir}")
+        if self.show_intermediate:
+            output_mode = "Full intermediate outputs" if self.show_full else "Truncated intermediate outputs"
+            print(f"Intermediate outputs: {output_mode}")
+        print("=" * 80 + "\n")
+        
+        total_start = time.time()
+        all_results = []
+        
+        try:
+            # Experiment 6: 2 agents, voting only (select_best)
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=2,
+                num_rounds=2,
+                use_consensus=False,
+                exp_num=6,
+                name="2agents_voting_select",
+                use_voting=True,
+                voting_mode="select_best",
+                top_n_voted=None
+            ))
+            
+            # Experiment 7: 3 agents, voting only (select_best)
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=3,
+                num_rounds=2,
+                use_consensus=False,
+                exp_num=7,
+                name="3agents_voting_select",
+                use_voting=True,
+                voting_mode="select_best",
+                top_n_voted=None
+            ))
+            
+            # Experiment 8: 2 agents, voting + consensus (filter)
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=2,
+                num_rounds=2,
+                use_consensus=True,
+                exp_num=8,
+                name="2agents_voting_consensus",
+                use_voting=True,
+                voting_mode="filter",
+                top_n_voted=None
+            ))
+            
+            # Experiment 9: 3 agents, voting + consensus (filter)
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=3,
+                num_rounds=2,
+                use_consensus=True,
+                exp_num=9,
+                name="3agents_voting_consensus",
+                use_voting=True,
+                voting_mode="filter",
+                top_n_voted=None
+            ))
+            
+            # Experiment 10: 2 agents, voting filter (top 2) + consensus
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=2,
+                num_rounds=2,
+                use_consensus=True,
+                exp_num=10,
+                name="2agents_voting_top2_consensus",
+                use_voting=True,
+                voting_mode="filter",
+                top_n_voted=2
+            ))
+            
+            # Experiment 11: 3 agents, voting filter (top 2) + consensus
+            all_results.append(self.run_multi_agent_experiment(
+                num_agents=3,
+                num_rounds=2,
+                use_consensus=True,
+                exp_num=11,
+                name="3agents_voting_top2_consensus",
+                use_voting=True,
+                voting_mode="filter",
+                top_n_voted=2
+            ))
+            
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Experiments interrupted by user")
+            print(f"Completed {len(all_results)}/6 voting experiments")
+            return all_results
+        except Exception as e:
+            print(f"\n\n✗ Error during experiments: {e}")
+            import traceback
+            traceback.print_exc()
+            return all_results
+        
+        total_time = time.time() - total_start
+        
+        print("\n" + "=" * 80)
+        print("VOTING EXPERIMENTS COMPLETE!")
+        print("=" * 80)
+        print(f"Total time: {total_time:.1f}s ({total_time/60:.1f} minutes)")
+        print(f"Results saved to: {self.results_dir}")
+        print(f"\nRun 'python experiments/analyze_results.py' to view comparison")
+        print("=" * 80 + "\n")
+        
+        return all_results
 
 
 def main():
@@ -451,8 +563,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run with default settings (no intermediate outputs)
+  # Run all experiments (baseline + consensus + voting)
   python experiments/run_experiments.py
+  
+  # Run only voting experiments (6-11), skip baseline and consensus
+  python experiments/run_experiments.py --voting-only
   
   # Show truncated intermediate outputs
   python experiments/run_experiments.py --show-intermediate
@@ -461,7 +576,7 @@ Examples:
   python experiments/run_experiments.py --show-full
   
   # Combine with other options
-  python experiments/run_experiments.py --show-intermediate --num-examples 5
+  python experiments/run_experiments.py --voting-only --show-intermediate --num-examples 5
         """
     )
     parser.add_argument("--num-examples", type=int, default=2,
@@ -470,6 +585,8 @@ Examples:
                        help="Model to use (default: gpt-4o-mini)")
     parser.add_argument("--seed", type=int, default=42,
                        help="Random seed (default: 42)")
+    parser.add_argument("--voting-only", action="store_true",
+                       help="Run only voting experiments (6-11), skip baseline and consensus")
     parser.add_argument("--show-intermediate", action="store_true",
                        help="Show intermediate agent outputs (truncated, ~300 chars)")
     parser.add_argument("--show-full", action="store_true",
@@ -486,7 +603,10 @@ Examples:
         show_full=args.show_full
     )
     
-    runner.run_all_experiments()
+    if args.voting_only:
+        runner.run_voting_experiments_only()
+    else:
+        runner.run_all_experiments()
 
 
 if __name__ == "__main__":

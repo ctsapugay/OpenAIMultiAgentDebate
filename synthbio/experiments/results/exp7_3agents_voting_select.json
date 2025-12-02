@@ -1,0 +1,152 @@
+{
+  "config": {
+    "name": "3agents_voting_select",
+    "num_agents": 3,
+    "num_rounds": 2,
+    "consensus": false,
+    "voting": true,
+    "voting_mode": "select_best",
+    "top_n_voted": null,
+    "model": "gpt-4o-mini",
+    "num_examples": 2,
+    "seed": 42
+  },
+  "results": [
+    {
+      "name": "Louis Deschamps",
+      "biography": "'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a notable French novelist, film director, and art historian, recognized for his impactful contributions to history, art history, film studies, and photography. He was born in Paris, France, and spent his formative years in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps graduated from the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he completed his doctoral thesis in 1982, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" under the guidance of Michel Poivert. He held esteemed academic positions at several institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nThroughout his career, Deschamps gained recognition for his creative works, particularly for ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His artistic output was significantly shaped by a variety of intellectual influences, including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nDeschamps was the recipient of numerous prestigious awards, including the Prix des lettres Aga Khan in 1981 and the Prix France-Italy in 1989. He was also honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nLouis Deschamps passed away on 14 June 1995 in Avignon, France, after a battle with stomach cancer. He is interred at Pere Lachaise Cemetery in Paris. He was the son of Paul Deschamps and did not have any children.",
+      "evaluation": {
+        "rouge_l": 0.28272251308900526,
+        "faithfulness": {
+          "score": 0.5833333333333334,
+          "found_attributes": 14,
+          "total_attributes": 24,
+          "details": {
+            "name": true,
+            "gender": false,
+            "birth_date": false,
+            "birth_place": true,
+            "death_date": true,
+            "death_place": true,
+            "death_cause": true,
+            "resting_place": true,
+            "occupation": true,
+            "fields": true,
+            "known_for": false,
+            "hometown": true,
+            "nationality": true,
+            "citizenship": true,
+            "alma_mater": false,
+            "thesis_title": false,
+            "thesis_year": true,
+            "doctoral_advisor": true,
+            "awards": false,
+            "institutions": false,
+            "notable_students": false,
+            "influences": false,
+            "father": true,
+            "children": false
+          }
+        },
+        "hallucination_score": {
+          "score": 0.0,
+          "sentences_with_attributes": 12,
+          "total_sentences": 12,
+          "potential_hallucinations": []
+        },
+        "attribute_coverage": {
+          "coverage_ratio": 0.5833333333333334,
+          "covered_attributes": 14,
+          "total_attributes": 24,
+          "missing_attributes": [
+            "gender",
+            "birth_date",
+            "known_for",
+            "alma_mater",
+            "thesis_title",
+            "awards",
+            "institutions",
+            "notable_students",
+            "influences",
+            "children"
+          ]
+        }
+      },
+      "time": 83.15413188934326,
+      "transcript": "================================================================================\nDEBATE TRANSCRIPT\n================================================================================\n\n[Round 1] Biographer_1:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a French novelist, film director, and art historian known for his contributions to history, art history, film studies, and photography. Born in Paris, France, Deschamps grew up in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps completed his education at the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he earned a doctorate in 1982 with his thesis titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" under the supervision of Michel Poivert. Throughout his career, he held positions at several institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nAs a writer and director, Deschamps is best known for works such as ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His creative output was influenced by prominent thinkers including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault, among others.\n\nDeschamps received several prestigious awards throughout his life, including the Prix des lettres Aga Khan in 1981, the Prix France-Italy in 1989, and was honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nLouis Deschamps passed away on 14 June 1995 in Avignon, France, due to stomach cancer. He is interred at Pere Lachaise Cemetery in Paris. He was the son of Paul Deschamps and did not have any children.\n\n[Round 1] Biographer_2:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a French novelist, film director, and art historian renowned for his contributions to the fields of history, art history, film studies, and photography. Born in Paris, France, he grew up in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps pursued his academic career at the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he earned his doctorate in 1982. His thesis, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" was supervised by Michel Poivert. He later held teaching positions at various institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nIn his creative work, Deschamps gained recognition for notable projects like ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His writing and filmmaking were influenced by a diverse range of intellectual figures, including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nThroughout his career, he received several accolades, including the Prix des lettres Aga Khan in 1981 and the Prix France-Italy in 1989, as well as being named Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nLouis Deschamps passed away on 14 June 1995 in Avignon, France, after a battle with stomach cancer. He is buried at Pere Lachaise Cemetery in Paris. He was the son of Paul Deschamps and had no children.\n\n[Round 1] Biographer_3:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a French novelist, film director, and art historian known for his significant contributions to history, art history, film studies, and photography. He was born in Paris, France, and raised in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps pursued higher education at the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he completed his doctoral thesis in 1982, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" under the supervision of Michel Poivert. He had an influential academic career, holding positions at institutions such as the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nIn his creative endeavors, Deschamps is best known for works such as ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His artistic vision was shaped by notable influences, including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nDeschamps received numerous accolades including the Prix des lettres Aga Khan in 1981, the Prix France-Italy in 1989, and was honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nHe passed away on 14 June 1995 in Avignon, France, due to stomach cancer, and was interred at Pere Lachaise Cemetery in Paris. Louis Deschamps was the son of Paul Deschamps and did not have any children.\n\n[Round 2] Biographer_1:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a notable French novelist, film director, and art historian, recognized for his impactful contributions to history, art history, film studies, and photography. He was born in Paris, France, and spent his formative years in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps graduated from the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he completed his doctoral thesis in 1982, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" under the guidance of Michel Poivert. He held esteemed academic positions at several institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nThroughout his career, Deschamps gained recognition for his creative works, particularly for ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His artistic output was significantly shaped by a variety of intellectual influences, including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nDeschamps was the recipient of numerous prestigious awards, including the Prix des lettres Aga Khan in 1981 and the Prix France-Italy in 1989. He was also honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nLouis Deschamps passed away on 14 June 1995 in Avignon, France, after a battle with stomach cancer. He is interred at Pere Lachaise Cemetery in Paris. He was the son of Paul Deschamps and did not have any children.\n\n[Round 2] Biographer_2:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a distinguished French novelist, film director, and art historian, renowned for his substantial contributions to the fields of history, art history, film studies, and photography. Born in Paris, France, he grew up in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps pursued his academic career at the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he earned his doctorate in 1982. His thesis, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" was supervised by Michel Poivert. He held prominent positions at various institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nIn his creative endeavors, Deschamps gained acclaim for noteworthy works such as ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His artistic vision was profoundly influenced by a variety of intellectuals, including Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nThroughout his career, Deschamps received several prestigious accolades, including the Prix des lettres Aga Khan in 1981, the Prix France-Italy in 1989, and he was honored as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nLouis Deschamps passed away on 14 June 1995 in Avignon, France, after battling stomach cancer. He is interred at Pere Lachaise Cemetery in Paris. He was the son of Paul Deschamps and did not have any children.\n\n[Round 2] Biographer_3:\n--------------------------------------------------------------------------------\n'''Louis Deschamps''' (2 June 1925 \u2013 14 June 1995) was a prominent French novelist, film director, and art historian, widely recognized for his significant contributions to the fields of history, art history, film studies, and photography. Born in Paris, France, he was raised in Saint-Mand\u00e9, Val-de-Marne.\n\nDeschamps pursued higher education at the \u00c9cole des hautes \u00e9tudes en sciences sociales, where he completed his doctoral thesis in 1982, titled \"The History of Photography in France after 1945. From the 'New Photography' to 'Photography as Art,\" under the mentorship of Michel Poivert. He held notable academic positions at various esteemed institutions, including the Centre des \u00c9tudes Catalanes, the French Institute for Research in Archaeology and History, and the University of Paris-Sorbonne (Paris IV).\n\nThroughout his creative career, Deschamps achieved acclaim for his key works, including ''The Last Day,'' the \"In Search of Dinosaurs\" series, and ''A Time of Dragons.'' His artistic vision was distinctly shaped by influential thinkers such as Jacques Derrida, Jean-Fran\u00e7ois Lyotard, Gilles Deleuze, and Michel Foucault.\n\nDeschamps was honored with several prestigious awards, including the Prix des lettres Aga Khan in 1981, the Prix France-Italy in 1989, and recognition as Chevalier de la L\u00e9gion d'honneur and Chevalier des Arts et des Lettres in 1992.\n\nHe passed away on 14 June 1995 in Avignon, France, after a battle with stomach cancer, and is interred at Pere Lachaise Cemetery in Paris. The son of Paul Deschamps, he did not have any children.\n\n================================================================================\nEND OF DEBATE\n================================================================================",
+      "consensus_used": false,
+      "voting_used": true,
+      "vote_scores": {
+        "0": 0.5,
+        "1": 0.3333333333333333,
+        "2": 0.16666666666666666
+      }
+    },
+    {
+      "name": "Sonia Mabwe",
+      "biography": "### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a prominent Congolese theologian, activist, and professor celebrated for her impactful contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe, who identified as non-binary, was a fervent advocate for the principles of Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe's academic journey took her to several esteemed institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her scholarly work was characterized by a deep engagement with issues of social justice and the critical role of faith in public discourse, reflecting her commitment to promoting equity and community empowerment.\n\nShe was the daughter of Rose Mabwe and had a significant partnership with Andr\u00e9 Tassi, though she had no children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, as a result of multiple organ failure. She was laid to rest in Kinshasa, Republic of the Congo, leaving behind a rich legacy of intellectual and social activism that continues to inspire.",
+      "evaluation": {
+        "rouge_l": 0.3522727272727273,
+        "faithfulness": {
+          "score": 0.8125,
+          "found_attributes": 13,
+          "total_attributes": 16,
+          "details": {
+            "name": true,
+            "gender": true,
+            "nationality": true,
+            "birth_date": false,
+            "birth_place": true,
+            "death_date": true,
+            "death_place": true,
+            "death_cause": true,
+            "resting_place": true,
+            "alma_mater": true,
+            "occupation": true,
+            "tradition_movement": false,
+            "main_interests": true,
+            "mother": true,
+            "partner": true,
+            "children": false
+          }
+        },
+        "hallucination_score": {
+          "score": 0.1428571428571429,
+          "sentences_with_attributes": 6,
+          "total_sentences": 7,
+          "potential_hallucinations": []
+        },
+        "attribute_coverage": {
+          "coverage_ratio": 0.8125,
+          "covered_attributes": 13,
+          "total_attributes": 16,
+          "missing_attributes": [
+            "birth_date",
+            "tradition_movement",
+            "children"
+          ]
+        }
+      },
+      "time": 69.44213509559631,
+      "transcript": "================================================================================\nDEBATE TRANSCRIPT\n================================================================================\n\n[Round 1] Biographer_1:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a Congolese theologian, activist, and professor renowned for her contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe was a prominent figure in the movements of Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe pursued higher education at notable institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Throughout her academic and activist careers, she focused on issues pertaining to the intersection of religion and politics, championing social justice and equality.\n\nShe was the child of Rose Mabwe and shared a partnership with Andr\u00e9 Tassi, although she had no children. \n\nMabwe passed away in Brussels, Belgium, on 29 May 2009, due to multiple organ failure. She was laid to rest in her birthplace, Kinshasa, Republic of the Congo, leaving behind a legacy of scholarship and activism dedicated to the betterment of society.\n\n[Round 1] Biographer_2:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a Congolese theologian, activist, and professor known for her influential work in political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe identified as non-binary and was a dedicated advocate for social justice, drawing upon the principles of Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe pursued a comprehensive education, attending the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her scholarly pursuits and activism reflected her commitment to exploring the intersections of faith and politics, aiming to promote equity and community well-being.\n\nShe was the daughter of Rose Mabwe and had a partnership with Andr\u00e9 Tassi; however, she had no children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, from multiple organ failure. She was interred in Kinshasa, Republic of the Congo, leaving a lasting impact on theological discourse and social activism.\n\n[Round 1] Biographer_3:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a Congolese theologian, activist, and professor, recognized for her significant contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe identified as non-binary and was an influential advocate for Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe pursued her education at several prestigious institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her academic pursuits were deeply intertwined with her activism, focusing on issues of social justice and the role of faith in public life.\n\nShe was the daughter of Rose Mabwe and shared a partnership with Andr\u00e9 Tassi; however, she had no children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, due to multiple organ failure. She was laid to rest in Kinshasa, Republic of the Congo, leaving a legacy of scholarship and commitment to social equity.\n\n[Round 2] Biographer_1:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a prominent Congolese theologian, activist, and professor celebrated for her impactful contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe, who identified as non-binary, was a fervent advocate for the principles of Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe's academic journey took her to several esteemed institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her scholarly work was characterized by a deep engagement with issues of social justice and the critical role of faith in public discourse, reflecting her commitment to promoting equity and community empowerment.\n\nShe was the daughter of Rose Mabwe and had a significant partnership with Andr\u00e9 Tassi, though she had no children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, as a result of multiple organ failure. She was laid to rest in Kinshasa, Republic of the Congo, leaving behind a rich legacy of intellectual and social activism that continues to inspire.\n\n[Round 2] Biographer_2:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a notable Congolese theologian, activist, and professor recognized for her substantial contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe identified as non-binary and was a passionate advocate for Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe received her education at several prestigious institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her academic work focused on the intersection of social justice and the role of faith in public life, reflecting her commitment to fostering equity and community development.\n\nThe daughter of Rose Mabwe, she shared a lifelong partnership with Andr\u00e9 Tassi and did not have children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, due to multiple organ failure. She was interred in Kinshasa, Republic of the Congo, leaving a lasting legacy of scholarship and activism that continues to resonate in discussions of theology and social justice.\n\n[Round 2] Biographer_3:\n--------------------------------------------------------------------------------\n### Sonia Mabwe\n\n**Sonia Mabwe** (1 January 1974 \u2013 29 May 2009) was a distinguished Congolese theologian, activist, and professor, widely recognized for her influential contributions to political theology and church-state relations. Born in Kinshasa, Republic of the Congo, Mabwe identified as non-binary and was a dedicated advocate of Pan-Africanism and Ubuntu-Contributionism.\n\nMabwe pursued her education at several esteemed institutions, including the University of Kinshasa, Sorbonne Panth\u00e9on-Sorbonne University, and Harvard University. Her academic work examined the intersection of social justice and faith in public discourse, reflecting her commitment to equity and inclusive community development.\n\nShe was the daughter of Rose Mabwe and shared a lifelong partnership with Andr\u00e9 Tassi, although she had no children. Mabwe passed away in Brussels, Belgium, on 29 May 2009, due to multiple organ failure. She was interred in Kinshasa, Republic of the Congo, leaving a profound legacy of scholarly and activist endeavors that continue to inspire discussions on theology and social justice.\n\n================================================================================\nEND OF DEBATE\n================================================================================",
+      "consensus_used": false,
+      "voting_used": true,
+      "vote_scores": {
+        "0": 0.5,
+        "1": 0.3333333333333333,
+        "2": 0.16666666666666666
+      }
+    }
+  ],
+  "summary": {
+    "num_examples": 2,
+    "avg_rouge_l": 0.31749762018086625,
+    "avg_faithfulness": 0.6979166666666667,
+    "avg_hallucination": 0.07142857142857145,
+    "avg_coverage": 0.6979166666666667,
+    "avg_time": 76.29813349246979,
+    "total_time": 152.59626698493958
+  },
+  "total_time": 152.6204936504364,
+  "timestamp": "2025-12-02T07:08:29.694035"
+}

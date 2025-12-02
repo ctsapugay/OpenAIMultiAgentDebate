@@ -6,6 +6,8 @@
 **Seed:** 42  
 **Total Runtime:** 326.0s (5.4 minutes)
 
+**Note:** This log shows the output from the original 5 experiments (baseline + consensus). Voting experiments (6-11) were run separately. See `RESULTS_SUMMARY.md` for complete results including voting experiments.
+
 ---
 
 ## Experiment Execution Log
