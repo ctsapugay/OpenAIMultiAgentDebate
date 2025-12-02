@@ -10,6 +10,8 @@ Usage:
     python pilot_test.py --dev    # Dev mode (uses small 20-entry dev set, instant loading)
     python pilot_test.py -f       # Short form for fast mode
     python pilot_test.py -d       # Short form for dev mode
+    python pilot_test.py --voting # Enable voting (filter mode + consensus)
+    python pilot_test.py --voting-select  # Enable voting (select best only)
     python pilot_test.py --show-intermediate  # Show intermediate agent outputs (truncated)
     python pilot_test.py --show-full          # Show full intermediate outputs
 """
@@ -64,6 +66,9 @@ def main():
     dev_mode = "--dev" in sys.argv or "-d" in sys.argv
     show_intermediate = "--show-intermediate" in sys.argv or "-i" in sys.argv
     show_full = "--show-full" in sys.argv
+    use_voting = "--voting" in sys.argv or "-v" in sys.argv or "--voting-select" in sys.argv
+    voting_mode = "select_best" if "--voting-select" in sys.argv else ("filter" if use_voting else None)
+    top_n_voted = None  # Can add --top-n flag later if needed
     
     # Simple experiment: just 1 example for quick timing test
     num_test_examples = 1
@@ -81,6 +86,8 @@ def main():
     print(f"  Agents: {num_agents}")
     print(f"  Rounds: {num_rounds}")
     print(f"  Consensus: {'enabled' if use_consensus else 'disabled (fast mode)'}")
+    if use_voting:
+        print(f"  Voting: enabled ({voting_mode} mode)")
     print(f"  Model: {model}")
     print(f"  Dataset: {'Dev set (20 entries, instant load)' if use_dev_set else 'Full set (2237 entries, ~2s load)'}")
     if fast_mode:
@@ -244,17 +251,51 @@ def main():
                                 print(f"    [Preview: {len(content)} chars total]")
                         
                         print(f"    {'─' * 76}\n")
+                    
+                    elif data['type'] == 'vote_output':
+                        agent = data['agent']
+                        content = data['content']
+                        
+                        print(f"\n    {'─' * 76}")
+                        print(f"    [INTERMEDIATE OUTPUT - Vote from {agent}]")
+                        print(f"    {'─' * 76}")
+                        
+                        if show_full:
+                            # Show full content with proper indentation
+                            for line in content.split('\n'):
+                                print(f"    {line}")
+                        else:
+                            preview = content[:300]
+                            if len(content) > 300:
+                                preview += "..."
+                            # Handle multi-line preview
+                            for line in preview.split('\n'):
+                                print(f"    {line}")
+                            print(f"    [Preview: {len(content)} chars total]")
+                        
+                        print(f"    {'─' * 76}\n")
                 
                 result = debate_system.generate_biography(
                     attrs, 
                     num_rounds=num_rounds, 
                     use_consensus=use_consensus,
+                    use_voting=use_voting,
+                    voting_mode=voting_mode if use_voting else None,
+                    top_n_voted=top_n_voted,
                     progress_callback=progress_update,
                     intermediate_callback=intermediate_callback if (show_intermediate or show_full) else None
                 )
                 generated_bio = result['biography']
                 consensus_info = f" (consensus: {result.get('biographies_merged', 1)} biographies merged)" if result.get('consensus_used', False) else " (no consensus)"
-                print(f"✓ Generation complete{consensus_info}")
+                voting_info = ""
+                if result.get('voting_used', False):
+                    vote_scores = result.get('vote_scores', {})
+                    if vote_scores:
+                        scores_str = ", ".join([f"Bio{i+1}: {score:.2f}" for i, score in sorted(vote_scores.items(), key=lambda x: x[1], reverse=True)])
+                        voting_info = f" (voting scores: {scores_str})"
+                    else:
+                        voting_info = " (voting used)"
+                print(f"✓ Generation complete{consensus_info}{voting_info}")
                 print()
                 
                 # Generate baseline (single agent)

@@ -102,35 +102,62 @@ class ExperimentRunner:
                 
                 print(f"    {'─' * 76}\n")
             
-            elif data['type'] == 'consensus_input':
-                biographies = data['biographies']
-                count = data['count']
-                
-                print(f"\n    {'─' * 76}")
-                print(f"    [INTERMEDIATE OUTPUT - Consensus Input ({count} biographies)]")
-                print(f"    {'─' * 76}")
-                
-                for idx, bio in enumerate(biographies, 1):
-                    agent = bio['agent']
-                    content = bio['content']
+                    elif data['type'] == 'consensus_input':
+                        biographies = data['biographies']
+                        count = data['count']
+                        voting_info = data.get('voting_info', '')
+                        
+                        print(f"\n    {'─' * 76}")
+                        title = f"Consensus Input ({count} biographies)"
+                        if voting_info:
+                            title += f" - {voting_info}"
+                        print(f"    [INTERMEDIATE OUTPUT - {title}]")
+                        print(f"    {'─' * 76}")
+                        
+                        for idx, bio in enumerate(biographies, 1):
+                            agent = bio['agent']
+                            content = bio['content']
+                            
+                            print(f"\n    Source {idx} (by {agent}):")
+                            print(f"    {'─' * 72}")
+                            
+                            if self.show_full:
+                                # Show full content with proper indentation
+                                for line in content.split('\n'):
+                                    print(f"    {line}")
+                            else:
+                                preview = content[:200]
+                                if len(content) > 200:
+                                    preview += "..."
+                                # Handle multi-line preview
+                                for line in preview.split('\n'):
+                                    print(f"    {line}")
+                                print(f"    [Preview: {len(content)} chars total]")
+                        
+                        print(f"    {'─' * 76}\n")
                     
-                    print(f"\n    Source {idx} (by {agent}):")
-                    print(f"    {'─' * 72}")
-                    
-                    if self.show_full:
-                        # Show full content with proper indentation
-                        for line in content.split('\n'):
-                            print(f"    {line}")
-                    else:
-                        preview = content[:200]
-                        if len(content) > 200:
-                            preview += "..."
-                        # Handle multi-line preview
-                        for line in preview.split('\n'):
-                            print(f"    {line}")
-                        print(f"    [Preview: {len(content)} chars total]")
-                
-                print(f"    {'─' * 76}\n")
+                    elif data['type'] == 'vote_output':
+                        agent = data['agent']
+                        content = data['content']
+                        
+                        print(f"\n    {'─' * 76}")
+                        print(f"    [INTERMEDIATE OUTPUT - Vote from {agent}]")
+                        print(f"    {'─' * 76}")
+                        
+                        if self.show_full:
+                            # Show full content with proper indentation
+                            for line in content.split('\n'):
+                                print(f"    {line}")
+                        else:
+                            preview = content[:300]
+                            if len(content) > 300:
+                                preview += "..."
+                            # Handle multi-line preview
+                            for line in preview.split('\n'):
+                                print(f"    {line}")
+                            print(f"    [Preview: {len(content)} chars total]")
+                        
+                        print(f"    {'─' * 76}\n")
         
         return intermediate_callback
     
@@ -199,7 +226,8 @@ class ExperimentRunner:
         
         return output
     
-    def run_multi_agent_experiment(self, num_agents, num_rounds, use_consensus, exp_num, name):
+    def run_multi_agent_experiment(self, num_agents, num_rounds, use_consensus, exp_num, name,
+                                   use_voting=False, voting_mode="filter", top_n_voted=None):
         """
         Run a multi-agent experiment.
         
@@ -209,9 +237,18 @@ class ExperimentRunner:
             use_consensus: Whether to use consensus
             exp_num: Experiment number
             name: Experiment name for output file
+            use_voting: Whether to use voting mechanism
+            voting_mode: "select_best" or "filter"
+            top_n_voted: Number of top biographies after voting
         """
         print("=" * 80)
-        consensus_str = "WITH consensus" if use_consensus else "NO consensus"
+        if use_voting:
+            voting_str = f"WITH voting ({voting_mode})"
+            if use_consensus and voting_mode == "filter":
+                voting_str += " + consensus"
+            consensus_str = voting_str
+        else:
+            consensus_str = "WITH consensus" if use_consensus else "NO consensus"
         print(f"EXPERIMENT {exp_num}: {num_agents} agents, {num_rounds} rounds, {consensus_str}")
         print("=" * 80)
         
@@ -234,6 +271,9 @@ class ExperimentRunner:
                 attrs,
                 num_rounds=num_rounds,
                 use_consensus=use_consensus,
+                use_voting=use_voting,
+                voting_mode=voting_mode,
+                top_n_voted=top_n_voted,
                 progress_callback=lambda msg: print(f"  {msg}"),
                 intermediate_callback=intermediate_callback
             )
@@ -250,7 +290,9 @@ class ExperimentRunner:
                 'evaluation': eval_result,
                 'time': gen_time,
                 'transcript': result['transcript'],
-                'consensus_used': result.get('consensus_used', False)
+                'consensus_used': result.get('consensus_used', False),
+                'voting_used': result.get('voting_used', False),
+                'vote_scores': result.get('vote_scores')
             })
             
             print(f"  Total time: {gen_time:.1f}s | ROUGE-L: {eval_result['rouge_l']:.3f} | "
@@ -265,6 +307,9 @@ class ExperimentRunner:
                 'num_agents': num_agents,
                 'num_rounds': num_rounds,
                 'consensus': use_consensus,
+                'voting': use_voting,
+                'voting_mode': voting_mode if use_voting else None,
+                'top_n_voted': top_n_voted if use_voting else None,
                 'model': self.model,
                 'num_examples': self.num_examples,
                 'seed': self.seed
