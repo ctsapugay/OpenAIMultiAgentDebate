@@ -29,7 +29,8 @@ from synthbio.evaluator import BiographyEvaluator
 class ExperimentRunner:
     """Runs and tracks experiments."""
     
-    def __init__(self, num_examples=2, model="gpt-4o-mini", seed=42):
+    def __init__(self, num_examples=2, model="gpt-4o-mini", seed=42, 
+                 show_intermediate=False, show_full=False):
         """
         Initialize experiment runner.
         
@@ -37,10 +38,14 @@ class ExperimentRunner:
             num_examples: Number of examples to test (default: 2 for speed)
             model: Model to use for all experiments
             seed: Random seed for reproducibility
+            show_intermediate: If True, show intermediate agent outputs (truncated)
+            show_full: If True, show full intermediate outputs (overrides show_intermediate)
         """
         self.num_examples = num_examples
         self.model = model
         self.seed = seed
+        self.show_intermediate = show_intermediate or show_full
+        self.show_full = show_full
         self.results_dir = Path(__file__).parent / "results"
         self.results_dir.mkdir(exist_ok=True)
         
@@ -63,6 +68,71 @@ class ExperimentRunner:
         
         # Initialize evaluator
         self.evaluator = BiographyEvaluator()
+    
+    def _create_intermediate_callback(self):
+        """Create callback function for displaying intermediate outputs."""
+        if not self.show_intermediate:
+            return None
+        
+        def intermediate_callback(data):
+            """Display intermediate outputs based on type."""
+            if data['type'] == 'agent_output':
+                agent = data['agent']
+                round_num = data['round']
+                content = data['content']
+                elapsed = data.get('elapsed_time', 0)
+                
+                print(f"\n    {'─' * 76}")
+                print(f"    [INTERMEDIATE OUTPUT - {agent}, Round {round_num}]")
+                print(f"    {'─' * 76}")
+                
+                if self.show_full:
+                    # Show full content with proper indentation
+                    for line in content.split('\n'):
+                        print(f"    {line}")
+                else:
+                    # Show truncated preview (first 300 chars)
+                    preview = content[:300]
+                    if len(content) > 300:
+                        preview += "..."
+                    # Handle multi-line preview
+                    for line in preview.split('\n'):
+                        print(f"    {line}")
+                    print(f"    [Preview: {len(content)} chars total]")
+                
+                print(f"    {'─' * 76}\n")
+            
+            elif data['type'] == 'consensus_input':
+                biographies = data['biographies']
+                count = data['count']
+                
+                print(f"\n    {'─' * 76}")
+                print(f"    [INTERMEDIATE OUTPUT - Consensus Input ({count} biographies)]")
+                print(f"    {'─' * 76}")
+                
+                for idx, bio in enumerate(biographies, 1):
+                    agent = bio['agent']
+                    content = bio['content']
+                    
+                    print(f"\n    Source {idx} (by {agent}):")
+                    print(f"    {'─' * 72}")
+                    
+                    if self.show_full:
+                        # Show full content with proper indentation
+                        for line in content.split('\n'):
+                            print(f"    {line}")
+                    else:
+                        preview = content[:200]
+                        if len(content) > 200:
+                            preview += "..."
+                        # Handle multi-line preview
+                        for line in preview.split('\n'):
+                            print(f"    {line}")
+                        print(f"    [Preview: {len(content)} chars total]")
+                
+                print(f"    {'─' * 76}\n")
+        
+        return intermediate_callback
     
     def run_baseline(self):
         """Run baseline experiment (single agent)."""
@@ -159,11 +229,13 @@ class ExperimentRunner:
             
             # Generate biography
             start = time.time()
+            intermediate_callback = self._create_intermediate_callback()
             result = debate_system.generate_biography(
                 attrs,
                 num_rounds=num_rounds,
                 use_consensus=use_consensus,
-                progress_callback=lambda msg: print(f"  {msg}")
+                progress_callback=lambda msg: print(f"  {msg}"),
+                intermediate_callback=intermediate_callback
             )
             gen_time = time.time() - start
             
@@ -236,6 +308,9 @@ class ExperimentRunner:
         print(f"Examples per experiment: {self.num_examples}")
         print(f"Seed: {self.seed}")
         print(f"Results directory: {self.results_dir}")
+        if self.show_intermediate:
+            output_mode = "Full intermediate outputs" if self.show_full else "Truncated intermediate outputs"
+            print(f"Intermediate outputs: {output_mode}")
         print("=" * 80 + "\n")
         
         total_start = time.time()
@@ -326,13 +401,34 @@ def main():
     """Main entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Run multi-agent debate experiments")
+    parser = argparse.ArgumentParser(
+        description="Run multi-agent debate experiments",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Run with default settings (no intermediate outputs)
+  python experiments/run_experiments.py
+  
+  # Show truncated intermediate outputs
+  python experiments/run_experiments.py --show-intermediate
+  
+  # Show full intermediate outputs
+  python experiments/run_experiments.py --show-full
+  
+  # Combine with other options
+  python experiments/run_experiments.py --show-intermediate --num-examples 5
+        """
+    )
     parser.add_argument("--num-examples", type=int, default=2,
                        help="Number of examples to test (default: 2)")
     parser.add_argument("--model", type=str, default="gpt-4o-mini",
                        help="Model to use (default: gpt-4o-mini)")
     parser.add_argument("--seed", type=int, default=42,
                        help="Random seed (default: 42)")
+    parser.add_argument("--show-intermediate", action="store_true",
+                       help="Show intermediate agent outputs (truncated, ~300 chars)")
+    parser.add_argument("--show-full", action="store_true",
+                       help="Show full intermediate outputs (overrides --show-intermediate)")
     
     args = parser.parse_args()
     
@@ -340,7 +436,9 @@ def main():
     runner = ExperimentRunner(
         num_examples=args.num_examples,
         model=args.model,
-        seed=args.seed
+        seed=args.seed,
+        show_intermediate=args.show_intermediate,
+        show_full=args.show_full
     )
     
     runner.run_all_experiments()

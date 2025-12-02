@@ -132,7 +132,8 @@ class BiographyDebateSystem(DebateSystem):
     
     def generate_biography(self, attributes: Dict[str, Any], num_rounds: int = 2, 
                           use_consensus: bool = True, max_biographies: int = None,
-                          progress_callback: callable = None) -> Dict[str, Any]:
+                          progress_callback: callable = None,
+                          intermediate_callback: callable = None) -> Dict[str, Any]:
         """
         Generate a biography using multi-agent debate with optional consensus.
         
@@ -145,6 +146,8 @@ class BiographyDebateSystem(DebateSystem):
                             If None, includes all biographies from final round.
                             Only used if use_consensus=True.
             progress_callback: Optional callback function(message: str) for progress updates
+            intermediate_callback: Optional callback function(data: dict) for intermediate outputs.
+                                  Receives dict with 'type', 'agent', 'round', 'content', etc.
             
         Returns:
             Dictionary containing:
@@ -171,7 +174,7 @@ class BiographyDebateSystem(DebateSystem):
         for round_num in range(1, num_rounds + 1):
             if progress_callback:
                 progress_callback(f"Round {round_num}/{num_rounds}: Generating biographies...")
-            round_responses = self._execute_round(round_num, session, progress_callback)
+            round_responses = self._execute_round(round_num, session, progress_callback, intermediate_callback)
             all_responses.extend(round_responses)
         
         # Extract final biography
@@ -193,6 +196,15 @@ class BiographyDebateSystem(DebateSystem):
                 
                 if progress_callback:
                     progress_callback(f"Generating consensus from {len(biographies_to_merge)} biographies...")
+                
+                # Show consensus inputs if intermediate callback is enabled
+                if intermediate_callback:
+                    intermediate_callback({
+                        'type': 'consensus_input',
+                        'biographies': biographies_to_merge,
+                        'count': len(biographies_to_merge)
+                    })
+                
                 # Don't use session for consensus - the prompt already has everything needed
                 # This avoids sending duplicate context and speeds up the API call
                 final_biography = self._generate_consensus(biographies_to_merge, attributes, None, progress_callback)
@@ -224,7 +236,8 @@ class BiographyDebateSystem(DebateSystem):
             'num_rounds': num_rounds
         }
     
-    def _execute_round(self, round_num: int, session, progress_callback: callable = None) -> List[dict]:
+    def _execute_round(self, round_num: int, session, progress_callback: callable = None,
+                      intermediate_callback: callable = None) -> List[dict]:
         """
         Execute a single round with all agents.
         
@@ -232,6 +245,7 @@ class BiographyDebateSystem(DebateSystem):
             round_num: Current round number
             session: Session instance containing conversation history
             progress_callback: Optional callback function(message: str) for progress updates
+            intermediate_callback: Optional callback function(data: dict) for intermediate outputs
             
         Returns:
             List of response dictionaries from this round
@@ -263,6 +277,16 @@ class BiographyDebateSystem(DebateSystem):
                 "timestamp": time.time()
             }
             responses.append(response_dict)
+            
+            # Call intermediate callback if provided
+            if intermediate_callback:
+                intermediate_callback({
+                    'type': 'agent_output',
+                    'agent': agent.name,
+                    'round': round_num,
+                    'content': response_dict['content'],
+                    'elapsed_time': elapsed
+                })
         
         return responses
     

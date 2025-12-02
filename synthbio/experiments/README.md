@@ -52,6 +52,23 @@ For reproducibility, experiments use seed=42. To change:
 python synthbio/experiments/run_experiments.py --seed 123
 ```
 
+### Show Intermediate Outputs
+
+To see intermediate agent outputs during generation:
+
+```bash
+# Show truncated intermediate outputs (~300 chars per agent)
+python synthbio/experiments/run_experiments.py --show-intermediate
+
+# Show full intermediate outputs (complete agent biographies)
+python synthbio/experiments/run_experiments.py --show-full
+```
+
+This is useful for debugging and understanding how agents collaborate. The intermediate outputs show:
+- Each agent's biography after each round
+- Consensus input biographies (before merging)
+- Full or truncated views based on flag choice
+
 ## File Structure
 
 ```

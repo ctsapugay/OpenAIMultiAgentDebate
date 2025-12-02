@@ -10,6 +10,8 @@ Usage:
     python pilot_test.py --dev    # Dev mode (uses small 20-entry dev set, instant loading)
     python pilot_test.py -f       # Short form for fast mode
     python pilot_test.py -d       # Short form for dev mode
+    python pilot_test.py --show-intermediate  # Show intermediate agent outputs (truncated)
+    python pilot_test.py --show-full          # Show full intermediate outputs
 """
 
 import os
@@ -60,6 +62,8 @@ def main():
     import sys
     fast_mode = "--fast" in sys.argv or "-f" in sys.argv
     dev_mode = "--dev" in sys.argv or "-d" in sys.argv
+    show_intermediate = "--show-intermediate" in sys.argv or "-i" in sys.argv
+    show_full = "--show-full" in sys.argv
     
     # Simple experiment: just 1 example for quick timing test
     num_test_examples = 1
@@ -83,6 +87,9 @@ def main():
         print(f"  ⚡ FAST MODE: Reduced rounds and no consensus for faster testing")
     if dev_mode:
         print(f"  🚀 DEV MODE: Using small dev dataset for instant loading")
+    if show_intermediate or show_full:
+        output_mode = "Full intermediate outputs" if show_full else "Truncated intermediate outputs"
+        print(f"  📋 INTERMEDIATE OUTPUTS: {output_mode}")
     print()
     
     try:
@@ -180,11 +187,70 @@ def main():
                 def progress_update(message):
                     print(f"  {message}", flush=True)  # Flush to show progress immediately
                 
+                # Intermediate output callback function
+                def intermediate_callback(data):
+                    """Display intermediate outputs based on type."""
+                    if data['type'] == 'agent_output':
+                        agent = data['agent']
+                        round_num = data['round']
+                        content = data['content']
+                        
+                        print(f"\n    {'─' * 76}")
+                        print(f"    [INTERMEDIATE OUTPUT - {agent}, Round {round_num}]")
+                        print(f"    {'─' * 76}")
+                        
+                        if show_full:
+                            # Show full content with proper indentation
+                            for line in content.split('\n'):
+                                print(f"    {line}")
+                        else:
+                            # Show truncated preview (first 300 chars)
+                            preview = content[:300]
+                            if len(content) > 300:
+                                preview += "..."
+                            # Handle multi-line preview
+                            for line in preview.split('\n'):
+                                print(f"    {line}")
+                            print(f"    [Preview: {len(content)} chars total]")
+                        
+                        print(f"    {'─' * 76}\n")
+                    
+                    elif data['type'] == 'consensus_input':
+                        biographies = data['biographies']
+                        count = data['count']
+                        
+                        print(f"\n    {'─' * 76}")
+                        print(f"    [INTERMEDIATE OUTPUT - Consensus Input ({count} biographies)]")
+                        print(f"    {'─' * 76}")
+                        
+                        for idx, bio in enumerate(biographies, 1):
+                            agent = bio['agent']
+                            content = bio['content']
+                            
+                            print(f"\n    Source {idx} (by {agent}):")
+                            print(f"    {'─' * 72}")
+                            
+                            if show_full:
+                                # Show full content with proper indentation
+                                for line in content.split('\n'):
+                                    print(f"    {line}")
+                            else:
+                                preview = content[:200]
+                                if len(content) > 200:
+                                    preview += "..."
+                                # Handle multi-line preview
+                                for line in preview.split('\n'):
+                                    print(f"    {line}")
+                                print(f"    [Preview: {len(content)} chars total]")
+                        
+                        print(f"    {'─' * 76}\n")
+                
                 result = debate_system.generate_biography(
                     attrs, 
                     num_rounds=num_rounds, 
                     use_consensus=use_consensus,
-                    progress_callback=progress_update
+                    progress_callback=progress_update,
+                    intermediate_callback=intermediate_callback if (show_intermediate or show_full) else None
                 )
                 generated_bio = result['biography']
                 consensus_info = f" (consensus: {result.get('biographies_merged', 1)} biographies merged)" if result.get('consensus_used', False) else " (no consensus)"
