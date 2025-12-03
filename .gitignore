@@ -50,3 +50,6 @@ htmlcov/
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated artifacts
+

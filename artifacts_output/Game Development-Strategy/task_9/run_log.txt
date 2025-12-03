@@ -1,0 +1,2616 @@
+2025-11-30 19:39:09 - INFO - 
+================================================================================
+2025-11-30 19:39:09 - INFO - ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-11-30 19:39:09 - INFO - ================================================================================
+2025-11-30 19:39:09 - INFO - Task ID: 9
+2025-11-30 19:39:09 - INFO - Task Class: Game Development-Strategy
+2025-11-30 19:39:09 - INFO - Task Difficulty: hard
+2025-11-30 19:39:09 - INFO - Improvement Threshold: 7.0
+2025-11-30 19:39:09 - INFO - Max Iterations: 2
+2025-11-30 19:39:09 - INFO - Start Time: 2025-11-30 19:39:09
+2025-11-30 19:39:09 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:39:09 - INFO - Screenshots Enabled: True
+2025-11-30 19:39:09 - INFO - Use Screenshots in Evaluation: True
+2025-11-30 19:39:09 - INFO - ================================================================================
+2025-11-30 19:39:09 - INFO - 
+================================================================================
+2025-11-30 19:39:09 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-11-30 19:39:09 - INFO - ================================================================================
+2025-11-30 19:39:09 - INFO - 
+================================================================================
+2025-11-30 19:39:09 - INFO - GENERATING INITIAL CODE...
+2025-11-30 19:39:09 - INFO - ================================================================================
+2025-11-30 19:39:09 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:39:09 - INFO - Temperature: 0.0
+2025-11-30 19:39:09 - INFO - Task Question (first 200 chars): You are a code expert. Please use your professional knowledge to generate accurate and professional responses. Make sure the generated code is executable for demonstration purposes. 
+
+Please help me i...
+2025-11-30 19:41:05 - INFO - ✓ Initial code generated (took 116.08 seconds)
+2025-11-30 19:41:05 - INFO - Generated code length: 35518 characters
+2025-11-30 19:41:05 - INFO - Response length: 35518 characters
+2025-11-30 19:41:05 - INFO - 
+================================================================================
+2025-11-30 19:41:05 - INFO - INITIAL HTML CODE
+2025-11-30 19:41:05 - INFO - ================================================================================
+2025-11-30 19:41:05 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive SVG Chess Game</title>
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f0f0f0;
+    user-select: none;
+  }
+  h1 {
+    margin: 1rem 0 0.5rem 0;
+    color: #222;
+  }
+  #container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin: 1rem;
+  }
+  #chessboard {
+    border: 2px solid #333;
+    background: #eee;
+    touch-action: none;
+  }
+  #history {
+    width: 280px;
+    max-height: 512px;
+    overflow-y: auto;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  #history h2 {
+    margin-top: 0;
+    font-size: 18px;
+    text-align: center;
+  }
+  #history ol {
+    padding-left: 1.2rem;
+    margin: 0;
+  }
+  #history ol li {
+    margin-bottom: 0.3rem;
+  }
+  #status {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #222;
+    min-height: 1.5em;
+    text-align: center;
+  }
+  button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #666;
+    background: #fafafa;
+    transition: background-color 0.2s ease;
+  }
+  button:hover {
+    background: #ddd;
+  }
+  /* Highlight squares */
+  .highlight-move {
+    fill: rgba(50, 200, 50, 0.4);
+    pointer-events: none;
+  }
+  .highlight-capture {
+    fill: rgba(200, 50, 50, 0.5);
+    pointer-events: none;
+  }
+  .highlight-selected {
+    stroke: #f39c12;
+    stroke-width: 3;
+  }
+  /* Cursor for draggable pieces */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+<h1>Interactive SVG Chess Game</h1>
+<div id="container">
+  <svg id="chessboard" width="512" height="512" viewBox="0 0 512 512" aria-label="Chessboard" role="img" tabindex="0"></svg>
+  <div id="history" aria-live="polite" aria-atomic="true">
+    <h2>Game History</h2>
+    <ol id="moveList"></ol>
+    <button id="btnUndo" title="Undo last move">Undo Move</button>
+    <button id="btnRestart" title="Restart game">Restart Game</button>
+  </div>
+</div>
+<div id="status" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // Constants
+  const BOARD_SIZE = 8;
+  const SQUARE_SIZE = 64; // 512 / 8
+  const LIGHT_COLOR = "#f0d9b5";
+  const DARK_COLOR = "#b58863";
+
+  // Unicode chess pieces for fallback and accessibility
+  const UNICODE_PIECES = {
+    w: {
+      K: "\u2654",
+      Q: "\u2655",
+      R: "\u2656",
+      B: "\u2657",
+      N: "\u2658",
+      P: "\u2659",
+    },
+    b: {
+      K: "\u265A",
+      Q: "\u265B",
+      R: "\u265C",
+      B: "\u265D",
+      N: "\u265E",
+      P: "\u265F",
+    },
+  };
+
+  // Piece SVG paths (simplified, stylized)
+  // Source: adapted from Wikimedia Commons chess piece SVGs, simplified for clarity
+  // Each piece is drawn inside a 64x64 viewbox
+  const PIECE_PATHS = {
+    K: `<path d="M32 12 L32 52 M20 20 L44 20 M24 44 L40 44 M20 52 L44 52 M28 28 L36 36 M36 28 L28 36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    Q: `<circle cx="32" cy="24" r="6" stroke="currentColor" stroke-width="3" fill="none"/>
+        <path d="M20 52 L44 52 L32 36 Z" fill="currentColor" />
+        <path d="M20 20 L44 20 L32 36 Z" fill="none" stroke="currentColor" stroke-width="3"/>`,
+    R: `<rect x="20" y="20" width="24" height="32" stroke="currentColor" stroke-width="3" fill="none" rx="4" ry="4"/>
+        <path d="M20 20 L44 20" stroke="currentColor" stroke-width="3"/>
+        <path d="M32 20 L32 52" stroke="currentColor" stroke-width="3"/>`,
+    B: `<ellipse cx="32" cy="32" rx="12" ry="20" stroke="currentColor" stroke-width="3" fill="none"/>
+        <line x1="20" y1="20" x2="44" y2="44" stroke="currentColor" stroke-width="3"/>
+        <line x1="44" y1="20" x2="20" y2="44" stroke="currentColor" stroke-width="3"/>`,
+    N: `<path d="M20 52 Q32 20 44 52" stroke="currentColor" stroke-width="3" fill="none"/>
+        <circle cx="32" cy="32" r="6" fill="currentColor"/>`,
+    P: `<rect x="24" y="20" width="16" height="28" stroke="currentColor" stroke-width="3" fill="none" rx="4" ry="4"/>
+        <circle cx="32" cy="16" r="8" stroke="currentColor" stroke-width="3" fill="none"/>`,
+  };
+
+  // Initial board setup in FEN notation (standard chess start)
+  const START_FEN =
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+  // Helper: parse FEN to board array
+  function parseFEN(fen) {
+    const parts = fen.split(" ");
+    const rows = parts[0].split("/");
+    const board = [];
+    for (let r = 0; r < 8; r++) {
+      const row = [];
+      for (const ch of rows[r]) {
+        if (ch >= "1" && ch <= "8") {
+          for (let i = 0; i < +ch; i++) row.push(null);
+        } else {
+          const color = ch === ch.toUpperCase() ? "w" : "b";
+          const type = ch.toUpperCase();
+          row.push({ type, color, hasMoved: false });
+        }
+      }
+      board.push(row);
+    }
+    return {
+      board,
+      turn: parts[1],
+      castling: parts[2],
+      enPassant: parts[3] === "-" ? null : parts[3],
+      halfmove: +parts[4],
+      fullmove: +parts[5],
+    };
+  }
+
+  // Helper: convert board coords to algebraic notation
+  function coordsToAlgebraic(x, y) {
+    return "abcdefgh"[x] + (8 - y);
+  }
+  // Algebraic to coords
+  function algebraicToCoords(s) {
+    return [s.charCodeAt(0) - 97, 8 - parseInt(s[1], 10)];
+  }
+
+  // Deep clone board state
+  function cloneBoardState(state) {
+    return {
+      board: state.board.map((row) =>
+        row.map((p) => (p ? { ...p } : null))
+      ),
+      turn: state.turn,
+      castling: state.castling,
+      enPassant: state.enPassant,
+      halfmove: state.halfmove,
+      fullmove: state.fullmove,
+    };
+  }
+
+  // Chess logic and move generation
+  // We'll implement basic move generation for all pieces, including special moves:
+  // castling, en passant, promotion.
+  // For simplicity, no AI, only user moves with turn enforcement.
+
+  // Directions for sliding pieces
+  const DIRECTIONS = {
+    N: [0, -1],
+    S: [0, 1],
+    E: [1, 0],
+    W: [-1, 0],
+    NE: [1, -1],
+    NW: [-1, -1],
+    SE: [1, 1],
+    SW: [-1, 1],
+  };
+
+  // Knight moves
+  const KNIGHT_MOVES = [
+    [1, 2],
+    [2, 1],
+    [2, -1],
+    [1, -2],
+    [-1, -2],
+    [-2, -1],
+    [-2, 1],
+    [-1, 2],
+  ];
+
+  // Check if coords inside board
+  function inBounds(x, y) {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+  }
+
+  // Check if square is attacked by opponent
+  function isSquareAttacked(state, x, y, attackerColor) {
+    const board = state.board;
+
+    // Pawn attacks
+    const pawnDir = attackerColor === "w" ? -1 : 1;
+    const pawnAttackOffsets = [
+      [-1, pawnDir],
+      [1, pawnDir],
+    ];
+    for (const [dx, dy] of pawnAttackOffsets) {
+      const nx = x + dx,
+        ny = y + dy;
+      if (
+        inBounds(nx, ny) &&
+        board[ny][nx] &&
+        board[ny][nx].color === attackerColor &&
+        board[ny][nx].type === "P"
+      )
+        return true;
+    }
+
+    // Knight attacks
+    for (const [dx, dy] of KNIGHT_MOVES) {
+      const nx = x + dx,
+        ny = y + dy;
+      if (
+        inBounds(nx, ny) &&
+        board[ny][nx] &&
+        board[ny][nx].color === attackerColor &&
+        board[ny][nx].type === "N"
+      )
+        return true;
+    }
+
+    // Sliding pieces: bishop, rook, queen
+    const directions = [
+      DIRECTIONS.N,
+      DIRECTIONS.S,
+      DIRECTIONS.E,
+      DIRECTIONS.W,
+      DIRECTIONS.NE,
+      DIRECTIONS.NW,
+      DIRECTIONS.SE,
+      DIRECTIONS.SW,
+    ];
+    for (const [dx, dy] of directions) {
+      let nx = x + dx,
+        ny = y + dy;
+      while (inBounds(nx, ny)) {
+        const p = board[ny][nx];
+        if (p) {
+          if (p.color === attackerColor) {
+            if (
+              (dx === 0 || dy === 0) &&
+              (p.type === "R" || p.type === "Q")
+            )
+              return true;
+            if (
+              dx !== 0 &&
+              dy !== 0 &&
+              (p.type === "B" || p.type === "Q")
+            )
+              return true;
+            // King adjacent attack
+            if (
+              Math.abs(nx - x) === 1 &&
+              Math.abs(ny - y) === 1 &&
+              p.type === "K"
+            )
+              return true;
+          }
+          break;
+        }
+        nx += dx;
+        ny += dy;
+      }
+    }
+
+    // King attacks (adjacent squares)
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx,
+          ny = y + dy;
+        if (
+          inBounds(nx, ny) &&
+          board[ny][nx] &&
+          board[ny][nx].color === attackerColor &&
+          board[ny][nx].type === "K"
+        )
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Find king position for color
+  function findKing(state, color) {
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const p = state.board[y][x];
+        if (p && p.color === color && p.type === "K") return [x, y];
+      }
+    }
+    return null;
+  }
+
+  // Generate all legal moves for a piece at (x,y)
+  // Returns array of moves: {from: [x,y], to: [x,y], promotion: 'Q'|'R'|'B'|'N'|null, castling: 'K'|'Q'|null, enPassant: boolean}
+  function generateMoves(state, x, y) {
+    const board = state.board;
+    const piece = board[y][x];
+    if (!piece) return [];
+    if (piece.color !== state.turn) return [];
+
+    const moves = [];
+    const enemy = piece.color === "w" ? "b" : "w";
+
+    function addMove(tx, ty, opts = {}) {
+      if (!inBounds(tx, ty)) return;
+      const target = board[ty][tx];
+      if (!target || target.color !== piece.color) {
+        moves.push({
+          from: [x, y],
+          to: [tx, ty],
+          promotion: opts.promotion || null,
+          castling: opts.castling || null,
+          enPassant: opts.enPassant || false,
+        });
+      }
+    }
+
+    switch (piece.type) {
+      case "P": {
+        const dir = piece.color === "w" ? -1 : 1;
+        const startRow = piece.color === "w" ? 6 : 1;
+        // Forward move
+        const oneStepY = y + dir;
+        if (inBounds(x, oneStepY) && !board[oneStepY][x]) {
+          // Promotion check
+          if (oneStepY === 0 || oneStepY === 7) {
+            ["Q", "R", "B", "N"].forEach((promo) =>
+              moves.push({
+                from: [x, y],
+                to: [x, oneStepY],
+                promotion: promo,
+                castling: null,
+                enPassant: false,
+              })
+            );
+          } else {
+            addMove(x, oneStepY);
+          }
+          // Two steps from start
+          if (
+            y === startRow &&
+            !board[y + 2 * dir][x]
+          ) {
+            addMove(x, y + 2 * dir);
+          }
+        }
+        // Captures
+        for (const dx of [-1, 1]) {
+          const cx = x + dx,
+            cy = y + dir;
+          if (inBounds(cx, cy)) {
+            const target = board[cy][cx];
+            if (target && target.color === enemy) {
+              if (cy === 0 || cy === 7) {
+                ["Q", "R", "B", "N"].forEach((promo) =>
+                  moves.push({
+                    from: [x, y],
+                    to: [cx, cy],
+                    promotion: promo,
+                    castling: null,
+                    enPassant: false,
+                  })
+                );
+              } else {
+                addMove(cx, cy);
+              }
+            }
+            // En passant
+            if (
+              state.enPassant &&
+              coordsToAlgebraic(cx, cy) === state.enPassant
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [cx, cy],
+                promotion: null,
+                castling: null,
+                enPassant: true,
+              });
+            }
+          }
+        }
+        break;
+      }
+      case "N": {
+        for (const [dx, dy] of KNIGHT_MOVES) {
+          const nx = x + dx,
+            ny = y + dy;
+          if (!inBounds(nx, ny)) continue;
+          const target = board[ny][nx];
+          if (!target || target.color === enemy) addMove(nx, ny);
+        }
+        break;
+      }
+      case "B": {
+        for (const dir of [DIRECTIONS.NE, DIRECTIONS.NW, DIRECTIONS.SE, DIRECTIONS.SW]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "R": {
+        for (const dir of [DIRECTIONS.N, DIRECTIONS.S, DIRECTIONS.E, DIRECTIONS.W]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "Q": {
+        for (const dir of [
+          DIRECTIONS.N,
+          DIRECTIONS.S,
+          DIRECTIONS.E,
+          DIRECTIONS.W,
+          DIRECTIONS.NE,
+          DIRECTIONS.NW,
+          DIRECTIONS.SE,
+          DIRECTIONS.SW,
+        ]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "K": {
+        for (let dx = -1; dx <= 1; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            if (dx === 0 && dy === 0) continue;
+            const nx = x + dx,
+              ny = y + dy;
+            if (!inBounds(nx, ny)) continue;
+            const target = board[ny][nx];
+            if (!target || target.color === enemy) addMove(nx, ny);
+          }
+        }
+        // Castling
+        if (!piece.hasMoved && !isSquareAttacked(state, x, y, enemy)) {
+          // Kingside
+          if (
+            (piece.color === "w" && state.castling.includes("K")) ||
+            (piece.color === "b" && state.castling.includes("k"))
+          ) {
+            const row = y;
+            if (
+              !board[row][x + 1] &&
+              !board[row][x + 2] &&
+              !isSquareAttacked(state, x + 1, row, enemy) &&
+              !isSquareAttacked(state, x + 2, row, enemy)
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [x + 2, y],
+                promotion: null,
+                castling: "K",
+                enPassant: false,
+              });
+            }
+          }
+          // Queenside
+          if (
+            (piece.color === "w" && state.castling.includes("Q")) ||
+            (piece.color === "b" && state.castling.includes("q"))
+          ) {
+            const row = y;
+            if (
+              !board[row][x - 1] &&
+              !board[row][x - 2] &&
+              !board[row][x - 3] &&
+              !isSquareAttacked(state, x - 1, row, enemy) &&
+              !isSquareAttacked(state, x - 2, row, enemy)
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [x - 2, y],
+                promotion: null,
+                castling: "Q",
+                enPassant: false,
+              });
+            }
+          }
+        }
+        break;
+      }
+    }
+    return moves;
+  }
+
+  // Apply a move to a board state, returns new state
+  // Does not check legality here, assumes move is legal
+  function applyMove(state, move) {
+    const newState = cloneBoardState(state);
+    const [fx, fy] = move.from;
+    const [tx, ty] = move.to;
+    const piece = newState.board[fy][fx];
+    const enemy = piece.color === "w" ? "b" : "w";
+
+    // Move piece
+    newState.board[ty][tx] = { ...piece, hasMoved: true };
+    newState.board[fy][fx] = null;
+
+    // Handle en passant capture
+    if (move.enPassant) {
+      const epY = piece.color === "w" ? ty + 1 : ty - 1;
+      newState.board[epY][tx] = null;
+    }
+
+    // Handle castling
+    if (move.castling) {
+      const row = fy;
+      if (move.castling === "K") {
+        // Move rook from h-file to f-file
+        newState.board[row][5] = newState.board[row][7];
+        newState.board[row][7] = null;
+        newState.board[row][5].hasMoved = true;
+      } else if (move.castling === "Q") {
+        // Move rook from a-file to d-file
+        newState.board[row][3] = newState.board[row][0];
+        newState.board[row][0] = null;
+        newState.board[row][3].hasMoved = true;
+      }
+    }
+
+    // Handle promotion
+    if (move.promotion) {
+      newState.board[ty][tx].type = move.promotion;
+    }
+
+    // Update castling rights
+    let castling = newState.castling;
+    const fromSquare = coordsToAlgebraic(fx, fy);
+    const toSquare = coordsToAlgebraic(tx, ty);
+
+    // Remove castling rights if king or rook moved or captured
+    if (piece.type === "K") {
+      if (piece.color === "w") {
+        castling = castling.replace("K", "").replace("Q", "");
+      } else {
+        castling = castling.replace("k", "").replace("q", "");
+      }
+    }
+    if (piece.type === "R") {
+      if (piece.color === "w") {
+        if (fromSquare === "a1") castling = castling.replace("Q", "");
+        else if (fromSquare === "h1") castling = castling.replace("K", "");
+      } else {
+        if (fromSquare === "a8") castling = castling.replace("q", "");
+        else if (fromSquare === "h8") castling = castling.replace("k", "");
+      }
+    }
+    // If rook captured
+    if (newState.board[ty][tx] && newState.board[ty][tx].color !== piece.color) {
+      if (toSquare === "a1") castling = castling.replace("Q", "");
+      else if (toSquare === "h1") castling = castling.replace("K", "");
+      else if (toSquare === "a8") castling = castling.replace("q", "");
+      else if (toSquare === "h8") castling = castling.replace("k", "");
+    }
+    newState.castling = castling;
+
+    // Update en passant target square
+    if (
+      piece.type === "P" &&
+      Math.abs(ty - fy) === 2
+    ) {
+      const epRank = (fy + ty) / 2;
+      newState.enPassant = coordsToAlgebraic(fx, epRank);
+    } else {
+      newState.enPassant = null;
+    }
+
+    // Update halfmove clock
+    if (
+      piece.type === "P" ||
+      (newState.board[ty][tx] && newState.board[ty][tx].color !== piece.color)
+    ) {
+      newState.halfmove = 0;
+    } else {
+      newState.halfmove++;
+    }
+
+    // Update fullmove number
+    if (piece.color === "b") newState.fullmove++;
+
+    // Switch turn
+    newState.turn = enemy;
+
+    return newState;
+  }
+
+  // Check if current player is in check
+  function inCheck(state, color) {
+    const kingPos = findKing(state, color);
+    if (!kingPos) return false; // Should not happen
+    return isSquareAttacked(state, kingPos[0], kingPos[1], color === "w" ? "b" : "w");
+  }
+
+  // Generate all legal moves for current player
+  function generateAllLegalMoves(state) {
+    const moves = [];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const piece = state.board[y][x];
+        if (piece && piece.color === state.turn) {
+          const pieceMoves = generateMoves(state, x, y);
+          for (const move of pieceMoves) {
+            const newState = applyMove(state, move);
+            if (!inCheck(newState, state.turn)) {
+              moves.push(move);
+            }
+          }
+        }
+      }
+    }
+    return moves;
+  }
+
+  // Convert move to SAN (Standard Algebraic Notation)
+  // Simplified: no disambiguation, no check/checkmate symbols
+  function moveToSAN(state, move) {
+    const piece = state.board[move.from[1]][move.from[0]];
+    if (!piece) return "";
+
+    const enemy = piece.color === "w" ? "b" : "w";
+    const target = state.board[move.to[1]][move.to[0]];
+    const fromAlg = coordsToAlgebraic(...move.from);
+    const toAlg = coordsToAlgebraic(...move.to);
+
+    // Castling
+    if (move.castling === "K") return "O-O";
+    if (move.castling === "Q") return "O-O-O";
+
+    let san = "";
+
+    // Pawn moves
+    if (piece.type === "P") {
+      if (move.enPassant || (target && target.color === enemy)) {
+        san += fromAlg[0] + "x" + toAlg;
+      } else {
+        san += toAlg;
+      }
+      if (move.promotion) san += "=" + move.promotion;
+    } else {
+      san += piece.type;
+      // Capture
+      if (target && target.color === enemy) san += "x";
+      san += toAlg;
+    }
+
+    // Check or checkmate detection
+    const newState = applyMove(state, move);
+    if (inCheck(newState, enemy)) {
+      const enemyMoves = generateAllLegalMoves(newState);
+      if (enemyMoves.length === 0) san += "#";
+      else san += "+";
+    }
+
+    return san;
+  }
+
+  // === SVG Rendering ===
+
+  const svg = document.getElementById("chessboard");
+  const moveList = document.getElementById("moveList");
+  const statusDiv = document.getElementById("status");
+  const btnUndo = document.getElementById("btnUndo");
+  const btnRestart = document.getElementById("btnRestart");
+
+  // State variables
+  let gameState = parseFEN(START_FEN);
+  let history = [cloneBoardState(gameState)];
+  let selectedSquare = null;
+  let legalMovesForSelected = [];
+  let draggingPiece = null;
+  let dragOffset = { x: 0, y: 0 };
+  let dragElement = null;
+
+  // Create board squares
+  function createBoardSquares() {
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const rect = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "rect"
+        );
+        rect.setAttribute("x", x * SQUARE_SIZE);
+        rect.setAttribute("y", y * SQUARE_SIZE);
+        rect.setAttribute("width", SQUARE_SIZE);
+        rect.setAttribute("height", SQUARE_SIZE);
+        rect.setAttribute(
+          "fill",
+          (x + y) % 2 === 0 ? LIGHT_COLOR : DARK_COLOR
+        );
+        rect.setAttribute("data-x", x);
+        rect.setAttribute("data-y", y);
+        rect.classList.add("square");
+        svg.appendChild(rect);
+      }
+    }
+  }
+
+  // Clear highlights
+  function clearHighlights() {
+    svg.querySelectorAll(".highlight-move, .highlight-capture, .highlight-selected").forEach((el) => el.remove());
+  }
+
+  // Highlight squares for legal moves
+  function highlightMoves(moves) {
+    moves.forEach((move) => {
+      const [tx, ty] = move.to;
+      const squareX = tx * SQUARE_SIZE;
+      const squareY = ty * SQUARE_SIZE;
+      const circle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+      circle.setAttribute("cx", squareX + SQUARE_SIZE / 2);
+      circle.setAttribute("cy", squareY + SQUARE_SIZE / 2);
+      circle.setAttribute("r", SQUARE_SIZE / 6);
+      if (move.enPassant || (gameState.board[ty][tx] && gameState.board[ty][tx].color !== gameState.turn)) {
+        circle.classList.add("highlight-capture");
+      } else {
+        circle.classList.add("highlight-move");
+      }
+      svg.appendChild(circle);
+    });
+  }
+
+  // Highlight selected square border
+  function highlightSelected(x, y) {
+    const rect = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+    rect.setAttribute("x", x * SQUARE_SIZE);
+    rect.setAttribute("y", y * SQUARE_SIZE);
+    rect.setAttribute("width", SQUARE_SIZE);
+    rect.setAttribute("height", SQUARE_SIZE);
+    rect.classList.add("highlight-selected");
+    rect.setAttribute("fill", "none");
+    svg.appendChild(rect);
+  }
+
+  // Create piece SVG element
+  function createPieceElement(piece, x, y) {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("transform", `translate(${x * SQUARE_SIZE},${y * SQUARE_SIZE})`);
+    g.setAttribute("data-x", x);
+    g.setAttribute("data-y", y);
+    g.setAttribute("data-color", piece.color);
+    g.setAttribute("data-type", piece.type);
+    g.classList.add("piece", "draggable");
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "img");
+    g.setAttribute("aria-label", `${piece.color === "w" ? "White" : "Black"} ${pieceName(piece.type)}`);
+
+    // Background circle for better visibility
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    bg.setAttribute("cx", SQUARE_SIZE / 2);
+    bg.setAttribute("cy", SQUARE_SIZE / 2);
+    bg.setAttribute("r", SQUARE_SIZE / 2 - 4);
+    bg.setAttribute("fill", piece.color === "w" ? "#fff" : "#222");
+    bg.setAttribute("stroke", piece.color === "w" ? "#222" : "#fff");
+    bg.setAttribute("stroke-width", "2");
+    g.appendChild(bg);
+
+    // Piece shape path
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    path.setAttribute("x", 0);
+    path.setAttribute("y", 0);
+    path.setAttribute("width", SQUARE_SIZE);
+    path.setAttribute("height", SQUARE_SIZE);
+    path.setAttribute("viewBox", "0 0 64 64");
+    path.setAttribute("fill", piece.color === "w" ? "#222" : "#eee");
+    path.setAttribute("stroke", piece.color === "w" ? "#222" : "#eee");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linejoin", "round");
+    path.setAttribute("stroke-linecap", "round");
+    path.innerHTML = PIECE_PATHS[piece.type];
+    g.appendChild(path);
+
+    return g;
+  }
+
+  // Piece full names for aria-label
+  function pieceName(type) {
+    switch (type) {
+      case "K": return "King";
+      case "Q": return "Queen";
+      case "R": return "Rook";
+      case "B": return "Bishop";
+      case "N": return "Knight";
+      case "P": return "Pawn";
+      default: return "Piece";
+    }
+  }
+
+  // Render the entire board and pieces
+  function renderBoard() {
+    // Clear all pieces and highlights
+    svg.querySelectorAll(".piece, .highlight-move, .highlight-capture, .highlight-selected").forEach((el) => el.remove());
+
+    // Draw pieces
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const piece = gameState.board[y][x];
+        if (piece) {
+          const pieceEl = createPieceElement(piece, x, y);
+          svg.appendChild(pieceEl);
+        }
+      }
+    }
+
+    // Highlight selected and legal moves if any
+    if (selectedSquare) {
+      highlightSelected(selectedSquare[0], selectedSquare[1]);
+      highlightMoves(legalMovesForSelected);
+    }
+
+    updateStatus();
+  }
+
+  // Update status text
+  function updateStatus() {
+    const enemy = gameState.turn === "w" ? "Black" : "White";
+    const current = gameState.turn === "w" ? "White" : "Black";
+    const legalMoves = generateAllLegalMoves(gameState);
+    const inCheckNow = inCheck(gameState, gameState.turn);
+    let statusText = `${current} to move.`;
+    if (inCheckNow) {
+      if (legalMoves.length === 0) {
+        statusText = `Checkmate! ${enemy} wins.`;
+      } else {
+        statusText = `${current} is in check.`;
+      }
+    } else if (legalMoves.length === 0) {
+      statusText = `Stalemate! Draw.`;
+    }
+    statusDiv.textContent = statusText;
+  }
+
+  // Update move history list
+  function updateHistory() {
+    moveList.innerHTML = "";
+    for (let i = 1; i < history.length; i++) {
+      const prev = history[i - 1];
+      const curr = history[i];
+      // Find move difference
+      let moveSAN = "";
+      outer: for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          const p1 = prev.board[y][x];
+          const p2 = curr.board[y][x];
+          if (
+            (p1 && !p2) ||
+            (!p1 && p2) ||
+            (p1 && p2 && (p1.type !== p2.type || p1.color !== p2.color))
+          ) {
+            // We don't have exact move stored, so we skip SAN here
+            break outer;
+          }
+        }
+      }
+      // Instead, we store SAN when making moves
+      // We'll keep a separate array for SAN moves
+    }
+    // We'll keep a separate array for SAN moves
+    moveList.innerHTML = "";
+    for (let i = 0; i < sanHistory.length; i += 2) {
+      const whiteMove = sanHistory[i] || "";
+      const blackMove = sanHistory[i + 1] || "";
+      const li = document.createElement("li");
+      li.textContent = `${(i / 2) + 1}. ${whiteMove} ${blackMove}`;
+      moveList.appendChild(li);
+    }
+  }
+
+  // Variables to store SAN moves for history display
+  let sanHistory = [];
+
+  // Handle piece selection and move
+  function onSquareClick(x, y) {
+    if (draggingPiece) return; // Ignore clicks during drag
+
+    const piece = gameState.board[y][x];
+    if (selectedSquare) {
+      // If clicked on a legal move square, move piece
+      const legalMove = legalMovesForSelected.find(
+        (m) => m.to[0] === x && m.to[1] === y
+      );
+      if (legalMove) {
+        makeMove(legalMove);
+        selectedSquare = null;
+        legalMovesForSelected = [];
+        renderBoard();
+        return;
+      }
+      // If clicked on another piece of current player, select it
+      if (piece && piece.color === gameState.turn) {
+        selectedSquare = [x, y];
+        legalMovesForSelected = generateMoves(gameState, x, y).filter((m) => {
+          const newState = applyMove(gameState, m);
+          return !inCheck(newState, gameState.turn);
+        });
+        renderBoard();
+        return;
+      }
+      // Otherwise deselect
+      selectedSquare = null;
+      legalMovesForSelected = [];
+      renderBoard();
+    } else {
+      // No selection yet
+      if (piece && piece.color === gameState.turn) {
+        selectedSquare = [x, y];
+        legalMovesForSelected = generateMoves(gameState, x, y).filter((m) => {
+          const newState = applyMove(gameState, m);
+          return !inCheck(newState, gameState.turn);
+        });
+        renderBoard();
+      }
+    }
+  }
+
+  // Make a move and update history
+  function makeMove(move) {
+    const san = moveToSAN(gameState, move);
+    gameState = applyMove(gameState, move);
+    history.push(cloneBoardState(gameState));
+    sanHistory.push(san);
+    updateHistory();
+  }
+
+  // Undo last move
+  function undoMove() {
+    if (history.length <= 1) return;
+    history.pop();
+    sanHistory.pop();
+    gameState = cloneBoardState(history[history.length - 1]);
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+  }
+
+  // Restart game
+  function restartGame() {
+    gameState = parseFEN(START_FEN);
+    history = [cloneBoardState(gameState)];
+    sanHistory = [];
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+    updateHistory();
+  }
+
+  // Handle drag and drop for pieces
+  function onPointerDown(e) {
+    if (e.target.closest(".piece")) {
+      const pieceEl = e.target.closest(".piece");
+      const x = +pieceEl.getAttribute("data-x");
+      const y = +pieceEl.getAttribute("data-y");
+      const piece = gameState.board[y][x];
+      if (!piece || piece.color !== gameState.turn) return;
+
+      draggingPiece = { piece, from: [x, y] };
+      dragElement = pieceEl.cloneNode(true);
+      dragElement.classList.add("dragging");
+      dragElement.style.pointerEvents = "none";
+      svg.appendChild(dragElement);
+
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+      dragOffset.x = cursorpt.x - x * SQUARE_SIZE;
+      dragOffset.y = cursorpt.y - y * SQUARE_SIZE;
+
+      moveDragElement(e);
+      e.preventDefault();
+    }
+  }
+  function moveDragElement(e) {
+    if (!dragElement) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    dragElement.setAttribute(
+      "transform",
+      `translate(${cursorpt.x - dragOffset.x},${cursorpt.y - dragOffset.y})`
+    );
+  }
+  function onPointerMove(e) {
+    if (dragElement) {
+      moveDragElement(e);
+      e.preventDefault();
+    }
+  }
+  function onPointerUp(e) {
+    if (!draggingPiece) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const tx = Math.floor(cursorpt.x / SQUARE_SIZE);
+    const ty = Math.floor(cursorpt.y / SQUARE_SIZE);
+
+    const legalMoves = generateMoves(gameState, draggingPiece.from[0], draggingPiece.from[1]).filter((m) => {
+      const newState = applyMove(gameState, m);
+      return !inCheck(newState, gameState.turn);
+    });
+    const move = legalMoves.find((m) => m.to[0] === tx && m.to[1] === ty);
+
+    if (move) {
+      makeMove(move);
+    }
+
+    draggingPiece = null;
+    if (dragElement) {
+      dragElement.remove();
+      dragElement = null;
+    }
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+  }
+
+  // Keyboard navigation and accessibility
+  function onKeyDown(e) {
+    if (!selectedSquare) return;
+    const [x, y] = selectedSquare;
+    let nx = x,
+      ny = y;
+    switch (e.key) {
+      case "ArrowUp":
+        ny = Math.max(0, y - 1);
+        break;
+      case "ArrowDown":
+        ny = Math.min(7, y + 1);
+        break;
+      case "ArrowLeft":
+        nx = Math.max(0, x - 1);
+        break;
+      case "ArrowRight":
+        nx = Math.min(7, x + 1);
+        break;
+      case "Enter":
+      case " ":
+        // If a piece is selected, try to move to selected square if legal
+        if (legalMovesForSelected.length > 0) {
+          const move = legalMovesForSelected.find((m) => m.to[0] === x && m.to[1] === y);
+          if (move) {
+            makeMove(move);
+            selectedSquare = null;
+            legalMovesForSelected = [];
+            renderBoard();
+            e.preventDefault();
+            return;
+          }
+        }
+        break;
+      case "Escape":
+        selectedSquare = null;
+        legalMovesForSelected = [];
+        renderBoard();
+        e.preventDefault();
+        return;
+      default:
+        return;
+    }
+    if (nx !== x || ny !== y) {
+      selectedSquare = [nx, ny];
+      legalMovesForSelected = generateMoves(gameState, nx, ny).filter((m) => {
+        const newState = applyMove(gameState, m);
+        return !inCheck(newState, gameState.turn);
+      });
+      renderBoard();
+      e.preventDefault();
+    }
+  }
+
+  // Initialize board squares and event listeners
+  function init() {
+    createBoardSquares();
+
+    // Click on squares
+    svg.addEventListener("click", (e) => {
+      if (e.target.classList.contains("square")) {
+        const x = +e.target.getAttribute("data-x");
+        const y = +e.target.getAttribute("data-y");
+        onSquareClick(x, y);
+      }
+    });
+
+    // Drag and drop events
+    svg.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+
+    // Keyboard navigation
+    svg.addEventListener("keydown", onKeyDown);
+
+    btnUndo.addEventListener("click", () => {
+      undoMove();
+    });
+    btnRestart.addEventListener("click", () => {
+      restartGame();
+    });
+
+    renderBoard();
+    updateHistory();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:41:05 - INFO - ================================================================================
+2025-11-30 19:41:05 - INFO - 
+✓ Initial code saved to: artifacts_output/Game Development-Strategy/task_9/iteration_0_initial.html
+2025-11-30 19:41:05 - INFO - 
+================================================================================
+2025-11-30 19:41:05 - INFO - EVALUATING INITIAL CODE
+2025-11-30 19:41:05 - INFO - ================================================================================
+2025-11-30 19:41:05 - INFO - Generating screenshots for initial code...
+2025-11-30 19:41:15 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 19:41:15 - INFO - Evaluating initial code...
+2025-11-30 19:41:30 - INFO - Initial evaluation completed in 15.20 seconds
+2025-11-30 19:41:30 - INFO - 
+Initial Scores:
+2025-11-30 19:41:30 - INFO - Individual Scores (JSON):
+{
+  "Is the chess board and pieces visualization accurately implemented using SVG?": 9.0,
+  "Is piece movement and selection properly implemented?": 8.0,
+  "Is the chess game logic fully implemented?": 9.0,
+  "Is the game history viewer functional and comprehensive?": 7.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 7.5,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 8.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 19:41:30 - INFO - Initial Calculated Sum: 81.5
+2025-11-30 19:41:30 - INFO - 
+✓ Initial code already meets all thresholds! No iterations needed.
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - STEP 2: ITERATIVE IMPROVEMENT LOOP
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - FINAL EVALUATION RESULTS
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - Individual Scores (JSON):
+{
+  "Is the chess board and pieces visualization accurately implemented using SVG?": 9.0,
+  "Is piece movement and selection properly implemented?": 8.0,
+  "Is the chess game logic fully implemented?": 9.0,
+  "Is the game history viewer functional and comprehensive?": 7.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 7.5,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 8.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 19:41:30 - INFO - Final Calculated Sum: 81.5
+2025-11-30 19:41:30 - INFO - Final Overall Score: 78.5
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - ```json
+{
+  "Is the chess board and pieces visualization accurately implemented using SVG?": "9",
+  "Is piece movement and selection properly implemented?": "8",
+  "Is the chess game logic fully implemented?": "9",
+  "Is the game history viewer functional and comprehensive?": "7",
+  "Is the code robust?": "7",
+  "Are there any innovative features that are eye-catching?": "7.5",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional design standards?": "8",
+  "Is the dynamic interaction smooth and seamless?": "8",
+  "Overall Score": "78.5"
+}
+```
+
+Reason:
+
+1. **Chess board and pieces visualization (9/10):**  
+   The SVG board is correctly implemented as an 8x8 grid with alternating light and dark squares. Pieces are represented with custom SVG paths that are stylized and visually distinct, sized and centered well within each square. The use of groups (`<g>`) for pieces with proper data attributes (`data-x`, `data-y`, `data-type`, `data-color`) is excellent for manipulation. The only minor deduction is because the piece SVG paths are somewhat simplified and abstract rather than fully standard or highly detailed chess piece icons, which slightly reduces clarity for some users.
+
+2. **Piece movement and selection (8/10):**  
+   The code supports both click-to-select and drag-and-drop piece movement, with visual feedback for selected pieces and legal moves highlighted. Event listeners are properly set up for pointer events and keyboard navigation. However, the drag-and-drop implementation, while functional, could be improved with smoother drag visuals and better snapping feedback. Also, the visual indication of selection is present but could be more prominent or consistent. Legal move validation is implemented and enforced.
+
+3. **Chess game logic fully implemented (9/10):**  
+   The code implements all standard chess rules including castling, en passant, pawn promotion, and check/checkmate detection. Turn-based gameplay is enforced. The move generation and legality checks are thorough. The only slight deduction is that some edge cases or advanced rules (like threefold repetition or 50-move rule) are not handled, but these are often considered advanced features beyond basic full rules.
+
+4. **Game history viewer functional and comprehensive (7/10):**  
+   The game history is displayed in a clean list with standard algebraic notation (SAN). Users can see move numbers and moves for both White and Black. Undo and restart buttons are provided. However, the history viewer does not support navigating through previous moves to update the board state, which is a significant limitation. Also, the SAN notation is simplified without disambiguation or check/checkmate symbols in the list, reducing clarity.
+
+5. **Code robustness (7/10):**  
+   The code handles invalid moves by ignoring them and provides undo and restart functionality. It prevents illegal moves and enforces turn order. However, there is limited explicit error handling or user prompts for invalid actions. The code does not explicitly handle browser resizing or window scaling, which could affect SVG coordinate calculations. Overall robustness is good but could be improved with more defensive programming and error feedback.
+
+6. **Innovative features (7.5/10):**  
+   The implementation includes several nice features: drag-and-drop piece movement, keyboard navigation for accessibility, visual highlighting of legal moves and captures, and a game history panel with undo/restart. These enhance user experience beyond a minimal chess board. However, it lacks advanced innovations like move suggestions, captured pieces display, or animated check/checkmate indicators.
+
+7. **Redundant features (10/10):**  
+   The code is clean with no redundant or conflicting implementations. There is a single clear method for piece selection and movement. No unrelated or performance-harming fancy effects are present. The code avoids unnecessary complexity or duplication.
+
+8. **Engineering quality (8/10):**  
+   The code is modularly structured with clear separation of concerns: game logic, SVG rendering, and user interaction. Variable naming is mostly clear and comments are present in key areas. The use of cloning for state management is good. Minor deductions for some cryptic variable names (e.g., `pt`, `nx`, `ny`) and some inline SVG manipulation could be optimized further.
+
+9. **Interface vision and professional design (8/10):**  
+   The color scheme is harmonious and traditional for chess, with good contrast between light and dark squares and pieces. Visual hierarchy is clear with distinct interactive elements and a clean game history panel. The design is minimalistic and readable. Minor deductions for the somewhat abstract piece shapes that may reduce immediate recognition for casual users.
+
+10. **Dynamic interaction smoothness (8/10):**  
+    Animations and visual feedback are responsive and mostly smooth. Dragging pieces provides immediate feedback, and selection highlighting updates quickly. The move animations are instantaneous rather than smoothly animated transitions, which is acceptable but could be improved for polish. The interface remains responsive during interactions.
+
+**Summary:**  
+This is a very strong and professional implementation of an interactive SVG chess game with comprehensive chess logic, good user interaction, and a clean interface. It meets most requirements with only minor areas for improvement in polish, advanced features, and robustness. The overall score reflects a high-quality, practical, and well-engineered solution suitable for demonstration and further extension.
+
+---
+
+If you want, I can also provide specific suggestions for improvement or code refactoring tips.
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - FINAL HTML CODE
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive SVG Chess Game</title>
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f0f0f0;
+    user-select: none;
+  }
+  h1 {
+    margin: 1rem 0 0.5rem 0;
+    color: #222;
+  }
+  #container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin: 1rem;
+  }
+  #chessboard {
+    border: 2px solid #333;
+    background: #eee;
+    touch-action: none;
+  }
+  #history {
+    width: 280px;
+    max-height: 512px;
+    overflow-y: auto;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  #history h2 {
+    margin-top: 0;
+    font-size: 18px;
+    text-align: center;
+  }
+  #history ol {
+    padding-left: 1.2rem;
+    margin: 0;
+  }
+  #history ol li {
+    margin-bottom: 0.3rem;
+  }
+  #status {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #222;
+    min-height: 1.5em;
+    text-align: center;
+  }
+  button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #666;
+    background: #fafafa;
+    transition: background-color 0.2s ease;
+  }
+  button:hover {
+    background: #ddd;
+  }
+  /* Highlight squares */
+  .highlight-move {
+    fill: rgba(50, 200, 50, 0.4);
+    pointer-events: none;
+  }
+  .highlight-capture {
+    fill: rgba(200, 50, 50, 0.5);
+    pointer-events: none;
+  }
+  .highlight-selected {
+    stroke: #f39c12;
+    stroke-width: 3;
+  }
+  /* Cursor for draggable pieces */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+<h1>Interactive SVG Chess Game</h1>
+<div id="container">
+  <svg id="chessboard" width="512" height="512" viewBox="0 0 512 512" aria-label="Chessboard" role="img" tabindex="0"></svg>
+  <div id="history" aria-live="polite" aria-atomic="true">
+    <h2>Game History</h2>
+    <ol id="moveList"></ol>
+    <button id="btnUndo" title="Undo last move">Undo Move</button>
+    <button id="btnRestart" title="Restart game">Restart Game</button>
+  </div>
+</div>
+<div id="status" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // Constants
+  const BOARD_SIZE = 8;
+  const SQUARE_SIZE = 64; // 512 / 8
+  const LIGHT_COLOR = "#f0d9b5";
+  const DARK_COLOR = "#b58863";
+
+  // Unicode chess pieces for fallback and accessibility
+  const UNICODE_PIECES = {
+    w: {
+      K: "\u2654",
+      Q: "\u2655",
+      R: "\u2656",
+      B: "\u2657",
+      N: "\u2658",
+      P: "\u2659",
+    },
+    b: {
+      K: "\u265A",
+      Q: "\u265B",
+      R: "\u265C",
+      B: "\u265D",
+      N: "\u265E",
+      P: "\u265F",
+    },
+  };
+
+  // Piece SVG paths (simplified, stylized)
+  // Source: adapted from Wikimedia Commons chess piece SVGs, simplified for clarity
+  // Each piece is drawn inside a 64x64 viewbox
+  const PIECE_PATHS = {
+    K: `<path d="M32 12 L32 52 M20 20 L44 20 M24 44 L40 44 M20 52 L44 52 M28 28 L36 36 M36 28 L28 36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    Q: `<circle cx="32" cy="24" r="6" stroke="currentColor" stroke-width="3" fill="none"/>
+        <path d="M20 52 L44 52 L32 36 Z" fill="currentColor" />
+        <path d="M20 20 L44 20 L32 36 Z" fill="none" stroke="currentColor" stroke-width="3"/>`,
+    R: `<rect x="20" y="20" width="24" height="32" stroke="currentColor" stroke-width="3" fill="none" rx="4" ry="4"/>
+        <path d="M20 20 L44 20" stroke="currentColor" stroke-width="3"/>
+        <path d="M32 20 L32 52" stroke="currentColor" stroke-width="3"/>`,
+    B: `<ellipse cx="32" cy="32" rx="12" ry="20" stroke="currentColor" stroke-width="3" fill="none"/>
+        <line x1="20" y1="20" x2="44" y2="44" stroke="currentColor" stroke-width="3"/>
+        <line x1="44" y1="20" x2="20" y2="44" stroke="currentColor" stroke-width="3"/>`,
+    N: `<path d="M20 52 Q32 20 44 52" stroke="currentColor" stroke-width="3" fill="none"/>
+        <circle cx="32" cy="32" r="6" fill="currentColor"/>`,
+    P: `<rect x="24" y="20" width="16" height="28" stroke="currentColor" stroke-width="3" fill="none" rx="4" ry="4"/>
+        <circle cx="32" cy="16" r="8" stroke="currentColor" stroke-width="3" fill="none"/>`,
+  };
+
+  // Initial board setup in FEN notation (standard chess start)
+  const START_FEN =
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+  // Helper: parse FEN to board array
+  function parseFEN(fen) {
+    const parts = fen.split(" ");
+    const rows = parts[0].split("/");
+    const board = [];
+    for (let r = 0; r < 8; r++) {
+      const row = [];
+      for (const ch of rows[r]) {
+        if (ch >= "1" && ch <= "8") {
+          for (let i = 0; i < +ch; i++) row.push(null);
+        } else {
+          const color = ch === ch.toUpperCase() ? "w" : "b";
+          const type = ch.toUpperCase();
+          row.push({ type, color, hasMoved: false });
+        }
+      }
+      board.push(row);
+    }
+    return {
+      board,
+      turn: parts[1],
+      castling: parts[2],
+      enPassant: parts[3] === "-" ? null : parts[3],
+      halfmove: +parts[4],
+      fullmove: +parts[5],
+    };
+  }
+
+  // Helper: convert board coords to algebraic notation
+  function coordsToAlgebraic(x, y) {
+    return "abcdefgh"[x] + (8 - y);
+  }
+  // Algebraic to coords
+  function algebraicToCoords(s) {
+    return [s.charCodeAt(0) - 97, 8 - parseInt(s[1], 10)];
+  }
+
+  // Deep clone board state
+  function cloneBoardState(state) {
+    return {
+      board: state.board.map((row) =>
+        row.map((p) => (p ? { ...p } : null))
+      ),
+      turn: state.turn,
+      castling: state.castling,
+      enPassant: state.enPassant,
+      halfmove: state.halfmove,
+      fullmove: state.fullmove,
+    };
+  }
+
+  // Chess logic and move generation
+  // We'll implement basic move generation for all pieces, including special moves:
+  // castling, en passant, promotion.
+  // For simplicity, no AI, only user moves with turn enforcement.
+
+  // Directions for sliding pieces
+  const DIRECTIONS = {
+    N: [0, -1],
+    S: [0, 1],
+    E: [1, 0],
+    W: [-1, 0],
+    NE: [1, -1],
+    NW: [-1, -1],
+    SE: [1, 1],
+    SW: [-1, 1],
+  };
+
+  // Knight moves
+  const KNIGHT_MOVES = [
+    [1, 2],
+    [2, 1],
+    [2, -1],
+    [1, -2],
+    [-1, -2],
+    [-2, -1],
+    [-2, 1],
+    [-1, 2],
+  ];
+
+  // Check if coords inside board
+  function inBounds(x, y) {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+  }
+
+  // Check if square is attacked by opponent
+  function isSquareAttacked(state, x, y, attackerColor) {
+    const board = state.board;
+
+    // Pawn attacks
+    const pawnDir = attackerColor === "w" ? -1 : 1;
+    const pawnAttackOffsets = [
+      [-1, pawnDir],
+      [1, pawnDir],
+    ];
+    for (const [dx, dy] of pawnAttackOffsets) {
+      const nx = x + dx,
+        ny = y + dy;
+      if (
+        inBounds(nx, ny) &&
+        board[ny][nx] &&
+        board[ny][nx].color === attackerColor &&
+        board[ny][nx].type === "P"
+      )
+        return true;
+    }
+
+    // Knight attacks
+    for (const [dx, dy] of KNIGHT_MOVES) {
+      const nx = x + dx,
+        ny = y + dy;
+      if (
+        inBounds(nx, ny) &&
+        board[ny][nx] &&
+        board[ny][nx].color === attackerColor &&
+        board[ny][nx].type === "N"
+      )
+        return true;
+    }
+
+    // Sliding pieces: bishop, rook, queen
+    const directions = [
+      DIRECTIONS.N,
+      DIRECTIONS.S,
+      DIRECTIONS.E,
+      DIRECTIONS.W,
+      DIRECTIONS.NE,
+      DIRECTIONS.NW,
+      DIRECTIONS.SE,
+      DIRECTIONS.SW,
+    ];
+    for (const [dx, dy] of directions) {
+      let nx = x + dx,
+        ny = y + dy;
+      while (inBounds(nx, ny)) {
+        const p = board[ny][nx];
+        if (p) {
+          if (p.color === attackerColor) {
+            if (
+              (dx === 0 || dy === 0) &&
+              (p.type === "R" || p.type === "Q")
+            )
+              return true;
+            if (
+              dx !== 0 &&
+              dy !== 0 &&
+              (p.type === "B" || p.type === "Q")
+            )
+              return true;
+            // King adjacent attack
+            if (
+              Math.abs(nx - x) === 1 &&
+              Math.abs(ny - y) === 1 &&
+              p.type === "K"
+            )
+              return true;
+          }
+          break;
+        }
+        nx += dx;
+        ny += dy;
+      }
+    }
+
+    // King attacks (adjacent squares)
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx,
+          ny = y + dy;
+        if (
+          inBounds(nx, ny) &&
+          board[ny][nx] &&
+          board[ny][nx].color === attackerColor &&
+          board[ny][nx].type === "K"
+        )
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Find king position for color
+  function findKing(state, color) {
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const p = state.board[y][x];
+        if (p && p.color === color && p.type === "K") return [x, y];
+      }
+    }
+    return null;
+  }
+
+  // Generate all legal moves for a piece at (x,y)
+  // Returns array of moves: {from: [x,y], to: [x,y], promotion: 'Q'|'R'|'B'|'N'|null, castling: 'K'|'Q'|null, enPassant: boolean}
+  function generateMoves(state, x, y) {
+    const board = state.board;
+    const piece = board[y][x];
+    if (!piece) return [];
+    if (piece.color !== state.turn) return [];
+
+    const moves = [];
+    const enemy = piece.color === "w" ? "b" : "w";
+
+    function addMove(tx, ty, opts = {}) {
+      if (!inBounds(tx, ty)) return;
+      const target = board[ty][tx];
+      if (!target || target.color !== piece.color) {
+        moves.push({
+          from: [x, y],
+          to: [tx, ty],
+          promotion: opts.promotion || null,
+          castling: opts.castling || null,
+          enPassant: opts.enPassant || false,
+        });
+      }
+    }
+
+    switch (piece.type) {
+      case "P": {
+        const dir = piece.color === "w" ? -1 : 1;
+        const startRow = piece.color === "w" ? 6 : 1;
+        // Forward move
+        const oneStepY = y + dir;
+        if (inBounds(x, oneStepY) && !board[oneStepY][x]) {
+          // Promotion check
+          if (oneStepY === 0 || oneStepY === 7) {
+            ["Q", "R", "B", "N"].forEach((promo) =>
+              moves.push({
+                from: [x, y],
+                to: [x, oneStepY],
+                promotion: promo,
+                castling: null,
+                enPassant: false,
+              })
+            );
+          } else {
+            addMove(x, oneStepY);
+          }
+          // Two steps from start
+          if (
+            y === startRow &&
+            !board[y + 2 * dir][x]
+          ) {
+            addMove(x, y + 2 * dir);
+          }
+        }
+        // Captures
+        for (const dx of [-1, 1]) {
+          const cx = x + dx,
+            cy = y + dir;
+          if (inBounds(cx, cy)) {
+            const target = board[cy][cx];
+            if (target && target.color === enemy) {
+              if (cy === 0 || cy === 7) {
+                ["Q", "R", "B", "N"].forEach((promo) =>
+                  moves.push({
+                    from: [x, y],
+                    to: [cx, cy],
+                    promotion: promo,
+                    castling: null,
+                    enPassant: false,
+                  })
+                );
+              } else {
+                addMove(cx, cy);
+              }
+            }
+            // En passant
+            if (
+              state.enPassant &&
+              coordsToAlgebraic(cx, cy) === state.enPassant
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [cx, cy],
+                promotion: null,
+                castling: null,
+                enPassant: true,
+              });
+            }
+          }
+        }
+        break;
+      }
+      case "N": {
+        for (const [dx, dy] of KNIGHT_MOVES) {
+          const nx = x + dx,
+            ny = y + dy;
+          if (!inBounds(nx, ny)) continue;
+          const target = board[ny][nx];
+          if (!target || target.color === enemy) addMove(nx, ny);
+        }
+        break;
+      }
+      case "B": {
+        for (const dir of [DIRECTIONS.NE, DIRECTIONS.NW, DIRECTIONS.SE, DIRECTIONS.SW]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "R": {
+        for (const dir of [DIRECTIONS.N, DIRECTIONS.S, DIRECTIONS.E, DIRECTIONS.W]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "Q": {
+        for (const dir of [
+          DIRECTIONS.N,
+          DIRECTIONS.S,
+          DIRECTIONS.E,
+          DIRECTIONS.W,
+          DIRECTIONS.NE,
+          DIRECTIONS.NW,
+          DIRECTIONS.SE,
+          DIRECTIONS.SW,
+        ]) {
+          let nx = x + dir[0],
+            ny = y + dir[1];
+          while (inBounds(nx, ny)) {
+            const target = board[ny][nx];
+            if (!target) {
+              addMove(nx, ny);
+            } else {
+              if (target.color === enemy) addMove(nx, ny);
+              break;
+            }
+            nx += dir[0];
+            ny += dir[1];
+          }
+        }
+        break;
+      }
+      case "K": {
+        for (let dx = -1; dx <= 1; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            if (dx === 0 && dy === 0) continue;
+            const nx = x + dx,
+              ny = y + dy;
+            if (!inBounds(nx, ny)) continue;
+            const target = board[ny][nx];
+            if (!target || target.color === enemy) addMove(nx, ny);
+          }
+        }
+        // Castling
+        if (!piece.hasMoved && !isSquareAttacked(state, x, y, enemy)) {
+          // Kingside
+          if (
+            (piece.color === "w" && state.castling.includes("K")) ||
+            (piece.color === "b" && state.castling.includes("k"))
+          ) {
+            const row = y;
+            if (
+              !board[row][x + 1] &&
+              !board[row][x + 2] &&
+              !isSquareAttacked(state, x + 1, row, enemy) &&
+              !isSquareAttacked(state, x + 2, row, enemy)
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [x + 2, y],
+                promotion: null,
+                castling: "K",
+                enPassant: false,
+              });
+            }
+          }
+          // Queenside
+          if (
+            (piece.color === "w" && state.castling.includes("Q")) ||
+            (piece.color === "b" && state.castling.includes("q"))
+          ) {
+            const row = y;
+            if (
+              !board[row][x - 1] &&
+              !board[row][x - 2] &&
+              !board[row][x - 3] &&
+              !isSquareAttacked(state, x - 1, row, enemy) &&
+              !isSquareAttacked(state, x - 2, row, enemy)
+            ) {
+              moves.push({
+                from: [x, y],
+                to: [x - 2, y],
+                promotion: null,
+                castling: "Q",
+                enPassant: false,
+              });
+            }
+          }
+        }
+        break;
+      }
+    }
+    return moves;
+  }
+
+  // Apply a move to a board state, returns new state
+  // Does not check legality here, assumes move is legal
+  function applyMove(state, move) {
+    const newState = cloneBoardState(state);
+    const [fx, fy] = move.from;
+    const [tx, ty] = move.to;
+    const piece = newState.board[fy][fx];
+    const enemy = piece.color === "w" ? "b" : "w";
+
+    // Move piece
+    newState.board[ty][tx] = { ...piece, hasMoved: true };
+    newState.board[fy][fx] = null;
+
+    // Handle en passant capture
+    if (move.enPassant) {
+      const epY = piece.color === "w" ? ty + 1 : ty - 1;
+      newState.board[epY][tx] = null;
+    }
+
+    // Handle castling
+    if (move.castling) {
+      const row = fy;
+      if (move.castling === "K") {
+        // Move rook from h-file to f-file
+        newState.board[row][5] = newState.board[row][7];
+        newState.board[row][7] = null;
+        newState.board[row][5].hasMoved = true;
+      } else if (move.castling === "Q") {
+        // Move rook from a-file to d-file
+        newState.board[row][3] = newState.board[row][0];
+        newState.board[row][0] = null;
+        newState.board[row][3].hasMoved = true;
+      }
+    }
+
+    // Handle promotion
+    if (move.promotion) {
+      newState.board[ty][tx].type = move.promotion;
+    }
+
+    // Update castling rights
+    let castling = newState.castling;
+    const fromSquare = coordsToAlgebraic(fx, fy);
+    const toSquare = coordsToAlgebraic(tx, ty);
+
+    // Remove castling rights if king or rook moved or captured
+    if (piece.type === "K") {
+      if (piece.color === "w") {
+        castling = castling.replace("K", "").replace("Q", "");
+      } else {
+        castling = castling.replace("k", "").replace("q", "");
+      }
+    }
+    if (piece.type === "R") {
+      if (piece.color === "w") {
+        if (fromSquare === "a1") castling = castling.replace("Q", "");
+        else if (fromSquare === "h1") castling = castling.replace("K", "");
+      } else {
+        if (fromSquare === "a8") castling = castling.replace("q", "");
+        else if (fromSquare === "h8") castling = castling.replace("k", "");
+      }
+    }
+    // If rook captured
+    if (newState.board[ty][tx] && newState.board[ty][tx].color !== piece.color) {
+      if (toSquare === "a1") castling = castling.replace("Q", "");
+      else if (toSquare === "h1") castling = castling.replace("K", "");
+      else if (toSquare === "a8") castling = castling.replace("q", "");
+      else if (toSquare === "h8") castling = castling.replace("k", "");
+    }
+    newState.castling = castling;
+
+    // Update en passant target square
+    if (
+      piece.type === "P" &&
+      Math.abs(ty - fy) === 2
+    ) {
+      const epRank = (fy + ty) / 2;
+      newState.enPassant = coordsToAlgebraic(fx, epRank);
+    } else {
+      newState.enPassant = null;
+    }
+
+    // Update halfmove clock
+    if (
+      piece.type === "P" ||
+      (newState.board[ty][tx] && newState.board[ty][tx].color !== piece.color)
+    ) {
+      newState.halfmove = 0;
+    } else {
+      newState.halfmove++;
+    }
+
+    // Update fullmove number
+    if (piece.color === "b") newState.fullmove++;
+
+    // Switch turn
+    newState.turn = enemy;
+
+    return newState;
+  }
+
+  // Check if current player is in check
+  function inCheck(state, color) {
+    const kingPos = findKing(state, color);
+    if (!kingPos) return false; // Should not happen
+    return isSquareAttacked(state, kingPos[0], kingPos[1], color === "w" ? "b" : "w");
+  }
+
+  // Generate all legal moves for current player
+  function generateAllLegalMoves(state) {
+    const moves = [];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const piece = state.board[y][x];
+        if (piece && piece.color === state.turn) {
+          const pieceMoves = generateMoves(state, x, y);
+          for (const move of pieceMoves) {
+            const newState = applyMove(state, move);
+            if (!inCheck(newState, state.turn)) {
+              moves.push(move);
+            }
+          }
+        }
+      }
+    }
+    return moves;
+  }
+
+  // Convert move to SAN (Standard Algebraic Notation)
+  // Simplified: no disambiguation, no check/checkmate symbols
+  function moveToSAN(state, move) {
+    const piece = state.board[move.from[1]][move.from[0]];
+    if (!piece) return "";
+
+    const enemy = piece.color === "w" ? "b" : "w";
+    const target = state.board[move.to[1]][move.to[0]];
+    const fromAlg = coordsToAlgebraic(...move.from);
+    const toAlg = coordsToAlgebraic(...move.to);
+
+    // Castling
+    if (move.castling === "K") return "O-O";
+    if (move.castling === "Q") return "O-O-O";
+
+    let san = "";
+
+    // Pawn moves
+    if (piece.type === "P") {
+      if (move.enPassant || (target && target.color === enemy)) {
+        san += fromAlg[0] + "x" + toAlg;
+      } else {
+        san += toAlg;
+      }
+      if (move.promotion) san += "=" + move.promotion;
+    } else {
+      san += piece.type;
+      // Capture
+      if (target && target.color === enemy) san += "x";
+      san += toAlg;
+    }
+
+    // Check or checkmate detection
+    const newState = applyMove(state, move);
+    if (inCheck(newState, enemy)) {
+      const enemyMoves = generateAllLegalMoves(newState);
+      if (enemyMoves.length === 0) san += "#";
+      else san += "+";
+    }
+
+    return san;
+  }
+
+  // === SVG Rendering ===
+
+  const svg = document.getElementById("chessboard");
+  const moveList = document.getElementById("moveList");
+  const statusDiv = document.getElementById("status");
+  const btnUndo = document.getElementById("btnUndo");
+  const btnRestart = document.getElementById("btnRestart");
+
+  // State variables
+  let gameState = parseFEN(START_FEN);
+  let history = [cloneBoardState(gameState)];
+  let selectedSquare = null;
+  let legalMovesForSelected = [];
+  let draggingPiece = null;
+  let dragOffset = { x: 0, y: 0 };
+  let dragElement = null;
+
+  // Create board squares
+  function createBoardSquares() {
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const rect = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "rect"
+        );
+        rect.setAttribute("x", x * SQUARE_SIZE);
+        rect.setAttribute("y", y * SQUARE_SIZE);
+        rect.setAttribute("width", SQUARE_SIZE);
+        rect.setAttribute("height", SQUARE_SIZE);
+        rect.setAttribute(
+          "fill",
+          (x + y) % 2 === 0 ? LIGHT_COLOR : DARK_COLOR
+        );
+        rect.setAttribute("data-x", x);
+        rect.setAttribute("data-y", y);
+        rect.classList.add("square");
+        svg.appendChild(rect);
+      }
+    }
+  }
+
+  // Clear highlights
+  function clearHighlights() {
+    svg.querySelectorAll(".highlight-move, .highlight-capture, .highlight-selected").forEach((el) => el.remove());
+  }
+
+  // Highlight squares for legal moves
+  function highlightMoves(moves) {
+    moves.forEach((move) => {
+      const [tx, ty] = move.to;
+      const squareX = tx * SQUARE_SIZE;
+      const squareY = ty * SQUARE_SIZE;
+      const circle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+      circle.setAttribute("cx", squareX + SQUARE_SIZE / 2);
+      circle.setAttribute("cy", squareY + SQUARE_SIZE / 2);
+      circle.setAttribute("r", SQUARE_SIZE / 6);
+      if (move.enPassant || (gameState.board[ty][tx] && gameState.board[ty][tx].color !== gameState.turn)) {
+        circle.classList.add("highlight-capture");
+      } else {
+        circle.classList.add("highlight-move");
+      }
+      svg.appendChild(circle);
+    });
+  }
+
+  // Highlight selected square border
+  function highlightSelected(x, y) {
+    const rect = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+    rect.setAttribute("x", x * SQUARE_SIZE);
+    rect.setAttribute("y", y * SQUARE_SIZE);
+    rect.setAttribute("width", SQUARE_SIZE);
+    rect.setAttribute("height", SQUARE_SIZE);
+    rect.classList.add("highlight-selected");
+    rect.setAttribute("fill", "none");
+    svg.appendChild(rect);
+  }
+
+  // Create piece SVG element
+  function createPieceElement(piece, x, y) {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("transform", `translate(${x * SQUARE_SIZE},${y * SQUARE_SIZE})`);
+    g.setAttribute("data-x", x);
+    g.setAttribute("data-y", y);
+    g.setAttribute("data-color", piece.color);
+    g.setAttribute("data-type", piece.type);
+    g.classList.add("piece", "draggable");
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "img");
+    g.setAttribute("aria-label", `${piece.color === "w" ? "White" : "Black"} ${pieceName(piece.type)}`);
+
+    // Background circle for better visibility
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    bg.setAttribute("cx", SQUARE_SIZE / 2);
+    bg.setAttribute("cy", SQUARE_SIZE / 2);
+    bg.setAttribute("r", SQUARE_SIZE / 2 - 4);
+    bg.setAttribute("fill", piece.color === "w" ? "#fff" : "#222");
+    bg.setAttribute("stroke", piece.color === "w" ? "#222" : "#fff");
+    bg.setAttribute("stroke-width", "2");
+    g.appendChild(bg);
+
+    // Piece shape path
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    path.setAttribute("x", 0);
+    path.setAttribute("y", 0);
+    path.setAttribute("width", SQUARE_SIZE);
+    path.setAttribute("height", SQUARE_SIZE);
+    path.setAttribute("viewBox", "0 0 64 64");
+    path.setAttribute("fill", piece.color === "w" ? "#222" : "#eee");
+    path.setAttribute("stroke", piece.color === "w" ? "#222" : "#eee");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linejoin", "round");
+    path.setAttribute("stroke-linecap", "round");
+    path.innerHTML = PIECE_PATHS[piece.type];
+    g.appendChild(path);
+
+    return g;
+  }
+
+  // Piece full names for aria-label
+  function pieceName(type) {
+    switch (type) {
+      case "K": return "King";
+      case "Q": return "Queen";
+      case "R": return "Rook";
+      case "B": return "Bishop";
+      case "N": return "Knight";
+      case "P": return "Pawn";
+      default: return "Piece";
+    }
+  }
+
+  // Render the entire board and pieces
+  function renderBoard() {
+    // Clear all pieces and highlights
+    svg.querySelectorAll(".piece, .highlight-move, .highlight-capture, .highlight-selected").forEach((el) => el.remove());
+
+    // Draw pieces
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const piece = gameState.board[y][x];
+        if (piece) {
+          const pieceEl = createPieceElement(piece, x, y);
+          svg.appendChild(pieceEl);
+        }
+      }
+    }
+
+    // Highlight selected and legal moves if any
+    if (selectedSquare) {
+      highlightSelected(selectedSquare[0], selectedSquare[1]);
+      highlightMoves(legalMovesForSelected);
+    }
+
+    updateStatus();
+  }
+
+  // Update status text
+  function updateStatus() {
+    const enemy = gameState.turn === "w" ? "Black" : "White";
+    const current = gameState.turn === "w" ? "White" : "Black";
+    const legalMoves = generateAllLegalMoves(gameState);
+    const inCheckNow = inCheck(gameState, gameState.turn);
+    let statusText = `${current} to move.`;
+    if (inCheckNow) {
+      if (legalMoves.length === 0) {
+        statusText = `Checkmate! ${enemy} wins.`;
+      } else {
+        statusText = `${current} is in check.`;
+      }
+    } else if (legalMoves.length === 0) {
+      statusText = `Stalemate! Draw.`;
+    }
+    statusDiv.textContent = statusText;
+  }
+
+  // Update move history list
+  function updateHistory() {
+    moveList.innerHTML = "";
+    for (let i = 1; i < history.length; i++) {
+      const prev = history[i - 1];
+      const curr = history[i];
+      // Find move difference
+      let moveSAN = "";
+      outer: for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          const p1 = prev.board[y][x];
+          const p2 = curr.board[y][x];
+          if (
+            (p1 && !p2) ||
+            (!p1 && p2) ||
+            (p1 && p2 && (p1.type !== p2.type || p1.color !== p2.color))
+          ) {
+            // We don't have exact move stored, so we skip SAN here
+            break outer;
+          }
+        }
+      }
+      // Instead, we store SAN when making moves
+      // We'll keep a separate array for SAN moves
+    }
+    // We'll keep a separate array for SAN moves
+    moveList.innerHTML = "";
+    for (let i = 0; i < sanHistory.length; i += 2) {
+      const whiteMove = sanHistory[i] || "";
+      const blackMove = sanHistory[i + 1] || "";
+      const li = document.createElement("li");
+      li.textContent = `${(i / 2) + 1}. ${whiteMove} ${blackMove}`;
+      moveList.appendChild(li);
+    }
+  }
+
+  // Variables to store SAN moves for history display
+  let sanHistory = [];
+
+  // Handle piece selection and move
+  function onSquareClick(x, y) {
+    if (draggingPiece) return; // Ignore clicks during drag
+
+    const piece = gameState.board[y][x];
+    if (selectedSquare) {
+      // If clicked on a legal move square, move piece
+      const legalMove = legalMovesForSelected.find(
+        (m) => m.to[0] === x && m.to[1] === y
+      );
+      if (legalMove) {
+        makeMove(legalMove);
+        selectedSquare = null;
+        legalMovesForSelected = [];
+        renderBoard();
+        return;
+      }
+      // If clicked on another piece of current player, select it
+      if (piece && piece.color === gameState.turn) {
+        selectedSquare = [x, y];
+        legalMovesForSelected = generateMoves(gameState, x, y).filter((m) => {
+          const newState = applyMove(gameState, m);
+          return !inCheck(newState, gameState.turn);
+        });
+        renderBoard();
+        return;
+      }
+      // Otherwise deselect
+      selectedSquare = null;
+      legalMovesForSelected = [];
+      renderBoard();
+    } else {
+      // No selection yet
+      if (piece && piece.color === gameState.turn) {
+        selectedSquare = [x, y];
+        legalMovesForSelected = generateMoves(gameState, x, y).filter((m) => {
+          const newState = applyMove(gameState, m);
+          return !inCheck(newState, gameState.turn);
+        });
+        renderBoard();
+      }
+    }
+  }
+
+  // Make a move and update history
+  function makeMove(move) {
+    const san = moveToSAN(gameState, move);
+    gameState = applyMove(gameState, move);
+    history.push(cloneBoardState(gameState));
+    sanHistory.push(san);
+    updateHistory();
+  }
+
+  // Undo last move
+  function undoMove() {
+    if (history.length <= 1) return;
+    history.pop();
+    sanHistory.pop();
+    gameState = cloneBoardState(history[history.length - 1]);
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+  }
+
+  // Restart game
+  function restartGame() {
+    gameState = parseFEN(START_FEN);
+    history = [cloneBoardState(gameState)];
+    sanHistory = [];
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+    updateHistory();
+  }
+
+  // Handle drag and drop for pieces
+  function onPointerDown(e) {
+    if (e.target.closest(".piece")) {
+      const pieceEl = e.target.closest(".piece");
+      const x = +pieceEl.getAttribute("data-x");
+      const y = +pieceEl.getAttribute("data-y");
+      const piece = gameState.board[y][x];
+      if (!piece || piece.color !== gameState.turn) return;
+
+      draggingPiece = { piece, from: [x, y] };
+      dragElement = pieceEl.cloneNode(true);
+      dragElement.classList.add("dragging");
+      dragElement.style.pointerEvents = "none";
+      svg.appendChild(dragElement);
+
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+      dragOffset.x = cursorpt.x - x * SQUARE_SIZE;
+      dragOffset.y = cursorpt.y - y * SQUARE_SIZE;
+
+      moveDragElement(e);
+      e.preventDefault();
+    }
+  }
+  function moveDragElement(e) {
+    if (!dragElement) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    dragElement.setAttribute(
+      "transform",
+      `translate(${cursorpt.x - dragOffset.x},${cursorpt.y - dragOffset.y})`
+    );
+  }
+  function onPointerMove(e) {
+    if (dragElement) {
+      moveDragElement(e);
+      e.preventDefault();
+    }
+  }
+  function onPointerUp(e) {
+    if (!draggingPiece) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const tx = Math.floor(cursorpt.x / SQUARE_SIZE);
+    const ty = Math.floor(cursorpt.y / SQUARE_SIZE);
+
+    const legalMoves = generateMoves(gameState, draggingPiece.from[0], draggingPiece.from[1]).filter((m) => {
+      const newState = applyMove(gameState, m);
+      return !inCheck(newState, gameState.turn);
+    });
+    const move = legalMoves.find((m) => m.to[0] === tx && m.to[1] === ty);
+
+    if (move) {
+      makeMove(move);
+    }
+
+    draggingPiece = null;
+    if (dragElement) {
+      dragElement.remove();
+      dragElement = null;
+    }
+    selectedSquare = null;
+    legalMovesForSelected = [];
+    renderBoard();
+  }
+
+  // Keyboard navigation and accessibility
+  function onKeyDown(e) {
+    if (!selectedSquare) return;
+    const [x, y] = selectedSquare;
+    let nx = x,
+      ny = y;
+    switch (e.key) {
+      case "ArrowUp":
+        ny = Math.max(0, y - 1);
+        break;
+      case "ArrowDown":
+        ny = Math.min(7, y + 1);
+        break;
+      case "ArrowLeft":
+        nx = Math.max(0, x - 1);
+        break;
+      case "ArrowRight":
+        nx = Math.min(7, x + 1);
+        break;
+      case "Enter":
+      case " ":
+        // If a piece is selected, try to move to selected square if legal
+        if (legalMovesForSelected.length > 0) {
+          const move = legalMovesForSelected.find((m) => m.to[0] === x && m.to[1] === y);
+          if (move) {
+            makeMove(move);
+            selectedSquare = null;
+            legalMovesForSelected = [];
+            renderBoard();
+            e.preventDefault();
+            return;
+          }
+        }
+        break;
+      case "Escape":
+        selectedSquare = null;
+        legalMovesForSelected = [];
+        renderBoard();
+        e.preventDefault();
+        return;
+      default:
+        return;
+    }
+    if (nx !== x || ny !== y) {
+      selectedSquare = [nx, ny];
+      legalMovesForSelected = generateMoves(gameState, nx, ny).filter((m) => {
+        const newState = applyMove(gameState, m);
+        return !inCheck(newState, gameState.turn);
+      });
+      renderBoard();
+      e.preventDefault();
+    }
+  }
+
+  // Initialize board squares and event listeners
+  function init() {
+    createBoardSquares();
+
+    // Click on squares
+    svg.addEventListener("click", (e) => {
+      if (e.target.classList.contains("square")) {
+        const x = +e.target.getAttribute("data-x");
+        const y = +e.target.getAttribute("data-y");
+        onSquareClick(x, y);
+      }
+    });
+
+    // Drag and drop events
+    svg.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+
+    // Keyboard navigation
+    svg.addEventListener("keydown", onKeyDown);
+
+    btnUndo.addEventListener("click", () => {
+      undoMove();
+    });
+    btnRestart.addEventListener("click", () => {
+      restartGame();
+    });
+
+    renderBoard();
+    updateHistory();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - ✓ Final code saved to: artifacts_output/Game Development-Strategy/task_9/final.html
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - End Time: 2025-11-30 19:41:30
+2025-11-30 19:41:30 - INFO - Total Duration: 140.91 seconds (2.35 minutes)
+2025-11-30 19:41:30 - INFO - Total Iterations: 1
+2025-11-30 19:41:30 - INFO - Final Total Score: 81.5
+2025-11-30 19:41:30 - INFO - Log file saved to: artifacts_output/Game Development-Strategy/task_9/run_log.txt
+2025-11-30 19:41:30 - INFO - All files saved to: artifacts_output/Game Development-Strategy/task_9
+2025-11-30 19:41:30 - INFO - 
+================================================================================
+2025-11-30 19:41:30 - INFO - TOKEN USAGE SUMMARY
+2025-11-30 19:41:30 - INFO - ================================================================================
+2025-11-30 19:41:30 - INFO - Total Requests: 34
+2025-11-30 19:41:30 - INFO - Total Input Tokens: 283,016
+2025-11-30 19:41:30 - INFO - Total Output Tokens: 113,148
+2025-11-30 19:41:30 - INFO - Total Tokens: 396,164
+2025-11-30 19:41:30 - INFO - 
+Breakdown by Operation:
+2025-11-30 19:41:30 - INFO -   code_generation: 1 requests, 9,556 tokens
+2025-11-30 19:41:30 - INFO -   evaluation: 20 requests, 267,937 tokens
+2025-11-30 19:41:30 - INFO -   initial_code_generation: 7 requests, 43,137 tokens
+2025-11-30 19:41:30 - INFO -   code_improvement_iteration_1: 6 requests, 75,534 tokens
+2025-11-30 19:41:30 - INFO - 
+✓ Token usage saved to: artifacts_output/Game Development-Strategy/task_9/token_usage.json
+2025-11-30 19:41:30 - INFO - ✓ Task token usage saved to token_usage_iterative.json
+2025-11-30 19:41:30 - INFO - ================================================================================

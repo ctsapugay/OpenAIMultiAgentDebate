@@ -1,0 +1,96 @@
+{
+  "Game Development-Puzzle": {
+    "tasks": {
+      "task_1": {
+        "input_tokens": 72913,
+        "output_tokens": 33159,
+        "total_tokens": 106072,
+        "cost_usd": 0.0308,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:23:14"
+      }
+    },
+    "total_cost_usd": 0.0308
+  },
+  "Game Development-Role-Playing": {
+    "tasks": {
+      "task_2": {
+        "input_tokens": 111798,
+        "output_tokens": 47285,
+        "total_tokens": 159083,
+        "cost_usd": 0.0451,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:26:23"
+      },
+      "task_3": {
+        "input_tokens": 149651,
+        "output_tokens": 60523,
+        "total_tokens": 210174,
+        "cost_usd": 0.0588,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:29:16"
+      }
+    },
+    "total_cost_usd": 0.1039
+  },
+  "Game Development-Strategy": {
+    "tasks": {
+      "task_4": {
+        "input_tokens": 205810,
+        "output_tokens": 83086,
+        "total_tokens": 288896,
+        "cost_usd": 0.0807,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:34:11"
+      },
+      "task_9": {
+        "input_tokens": 283016,
+        "output_tokens": 113148,
+        "total_tokens": 396164,
+        "cost_usd": 0.1103,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:41:30"
+      }
+    },
+    "total_cost_usd": 0.191
+  },
+  "SVG Generation-SVG Images": {
+    "tasks": {
+      "task_5": {
+        "input_tokens": 231198,
+        "output_tokens": 90507,
+        "total_tokens": 321705,
+        "cost_usd": 0.089,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:36:24"
+      }
+    },
+    "total_cost_usd": 0.089
+  },
+  "Game Development-Casual": {
+    "tasks": {
+      "task_6": {
+        "input_tokens": 267071,
+        "output_tokens": 102157,
+        "total_tokens": 369228,
+        "cost_usd": 0.1014,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:39:09"
+      }
+    },
+    "total_cost_usd": 0.1014
+  },
+  "Simulation & Modeling-Mathematical Abstraction": {
+    "tasks": {
+      "task_10": {
+        "input_tokens": 316206,
+        "output_tokens": 124963,
+        "total_tokens": 441169,
+        "cost_usd": 0.1224,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-11-30 19:44:12"
+      }
+    },
+    "total_cost_usd": 0.1224
+  }
+}

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444a6d;
+  }
+  #game-container {
+    max-width: 600px;
+    margin: 1rem auto 3rem;
+    background: #2a2a44;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #000a;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  #grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(6, 80px);
+    grid-template-rows: repeat(6, 80px);
+    gap: 6px;
+    background: #1b1b2f;
+    border-radius: 10px;
+    padding: 6px;
+    user-select: none;
+  }
+  .cell {
+    width: 80px;
+    height: 80px;
+    background: #222244;
+    border-radius: 8px;
+    box-shadow: inset 0 0 8px #0008;
+    position: relative;
+  }
+  .cell.highlight {
+    background: #3a3a6a;
+    box-shadow: 0 0 12px #7f7fff;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .block {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: box-shadow 0.2s ease;
+  }
+  .block.dragging {
+    cursor: grabbing;
+    box-shadow: 0 0 20px #7f7fffaa;
+    z-index: 1000;
+  }
+  .block svg {
+    pointer-events: auto;
+  }
+  .block .rotate-btn {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: #444a6dcc;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .block .rotate-btn:hover {
+    background: #7f7fffcc;
+  }
+  .block .rotate-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: #eee;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    color: #bbb;
+    font-size: 0.9rem;
+    max-width: 600px;
+    line-height: 1.4;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #7f7fff;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7fff7f;
+    min-height: 1.4em;
+    text-align: center;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  button {
+    background: #444a6d;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #7f7fff;
+  }
+  button:disabled {
+    background: #222244;
+    cursor: default;
+    color: #555;
+  }
+  footer {
+    text-align: center;
+    color: #555;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  /* Tooltip for rotate button */
+  .rotate-btn[title] {
+    position: relative;
+  }
+  .rotate-btn[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    right: 50%;
+    transform: translateX(50%);
+    background: #7f7fffdd;
+    color: #111;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    z-index: 2000;
+  }
+  /* Path preview highlight */
+  .path-preview {
+    position: absolute;
+    pointer-events: none;
+    z-index: 900;
+  }
+  .path-preview svg path,
+  .path-preview svg polygon {
+    stroke: #ffcc66;
+    stroke-width: 16;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter: drop-shadow(0 0 4px #ffcc66aa);
+  }
+  .path-preview svg polygon {
+    fill: #ffcc66cc;
+    stroke: #b38600;
+    stroke-width: 2;
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup puzzle game">
+  <div id="grid" aria-label="Game grid" role="grid" tabindex="0"></div>
+  <div id="message" aria-live="polite" aria-atomic="true"></div>
+  <div id="controls" role="group" aria-label="Game controls">
+    <button id="btn-prev" aria-label="Previous level">← Prev</button>
+    <button id="btn-reset" aria-label="Reset level">Reset</button>
+    <button id="btn-undo" aria-label="Undo last move" disabled>Undo</button>
+    <button id="btn-redo" aria-label="Redo last undone move" disabled>Redo</button>
+    <button id="btn-hint" aria-label="Show hint for current level">Hint</button>
+    <button id="btn-next" aria-label="Next level">Next →</button>
+  </div>
+  <div id="info-panel" aria-label="Game information">
+    <div id="level-info"></div>
+    <div><strong>Tips:</strong> Drag blocks to move them. Click the rotate button on each block to rotate it. Connect paths to guide Cub (puppy) to the Star.</div>
+  </div>
+</div>
+<footer>© 2024 Cub n Pup Demo - Created by Code Expert</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  // Constants for directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+  const DIR_VECTORS = [
+    { x: 0, y: -1 }, // UP
+    { x: 1, y: 0 },  // RIGHT
+    { x: 0, y: 1 },  // DOWN
+    { x: -1, y: 0 }, // LEFT
+  ];
+
+  // Block types and their connection patterns (which sides connect)
+  // Connections are stored as array of directions that have openings
+  // Rotation rotates the connections clockwise by 90 degrees per step
+  const BLOCK_TYPES = {
+    EMPTY: 'empty',
+    STRAIGHT: 'straight', // connects two opposite sides (0-2 or 1-3)
+    CURVE: 'curve',       // connects two adjacent sides (e.g. 0-1)
+    T: 't',               // connects three sides
+    CROSS: 'cross',       // connects all four sides
+    START: 'start',       // Cub start position, connects one side (exit)
+    END: 'end',           // Star position, connects one side (entry)
+  };
+
+  // Define the connection patterns for each block type at rotation 0
+  // Rotation will be applied dynamically
+  const BLOCK_CONNECTIONS = {
+    [BLOCK_TYPES.EMPTY]: [],
+    [BLOCK_TYPES.STRAIGHT]: [DIRS.UP, DIRS.DOWN], // vertical by default
+    [BLOCK_TYPES.CURVE]: [DIRS.UP, DIRS.RIGHT],   // curve from up to right
+    [BLOCK_TYPES.T]: [DIRS.UP, DIRS.LEFT, DIRS.RIGHT], // T shape missing down
+    [BLOCK_TYPES.CROSS]: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+    [BLOCK_TYPES.START]: [DIRS.RIGHT], // Cub faces right by default
+    [BLOCK_TYPES.END]: [DIRS.LEFT],    // Star faces left by default
+  };
+
+  // Helper to create SVG elements
+  function createSVGElement(tag, attrs = {}) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      el.setAttribute(k, v);
+    }
+    return el;
+  }
+
+  // Create pipe path for straight pipe (vertical)
+  function createStraightPath() {
+    const path = createSVGElement('path', {
+      d: 'M40 10 L40 70',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    return path;
+  }
+
+  // Create pipe path for curve pipe (up-right)
+  function createCurvePath() {
+    const path = createSVGElement('path', {
+      d: 'M40 10 L40 40 A30 30 0 0 1 70 40 L70 40',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    return path;
+  }
+
+  // Create pipe path for T pipe (up-left-right)
+  function createTPath() {
+    const group = createSVGElement('g');
+    // vertical line up to center
+    const vertical = createSVGElement('path', {
+      d: 'M40 10 L40 40',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    // horizontal line left-right
+    const horizontal = createSVGElement('path', {
+      d: 'M10 40 L70 40',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(vertical);
+    group.appendChild(horizontal);
+    return group;
+  }
+
+  // Create pipe path for cross pipe (all four sides)
+  function createCrossPath() {
+    const group = createSVGElement('g');
+    // vertical line
+    const vertical = createSVGElement('path', {
+      d: 'M40 10 L40 70',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    // horizontal line
+    const horizontal = createSVGElement('path', {
+      d: 'M10 40 L70 40',
+      stroke: '#7f7fff',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(vertical);
+    group.appendChild(horizontal);
+    return group;
+  }
+
+  // Create start block SVG (puppy icon)
+  function createStartSVG() {
+    const group = createSVGElement('g');
+    // Pipe exit line (right)
+    const pipe = createSVGElement('path', {
+      d: 'M40 40 L70 40',
+      stroke: '#ffcc66',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(pipe);
+    // Puppy face simplified (circle + ears + eyes + nose)
+    const face = createSVGElement('circle', {
+      cx: 30,
+      cy: 40,
+      r: 18,
+      fill: '#ffcc66',
+      stroke: '#b38600',
+      'stroke-width': 2,
+    });
+    group.appendChild(face);
+    // Ears
+    const earL = createSVGElement('path', {
+      d: 'M18 30 Q15 40 25 38',
+      fill: '#b38600',
+      stroke: '#b38600',
+      'stroke-width': 1,
+    });
+    const earR = createSVGElement('path', {
+      d: 'M42 30 Q45 40 35 38',
+      fill: '#b38600',
+      stroke: '#b38600',
+      'stroke-width': 1,
+    });
+    group.appendChild(earL);
+    group.appendChild(earR);
+    // Eyes
+    const eyeL = createSVGElement('circle', { cx: 24, cy: 38, r: 3, fill: '#663300' });
+    const eyeR = createSVGElement('circle', { cx: 36, cy: 38, r: 3, fill: '#663300' });
+    group.appendChild(eyeL);
+    group.appendChild(eyeR);
+    // Nose
+    const nose = createSVGElement('circle', { cx: 30, cy: 46, r: 3, fill: '#663300' });
+    group.appendChild(nose);
+    return group;
+  }
+
+  // Create end block SVG (star icon)
+  function createEndSVG() {
+    const group = createSVGElement('g');
+    // Pipe entry line (left)
+    const pipe = createSVGElement('path', {
+      d: 'M10 40 L40 40',
+      stroke: '#ffff66',
+      'stroke-width': 14,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(pipe);
+    // Star shape
+    const star = createSVGElement('polygon', {
+      points: '40,15 45,35 65,35 48,47 55,67 40,55 25,67 32,47 15,35 35,35',
+      fill: '#ffff66',
+      stroke: '#b3b34d',
+      'stroke-width': 2,
+    });
+    group.appendChild(star);
+    return group;
+  }
+
+  // Create rotate button SVG (circular arrow)
+  function createRotateButtonSVG() {
+    const svg = createSVGElement('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
+    const path = createSVGElement('path', {
+      d: 'M7 7V3L3 7l4 4V8a6 6 0 1 1-1 11.9',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': 2,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    });
+    svg.appendChild(path);
+    return svg;
+  }
+
+  // Rotate an array of directions clockwise by rotation steps (each step = 90deg)
+  function rotateDirections(dirs, rotation) {
+    return dirs.map(d => (d + rotation) % 4);
+  }
+
+  // Check if two directions are opposite
+  function areOppositeDirs(d1, d2) {
+    return (d1 + 2) % 4 === d2;
+  }
+
+  // Level data structure:
+  // gridSize: number (NxN grid)
+  // blocks: array of block objects with properties:
+  //   type: block type string
+  //   rotation: 0-3 (0 = default rotation)
+  //   position: {x, y} grid coordinates (0-based)
+  //   fixed: boolean (true if block cannot be moved)
+  // startPos: {x, y} position of Cub start block
+  // endPos: {x, y} position of Star block
+
+  // Levels array
+  const LEVELS = [
+    {
+      gridSize: 6,
+      blocks: [
+        { type: BLOCK_TYPES.START, rotation: 1, position: { x: 0, y: 2 }, fixed: true },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 0, position: { x: 1, y: 2 }, fixed: false },
+        { type: BLOCK_TYPES.CURVE, rotation: 1, position: { x: 2, y: 2 }, fixed: false },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 1, position: { x: 2, y: 3 }, fixed: false },
+        { type: BLOCK_TYPES.CURVE, rotation: 2, position: { x: 2, y: 4 }, fixed: false },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 0, position: { x: 3, y: 4 }, fixed: false },
+        { type: BLOCK_TYPES.END, rotation: 3, position: { x: 4, y: 4 }, fixed: true },
+      ],
+      startPos: { x: 0, y: 2 },
+      endPos: { x: 4, y: 4 },
+      description: 'Level 1: Simple path with curves and straights.',
+    },
+    {
+      gridSize: 6,
+      blocks: [
+        { type: BLOCK_TYPES.START, rotation: 1, position: { x: 0, y: 3 }, fixed: true },
+        { type: BLOCK_TYPES.CURVE, rotation: 1, position: { x: 1, y: 3 }, fixed: false },
+        { type: BLOCK_TYPES.T, rotation: 2, position: { x: 1, y: 4 }, fixed: false },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 0, position: { x: 2, y: 4 }, fixed: false },
+        { type: BLOCK_TYPES.CURVE, rotation: 2, position: { x: 3, y: 4 }, fixed: false },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 1, position: { x: 3, y: 3 }, fixed: false },
+        { type: BLOCK_TYPES.END, rotation: 3, position: { x: 4, y: 3 }, fixed: true },
+      ],
+      startPos: { x: 0, y: 3 },
+      endPos: { x: 4, y: 3 },
+      description: 'Level 2: T-junction and multiple turns.',
+    },
+    {
+      gridSize: 6,
+      blocks: [
+        { type: BLOCK_TYPES.START, rotation: 1, position: { x: 0, y: 1 }, fixed: true },
+        { type: BLOCK_TYPES.CURVE, rotation: 1, position: { x: 1, y: 1 }, fixed: false },
+        { type: BLOCK_TYPES.T, rotation: 3, position: { x: 1, y: 2 }, fixed: false },
+        { type: BLOCK_TYPES.CROSS, rotation: 0, position: { x: 2, y: 2 }, fixed: false },
+        { type: BLOCK_TYPES.CURVE, rotation: 2, position: { x: 3, y: 2 }, fixed: false },
+        { type: BLOCK_TYPES.STRAIGHT, rotation: 1, position: { x: 3, y: 3 }, fixed: false },
+        { type: BLOCK_TYPES.END, rotation: 3, position: { x: 4, y: 3 }, fixed: true },
+      ],
+      startPos: { x: 0, y: 1 },
+      endPos: { x: 4, y: 3 },
+      description: 'Level 3: Crossroads and complex connections.',
+    },
+  ];
+
+  // Game state
+  let currentLevelIndex = 0;
+  let gridSize = 6;
+  let blocks = []; // array of block objects with current state
+  let draggingBlock = null;
+  let dragOffset = { x: 0, y: 0 };
+  let gridElement;
+  let messageElement;
+  let levelInfoElement;
+  let btnPrev, btnNext, btnReset, btnUndo, btnRedo, btnHint;
+
+  // Map from position key "x,y" to block index in blocks array
+  let positionMap = new Map();
+
+  // Undo/Redo stacks
+  let undoStack = [];
+  let redoStack = [];
+
+  // Path preview element
+  let pathPreviewEl = null;
+
+  // Initialize the game
+  function init() {
+    gridElement = document.getElementById('grid');
+    messageElement = document.getElementById('message');
+    levelInfoElement = document.getElementById('level-info');
+    btnPrev = document.getElementById('btn-prev');
+    btnNext = document.getElementById('btn-next');
+    btnReset = document.getElementById('btn-reset');
+    btnUndo = document.getElementById('btn-undo');
+    btnRedo = document.getElementById('btn-redo');
+    btnHint = document.getElementById('btn-hint');
+
+    btnPrev.addEventListener('click', () => {
+      if (currentLevelIndex > 0) {
+        currentLevelIndex--;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnNext.addEventListener('click', () => {
+      if (currentLevelIndex < LEVELS.length - 1) {
+        currentLevelIndex++;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnReset.addEventListener('click', () => {
+      loadLevel(currentLevelIndex);
+    });
+    btnUndo.addEventListener('click', () => {
+      undo();
+    });
+    btnRedo.addEventListener('click', () => {
+      redo();
+    });
+    btnHint.addEventListener('click', () => {
+      showHint();
+    });
+
+    loadLevel(currentLevelIndex);
+  }
+
+  // Load a level by index
+  function loadLevel(index) {
+    const level = LEVELS[index];
+    gridSize = level.gridSize;
+    blocks = level.blocks.map(b => ({
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: !!b.fixed,
+      id: generateId(),
+    }));
+    positionMap.clear();
+    blocks.forEach((b, i) => {
+      positionMap.set(posKey(b.position), i);
+    });
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoButtons();
+    renderGrid();
+    renderBlocks();
+    updateLevelInfo(level);
+    updateControls();
+    messageElement.textContent = '';
+    clearPathPreview();
+  }
+
+  // Generate unique ID for blocks
+  function generateId() {
+    return 'b' + Math.random().toString(36).slice(2, 10);
+  }
+
+  // Update level info text
+  function updateLevelInfo(level) {
+    levelInfoElement.textContent = `Level ${currentLevelIndex + 1} / ${LEVELS.length} - ${level.description}`;
+  }
+
+  // Update controls button states
+  function updateControls() {
+    btnPrev.disabled = currentLevelIndex === 0;
+    btnNext.disabled = currentLevelIndex === LEVELS.length - 1;
+  }
+
+  // Render the grid cells
+  function renderGrid() {
+    gridElement.innerHTML = '';
+    gridElement.style.gridTemplateColumns = `repeat(${gridSize}, 80px)`;
+    gridElement.style.gridTemplateRows = `repeat(${gridSize}, 80px)`;
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `Grid cell ${x + 1},${y + 1}`);
+        gridElement.appendChild(cell);
+      }
+    }
+  }
+
+  // Render all blocks on the grid
+  function renderBlocks() {
+    // Remove existing blocks
+    const existingBlocks = gridElement.querySelectorAll('.block');
+    existingBlocks.forEach(b => b.remove());
+
+    blocks.forEach(block => {
+      const blockEl = createBlockElement(block);
+      gridElement.appendChild(blockEl);
+    });
+  }
+
+  // Create a block DOM element with SVG and rotate button
+  function createBlockElement(block) {
+    const el = document.createElement('div');
+    el.className = 'block';
+    el.style.width = '80px';
+    el.style.height = '80px';
+    el.style.left = `${block.position.x * 86}px`;
+    el.style.top = `${block.position.y * 86}px`;
+    el.style.position = 'absolute';
+    el.style.touchAction = 'none';
+    el.dataset.id = block.id;
+    el.dataset.type = block.type;
+    el.dataset.fixed = block.fixed ? 'true' : 'false';
+    el.setAttribute('aria-grabbed', 'false');
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', block.fixed ? '-1' : '0');
+    el.setAttribute('aria-label', `Block type ${block.type}, rotation ${block.rotation * 90} degrees${block.fixed ? ', fixed' : ''}`);
+
+    // Create SVG container
+    const svg = createSVGElement('svg', { viewBox: '0 0 80 80', 'aria-hidden': 'true', focusable: 'false' });
+    const group = createSVGElement('g');
+    group.setAttribute('transform', `rotate(${block.rotation * 90} 40 40)`);
+
+    // Add pipe or icon paths depending on block type
+    switch (block.type) {
+      case BLOCK_TYPES.EMPTY:
+        // no paths
+        break;
+      case BLOCK_TYPES.STRAIGHT:
+        group.appendChild(createStraightPath());
+        break;
+      case BLOCK_TYPES.CURVE:
+        group.appendChild(createCurvePath());
+        break;
+      case BLOCK_TYPES.T:
+        group.appendChild(createTPath());
+        break;
+      case BLOCK_TYPES.CROSS:
+        group.appendChild(createCrossPath());
+        break;
+      case BLOCK_TYPES.START:
+        group.appendChild(createStartSVG());
+        break;
+      case BLOCK_TYPES.END:
+        group.appendChild(createEndSVG());
+        break;
+    }
+    svg.appendChild(group);
+    el.appendChild(svg);
+
+    // Add rotate button if not fixed and not empty and not start/end
+    if (!block.fixed && block.type !== BLOCK_TYPES.EMPTY && block.type !== BLOCK_TYPES.START && block.type !== BLOCK_TYPES.END) {
+      const rotateBtn = document.createElement('div');
+      rotateBtn.className = 'rotate-btn';
+      rotateBtn.title = 'Rotate block';
+      rotateBtn.appendChild(createRotateButtonSVG());
+      rotateBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        saveStateForUndo();
+        rotateBlock(block.id);
+      });
+      el.appendChild(rotateBtn);
+    }
+
+    // Drag handlers
+    if (!block.fixed) {
+      el.addEventListener('pointerdown', onPointerDown);
+      el.addEventListener('keydown', onBlockKeyDown);
+      el.addEventListener('mouseenter', onBlockMouseEnter);
+      el.addEventListener('mouseleave', onBlockMouseLeave);
+    }
+
+    return el;
+  }
+
+  // Rotate a block by 90 degrees clockwise
+  function rotateBlock(id) {
+    const block = blocks.find(b => b.id === id);
+    if (!block) return;
+    block.rotation = (block.rotation + 1) % 4;
+    renderBlocks();
+    checkWinCondition();
+  }
+
+  // Convert position object to key string
+  function posKey(pos) {
+    return `${pos.x},${pos.y}`;
+  }
+
+  // Check if a position is inside the grid
+  function isInsideGrid(pos) {
+    return pos.x >= 0 && pos.x < gridSize && pos.y >= 0 && pos.y < gridSize;
+  }
+
+  // Find block at position
+  function findBlockAt(pos) {
+    const key = posKey(pos);
+    const idx = positionMap.get(key);
+    if (idx === undefined) return null;
+    return blocks[idx];
+  }
+
+  // Update position map from blocks array
+  function updatePositionMap() {
+    positionMap.clear();
+    blocks.forEach((b, i) => {
+      positionMap.set(posKey(b.position), i);
+    });
+  }
+
+  // Drag and drop handlers
+  function onPointerDown(e) {
+    if (e.button !== 0) return; // left click only
+    const el = e.currentTarget;
+    const id = el.dataset.id;
+    const block = blocks.find(b => b.id === id);
+    if (!block || block.fixed) return;
+
+    saveStateForUndo();
+
+    draggingBlock = block;
+    el.classList.add('dragging');
+    el.setAttribute('aria-grabbed', 'true');
+
+    const rect = el.getBoundingClientRect();
+    dragOffset.x = e.clientX - rect.left;
+    dragOffset.y = e.clientY - rect.top;
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
+    e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    if (!draggingBlock) return;
+    const el = gridElement.querySelector(`.block[data-id="${draggingBlock.id}"]`);
+    if (!el) return;
+
+    // Calculate new position relative to grid container
+    const gridRect = gridElement.getBoundingClientRect();
+    let x = e.clientX - gridRect.left - dragOffset.x + 40; // center offset
+    let y = e.clientY - gridRect.top - dragOffset.y + 40;
+
+    // Snap to grid cells
+    let gridX = Math.floor(x / 86);
+    let gridY = Math.floor(y / 86);
+
+    // Clamp inside grid
+    gridX = Math.min(Math.max(gridX, 0), gridSize - 1);
+    gridY = Math.min(Math.max(gridY, 0), gridSize - 1);
+
+    // Check if target cell is occupied by another block (except self)
+    const key = posKey({ x: gridX, y: gridY });
+    const occupiedIdx = positionMap.get(key);
+    if (occupiedIdx !== undefined && blocks[occupiedIdx].id !== draggingBlock.id) {
+      // Occupied, do not move there, but still show dragging
+      el.style.left = `${draggingBlock.position.x * 86}px`;
+      el.style.top = `${draggingBlock.position.y * 86}px`;
+      return;
+    }
+
+    // Move block visually to pointer position (free drag)
+    el.style.left = `${e.clientX - gridRect.left - dragOffset.x}px`;
+    el.style.top = `${e.clientY - gridRect.top - dragOffset.y}px`;
+  }
+
+  function onPointerUp(e) {
+    if (!draggingBlock) return;
+    const el = gridElement.querySelector(`.block[data-id="${draggingBlock.id}"]`);
+    if (!el) return;
+
+    const gridRect = gridElement.getBoundingClientRect();
+    let x = e.clientX - gridRect.left - dragOffset.x + 40;
+    let y = e.clientY - gridRect.top - dragOffset.y + 40;
+
+    let gridX = Math.floor(x / 86);
+    let gridY = Math.floor(y / 86);
+
+    gridX = Math.min(Math.max(gridX, 0), gridSize - 1);
+    gridY = Math.min(Math.max(gridY, 0), gridSize - 1);
+
+    // Check if target cell is occupied by another block (except self)
+    const key = posKey({ x: gridX, y: gridY });
+    const occupiedIdx = positionMap.get(key);
+    if (occupiedIdx !== undefined && blocks[occupiedIdx].id !== draggingBlock.id) {
+      // Occupied, revert to original position
+      el.style.left = `${draggingBlock.position.x * 86}px`;
+      el.style.top = `${draggingBlock.position.y * 86}px`;
+      // Undo the saved state since no move happened
+      undoStack.pop();
+      updateUndoRedoButtons();
+    } else {
+      // Update block position
+      draggingBlock.position.x = gridX;
+      draggingBlock.position.y = gridY;
+      updatePositionMap();
+      el.style.left = `${gridX * 86}px`;
+      el.style.top = `${gridY * 86}px`;
+      checkWinCondition();
+    }
+
+    el.classList.remove('dragging');
+    el.setAttribute('aria-grabbed', 'false');
+    draggingBlock = null;
+
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+  }
+
+  // Keyboard accessibility: rotate block on Enter or Space, move with arrow keys
+  function onBlockKeyDown(e) {
+    const el = e.currentTarget;
+    const id = el.dataset.id;
+    const block = blocks.find(b => b.id === id);
+    if (!block || block.fixed) return;
+
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        saveStateForUndo();
+        rotateBlock(id);
+        break;
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        e.preventDefault();
+        saveStateForUndo();
+        moveBlockWithKeyboard(block, e.key);
+        break;
+    }
+  }
+
+  // Move block with keyboard arrow keys if possible
+  function moveBlockWithKeyboard(block, arrowKey) {
+    const dirMap = {
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 },
+    };
+    const delta = dirMap[arrowKey];
+    if (!delta) return;
+
+    const newPos = { x: block.position.x + delta.x, y: block.position.y + delta.y };
+    if (!isInsideGrid(newPos)) {
+      undoStack.pop();
+      updateUndoRedoButtons();
+      return;
+    }
+
+    const key = posKey(newPos);
+    const occupiedIdx = positionMap.get(key);
+    if (occupiedIdx !== undefined) {
+      undoStack.pop();
+      updateUndoRedoButtons();
+      return; // occupied
+    }
+
+    block.position = newPos;
+    updatePositionMap();
+    renderBlocks();
+    checkWinCondition();
+
+    // Focus moved block
+    setTimeout(() => {
+      const newEl = gridElement.querySelector(`.block[data-id="${block.id}"]`);
+      if (newEl) newEl.focus();
+    }, 0);
+  }
+
+  // Check if the path from start to end is connected properly
+  // We simulate the path traversal from start block's exit direction
+  // and follow connected blocks until we reach the end block or dead end
+  function checkWinCondition() {
+    const level = LEVELS[currentLevelIndex];
+    const startBlock = blocks.find(b => b.type === BLOCK_TYPES.START);
+    const endBlock = blocks.find(b => b.type === BLOCK_TYPES.END);
+    if (!startBlock || !endBlock) return;
+
+    // Get start block connections with rotation applied
+    const startConns = rotateDirections(BLOCK_CONNECTIONS[startBlock.type], startBlock.rotation);
+    if (startConns.length !== 1) return; // start block must have exactly one connection
+    const startDir = startConns[0];
+
+    // Traverse path
+    let currentPos = { x: startBlock.position.x, y: startBlock.position.y };
+    let currentDir = startDir;
+    let visited = new Set();
+    visited.add(posKey(currentPos));
+
+    while (true) {
+      // Move to next cell in currentDir
+      const vec = DIR_VECTORS[currentDir];
+      const nextPos = { x: currentPos.x + vec.x, y: currentPos.y + vec.y };
+      if (!isInsideGrid(nextPos)) break;
+
+      const nextBlock = findBlockAt(nextPos);
+      if (!nextBlock) break;
+
+      // Get next block connections with rotation
+      const nextConns = rotateDirections(BLOCK_CONNECTIONS[nextBlock.type], nextBlock.rotation);
+
+      // Check if next block has connection opposite to currentDir
+      const oppositeDir = (currentDir + 2) % 4;
+      if (!nextConns.includes(oppositeDir)) break;
+
+      // If next block is end block, check if it has connection oppositeDir only
+      if (nextBlock.type === BLOCK_TYPES.END) {
+        if (nextConns.length === 1 && nextConns[0] === oppositeDir) {
+          // Win condition met
+          messageElement.textContent = '🎉 Cub reached the Star! Level Complete!';
+          return true;
+        } else {
+          break;
+        }
+      }
+
+      // Find the other connection direction in next block (not oppositeDir)
+      const otherDirs = nextConns.filter(d => d !== oppositeDir);
+      if (otherDirs.length !== 1) break; // must have exactly one other connection to continue
+
+      currentPos = nextPos;
+      currentDir = otherDirs[0];
+
+      const key = posKey(currentPos);
+      if (visited.has(key)) break; // loop detected, break
+      visited.add(key);
+    }
+
+    // If we reach here, no win
+    messageElement.textContent = '';
+    return false;
+  }
+
+  // Undo/Redo functionality
+  function saveStateForUndo() {
+    // Save deep copy of blocks state
+    const state = blocks.map(b => ({
+      id: b.id,
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: b.fixed,
+    }));
+    undoStack.push(state);
+    // Clear redo stack on new action
+    redoStack = [];
+    updateUndoRedoButtons();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) return;
+    const currentState = blocks.map(b => ({
+      id: b.id,
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: b.fixed,
+    }));
+    redoStack.push(currentState);
+
+    const prevState = undoStack.pop();
+    blocks = prevState.map(b => ({
+      id: b.id,
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: b.fixed,
+    }));
+    updatePositionMap();
+    renderBlocks();
+    checkWinCondition();
+    updateUndoRedoButtons();
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    const currentState = blocks.map(b => ({
+      id: b.id,
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: b.fixed,
+    }));
+    undoStack.push(currentState);
+
+    const nextState = redoStack.pop();
+    blocks = nextState.map(b => ({
+      id: b.id,
+      type: b.type,
+      rotation: b.rotation,
+      position: { x: b.position.x, y: b.position.y },
+      fixed: b.fixed,
+    }));
+    updatePositionMap();
+    renderBlocks();
+    checkWinCondition();
+    updateUndoRedoButtons();
+  }
+
+  function updateUndoRedoButtons() {
+    btnUndo.disabled = undoStack.length === 0;
+    btnRedo.disabled = redoStack.length === 0;
+  }
+
+  // Path preview on hover
+  function onBlockMouseEnter(e) {
+    const el = e.currentTarget;
+    const id = el.dataset.id;
+    const block = blocks.find(b => b.id === id);
+    if (!block) return;
+    showPathPreview(block);
+  }
+
+  function onBlockMouseLeave(e) {
+    clearPathPreview();
+  }
+
+  // Show path preview starting from hovered block if possible
+  function showPathPreview(startBlock) {
+    clearPathPreview();
+
+    // We will highlight the path starting from the hovered block's connections
+    // For start block, start from its exit direction
+    // For others, try each connection direction to find a path
+
+    // Find all possible start directions for preview
+    const conns = rotateDirections(BLOCK_CONNECTIONS[startBlock.type], startBlock.rotation);
+    if (conns.length === 0) return;
+
+    // For start block, only one direction
+    // For others, try all directions to find a path
+    let paths = [];
+
+    if (startBlock.type === BLOCK_TYPES.START) {
+      paths.push(traversePathFrom(startBlock.position, conns[0]));
+    } else {
+      for (const dir of conns) {
+        const path = traversePathFrom(startBlock.position, dir);
+        if (path.length > 1) {
+          paths.push(path);
+        }
+      }
+    }
+
+    if (paths.length === 0) return;
+
+    // Choose the longest path for preview
+    let longestPath = paths.reduce((a, b) => (a.length > b.length ? a : b));
+
+    // Create path preview elements
+    pathPreviewEl = document.createElement('div');
+    pathPreviewEl.className = 'path-preview';
+    gridElement.appendChild(pathPreviewEl);
+
+    // For each position in path, create an SVG overlay with highlight
+    longestPath.forEach(({ pos, block, rotation }) => {
+      const previewBlock = createPreviewBlockSVG(block.type, rotation);
+      previewBlock.style.position = 'absolute';
+      previewBlock.style.left = `${pos.x * 86}px`;
+      previewBlock.style.top = `${pos.y * 86}px`;
+      previewBlock.style.width = '80px';
+      previewBlock.style.height = '80px';
+      pathPreviewEl.appendChild(previewBlock);
+    });
+  }
+
+  // Clear path preview
+  function clearPathPreview() {
+    if (pathPreviewEl) {
+      pathPreviewEl.remove();
+      pathPreviewEl = null;
+    }
+  }
+
+  // Traverse path from position and direction, return array of {pos, block, rotation}
+  function traversePathFrom(startPos, startDir) {
+    let path = [];
+    let currentPos = { x: startPos.x, y: startPos.y };
+    let currentDir = startDir;
+    let visited = new Set();
+    visited.add(posKey(currentPos));
+
+    while (true) {
+      const block = findBlockAt(currentPos);
+      if (!block) break;
+      path.push({ pos: { x: currentPos.x, y: currentPos.y }, block, rotation: block.rotation });
+
+      // Move to next cell in currentDir
+      const vec = DIR_VECTORS[currentDir];
+      const nextPos = { x: currentPos.x + vec.x, y: currentPos.y + vec.y };
+      if (!isInsideGrid(nextPos)) break;
+
+      const nextBlock = findBlockAt(nextPos);
+      if (!nextBlock) break;
+
+      // Get next block connections with rotation
+      const nextConns = rotateDirections(BLOCK_CONNECTIONS[nextBlock.type], nextBlock.rotation);
+
+      // Check if next block has connection opposite to currentDir
+      const oppositeDir = (currentDir + 2) % 4;
+      if (!nextConns.includes(oppositeDir)) break;
+
+      // If next block is end block, add and stop
+      if (nextBlock.type === BLOCK_TYPES.END) {
+        path.push({ pos: { x: nextPos.x, y: nextPos.y }, block: nextBlock, rotation: nextBlock.rotation });
+        break;
+      }
+
+      // Find the other connection direction in next block (not oppositeDir)
+      const otherDirs = nextConns.filter(d => d !== oppositeDir);
+      if (otherDirs.length !== 1) break; // must have exactly one other connection to continue
+
+      currentPos = nextPos;
+      currentDir = otherDirs[0];
+
+      const key = posKey(currentPos);
+      if (visited.has(key)) break; // loop detected, break
+      visited.add(key);
+    }
+    return path;
+  }
+
+  // Create preview block SVG with highlight color
+  function createPreviewBlockSVG(type, rotation) {
+    const el = document.createElement('div');
+    el.style.width = '80px';
+    el.style.height = '80px';
+    el.style.pointerEvents = 'none';
+
+    const svg = createSVGElement('svg', { viewBox: '0 0 80 80', 'aria-hidden': 'true', focusable: 'false' });
+    const group = createSVGElement('g');
+    group.setAttribute('transform', `rotate(${rotation * 90} 40 40)`);
+
+    // Add highlighted pipe or icon paths depending on block type
+    switch (type) {
+      case BLOCK_TYPES.EMPTY:
+        break;
+      case BLOCK_TYPES.STRAIGHT:
+        group.appendChild(createPreviewStraightPath());
+        break;
+      case BLOCK_TYPES.CURVE:
+        group.appendChild(createPreviewCurvePath());
+        break;
+      case BLOCK_TYPES.T:
+        group.appendChild(createPreviewTPath());
+        break;
+      case BLOCK_TYPES.CROSS:
+        group.appendChild(createPreviewCrossPath());
+        break;
+      case BLOCK_TYPES.START:
+        group.appendChild(createPreviewStartSVG());
+        break;
+      case BLOCK_TYPES.END:
+        group.appendChild(createPreviewEndSVG());
+        break;
+    }
+    svg.appendChild(group);
+    el.appendChild(svg);
+    return el;
+  }
+
+  // Preview versions of paths with highlight color
+  function createPreviewStraightPath() {
+    const path = createSVGElement('path', {
+      d: 'M40 10 L40 70',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    return path;
+  }
+  function createPreviewCurvePath() {
+    const path = createSVGElement('path', {
+      d: 'M40 10 L40 40 A30 30 0 0 1 70 40 L70 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    return path;
+  }
+  function createPreviewTPath() {
+    const group = createSVGElement('g');
+    const vertical = createSVGElement('path', {
+      d: 'M40 10 L40 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    const horizontal = createSVGElement('path', {
+      d: 'M10 40 L70 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(vertical);
+    group.appendChild(horizontal);
+    return group;
+  }
+  function createPreviewCrossPath() {
+    const group = createSVGElement('g');
+    const vertical = createSVGElement('path', {
+      d: 'M40 10 L40 70',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    const horizontal = createSVGElement('path', {
+      d: 'M10 40 L70 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(vertical);
+    group.appendChild(horizontal);
+    return group;
+  }
+  function createPreviewStartSVG() {
+    const group = createSVGElement('g');
+    const pipe = createSVGElement('path', {
+      d: 'M40 40 L70 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(pipe);
+    const face = createSVGElement('circle', {
+      cx: 30,
+      cy: 40,
+      r: 18,
+      fill: '#ffcc66',
+      stroke: '#b38600',
+      'stroke-width': 2,
+    });
+    group.appendChild(face);
+    const earL = createSVGElement('path', {
+      d: 'M18 30 Q15 40 25 38',
+      fill: '#b38600',
+      stroke: '#b38600',
+      'stroke-width': 1,
+    });
+    const earR = createSVGElement('path', {
+      d: 'M42 30 Q45 40 35 38',
+      fill: '#b38600',
+      stroke: '#b38600',
+      'stroke-width': 1,
+    });
+    group.appendChild(earL);
+    group.appendChild(earR);
+    const eyeL = createSVGElement('circle', { cx: 24, cy: 38, r: 3, fill: '#663300' });
+    const eyeR = createSVGElement('circle', { cx: 36, cy: 38, r: 3, fill: '#663300' });
+    group.appendChild(eyeL);
+    group.appendChild(eyeR);
+    const nose = createSVGElement('circle', { cx: 30, cy: 46, r: 3, fill: '#663300' });
+    group.appendChild(nose);
+    return group;
+  }
+  function createPreviewEndSVG() {
+    const group = createSVGElement('g');
+    const pipe = createSVGElement('path', {
+      d: 'M10 40 L40 40',
+      stroke: '#ffcc66',
+      'stroke-width': 16,
+      'stroke-linecap': 'round',
+      fill: 'none',
+    });
+    group.appendChild(pipe);
+    const star = createSVGElement('polygon', {
+      points: '40,15 45,35 65,35 48,47 55,67 40,55 25,67 32,47 15,35 35,35',
+      fill: '#ffcc66',
+      stroke: '#b38600',
+      'stroke-width': 2,
+    });
+    group.appendChild(star);
+    return group;
+  }
+
+  // Hint system: show next correct move by comparing current state to solution
+  function showHint() {
+    clearPathPreview();
+    messageElement.textContent = '';
+
+    const level = LEVELS[currentLevelIndex];
+    if (!level) return;
+
+    // Find first block that differs from solution in position or rotation (excluding fixed blocks)
+    for (let i = 0; i < blocks.length; i++) {
+      const currentBlock = blocks[i];
+      if (currentBlock.fixed) continue;
+      const solutionBlock = level.blocks.find(b => b.type === currentBlock.type && b.position.x === currentBlock.position.x && b.position.y === currentBlock.position.y);
+      if (!solutionBlock) {
+        // Block is misplaced, highlight it
+        highlightBlock(currentBlock.id, 'Block is misplaced. Try moving it to the correct position.');
+        return;
+      }
+      if (currentBlock.rotation !== solutionBlock.rotation) {
+        highlightBlock(currentBlock.id, 'Block rotation is incorrect. Try rotating it.');
+        return;
+      }
+    }
+
+    // If all blocks match positions and rotations, but no win, suggest to check connections
+    messageElement.textContent = 'No hints available. Try adjusting block positions or rotations.';
+  }
+
+  // Highlight a block with a temporary message
+  function highlightBlock(blockId, hintMessage) {
+    const blockEl = gridElement.querySelector(`.block[data-id="${blockId}"]`);
+    if (!blockEl) return;
+    blockEl.classList.add('highlight');
+    messageElement.textContent = hintMessage;
+    setTimeout(() => {
+      blockEl.classList.remove('highlight');
+      messageElement.textContent = '';
+    }, 4000);
+  }
+
+  // Initialize game on DOM ready
+  window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>

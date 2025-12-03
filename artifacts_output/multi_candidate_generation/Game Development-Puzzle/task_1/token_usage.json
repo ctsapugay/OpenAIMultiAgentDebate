@@ -1,0 +1,109 @@
+{
+  "summary": {
+    "total_requests": 8,
+    "total_input_tokens": 86910,
+    "total_output_tokens": 30483,
+    "total_tokens": 117393,
+    "operations": [
+      "code_generation",
+      "evaluation",
+      "initial_code_generation",
+      "code_improvement_iteration_1_candidate_0"
+    ],
+    "models": [
+      "gpt-4.1-mini"
+    ]
+  },
+  "operation_summary": {
+    "code_generation": {
+      "count": 1,
+      "input_tokens": 390,
+      "output_tokens": 7711,
+      "total_tokens": 8101
+    },
+    "evaluation": {
+      "count": 5,
+      "input_tokens": 76951,
+      "output_tokens": 5073,
+      "total_tokens": 82024
+    },
+    "initial_code_generation": {
+      "count": 1,
+      "input_tokens": 390,
+      "output_tokens": 8543,
+      "total_tokens": 8933
+    },
+    "code_improvement_iteration_1_candidate_0": {
+      "count": 1,
+      "input_tokens": 9179,
+      "output_tokens": 9156,
+      "total_tokens": 18335
+    }
+  },
+  "detailed_records": [
+    {
+      "operation": "code_generation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 390,
+      "output_tokens": 7711,
+      "total_tokens": 8101,
+      "timestamp": "2025-12-02 19:26:35"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14015,
+      "output_tokens": 947,
+      "total_tokens": 14962,
+      "timestamp": "2025-12-02 19:26:58"
+    },
+    {
+      "operation": "initial_code_generation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 390,
+      "output_tokens": 8543,
+      "total_tokens": 8933,
+      "timestamp": "2025-12-02 19:28:45"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 15432,
+      "output_tokens": 1005,
+      "total_tokens": 16437,
+      "timestamp": "2025-12-02 19:29:07"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 15432,
+      "output_tokens": 1086,
+      "total_tokens": 16518,
+      "timestamp": "2025-12-02 19:29:28"
+    },
+    {
+      "operation": "code_improvement_iteration_1_candidate_0",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 9179,
+      "output_tokens": 9156,
+      "total_tokens": 18335,
+      "timestamp": "2025-12-02 19:31:29"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 16036,
+      "output_tokens": 1031,
+      "total_tokens": 17067,
+      "timestamp": "2025-12-02 19:31:54"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 16036,
+      "output_tokens": 1004,
+      "total_tokens": 17040,
+      "timestamp": "2025-12-02 19:32:17"
+    }
+  ]
+}

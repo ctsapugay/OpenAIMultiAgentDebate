@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Character Leveling and Skill Tree System</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    padding: 1rem 2rem;
+    background: #2a2a44;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  }
+  main {
+    flex: 1;
+    display: flex;
+    max-width: 960px;
+    width: 100%;
+    padding: 1rem;
+    gap: 2rem;
+  }
+  section {
+    background: #2a2a44;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 0 10px #0008 inset;
+  }
+  #character-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  #character-info h2 {
+    margin-top: 0;
+  }
+  .attribute-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .attribute-list li {
+    margin-bottom: 0.5rem;
+  }
+  #xp-bar-container {
+    background: #444466;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 24px;
+    margin-top: 0.5rem;
+  }
+  #xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #81c784);
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+  #xp-text {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    text-align: center;
+    user-select: none;
+  }
+  #gain-xp-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background: #4caf50;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #gain-xp-btn:hover:not(:disabled) {
+    background: #388e3c;
+  }
+  #gain-xp-btn:disabled {
+    background: #777;
+    cursor: not-allowed;
+  }
+  #respec-btn {
+    margin-top: 0.5rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    background: #e53935;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #respec-btn:hover:not(:disabled) {
+    background: #b71c1c;
+  }
+  #respec-btn:disabled {
+    background: #777;
+    cursor: not-allowed;
+  }
+
+  /* Skill Tree Styles */
+  #skill-tree {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+  }
+  #skill-tree h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+  .skills-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    position: relative;
+  }
+  .skill-node {
+    background: #3a3a5a;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 0 8px #0008 inset;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    position: relative;
+  }
+  .skill-node.locked {
+    background: #2a2a3a;
+    cursor: not-allowed;
+    color: #777;
+    box-shadow: none;
+  }
+  .skill-node.unlocked {
+    background: #4a90e2;
+    box-shadow: 0 0 12px #4a90e2;
+  }
+  .skill-node.enhanced {
+    background: #81c784;
+    box-shadow: 0 0 12px #81c784;
+  }
+  .skill-node h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  .skill-node p {
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem 0;
+    min-height: 40px;
+  }
+  .skill-node small {
+    font-size: 0.75rem;
+    color: #ccc;
+  }
+  .skill-node .level {
+    font-weight: bold;
+    margin-top: 0.25rem;
+  }
+  .skill-node:hover:not(.locked) {
+    background-color: #5a9ae8;
+    box-shadow: 0 0 16px #5a9ae8;
+    transform: scale(1.05);
+  }
+  .skill-node.locked:hover {
+    background-color: #2a2a3a;
+  }
+  /* Lines connecting skills */
+  svg#skill-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 0;
+  }
+  /* Tooltip */
+  #tooltip {
+    position: fixed;
+    background: #222a44dd;
+    color: #eee;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    max-width: 220px;
+    z-index: 1000;
+  }
+  /* Animation for level up */
+  #level-up-animation {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4caf50dd;
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 0 20px #4caf50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 2000;
+  }
+  #level-up-animation.show {
+    opacity: 1;
+    pointer-events: auto;
+    animation: pop 0.6s ease forwards;
+  }
+  @keyframes pop {
+    0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+    50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  }
+  /* Animation for skill unlock/enhance */
+  .skill-node.unlock-anim {
+    animation: unlockGlow 0.8s ease forwards;
+  }
+  @keyframes unlockGlow {
+    0% {
+      box-shadow: 0 0 0 #4caf50;
+      background-color: #4a90e2;
+    }
+    50% {
+      box-shadow: 0 0 20px #4caf50;
+      background-color: #81c784;
+    }
+    100% {
+      box-shadow: 0 0 12px #81c784;
+      background-color: #81c784;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Character Leveling & Skill Tree System</h1>
+</header>
+<main>
+  <section id="character-info" aria-label="Character Information">
+    <h2>Character Info</h2>
+    <div>
+      <strong>Name:</strong> <span id="char-name">Hero</span>
+    </div>
+    <div>
+      <strong>Level:</strong> <span id="char-level">1</span>
+    </div>
+    <div>
+      <strong>Experience:</strong>
+      <div id="xp-bar-container" aria-label="Experience progress bar">
+        <div id="xp-bar"></div>
+      </div>
+      <div id="xp-text" aria-live="polite" aria-atomic="true">0 / 100 XP</div>
+    </div>
+    <ul class="attribute-list" aria-label="Character Attributes">
+      <li><strong>Strength:</strong> <span id="attr-strength">5</span></li>
+      <li><strong>Agility:</strong> <span id="attr-agility">5</span></li>
+      <li><strong>Intelligence:</strong> <span id="attr-intelligence">5</span></li>
+      <li><strong>Health:</strong> <span id="attr-health">100</span></li>
+    </ul>
+    <button id="gain-xp-btn" aria-label="Gain Experience Points">Gain 30 XP</button>
+    <button id="respec-btn" aria-label="Reset Skills and Attributes" title="Reset all skills and attributes to base values at a cost of 50 XP">Respec Skills (-50 XP)</button>
+  </section>
+  <section id="skill-tree" aria-label="Skill Tree">
+    <h2>Skill Tree</h2>
+    <div class="skills-container" id="skills-container" aria-live="polite" aria-atomic="true">
+      <!-- Skill nodes will be dynamically inserted here -->
+    </div>
+    <svg id="skill-lines" aria-hidden="true"></svg>
+  </section>
+</main>
+<div id="tooltip" role="tooltip"></div>
+<div id="level-up-animation" aria-live="assertive" aria-atomic="true" role="alert"></div>
+
+<script>
+(() => {
+  // Character data and leveling system
+  const character = {
+    name: "Hero",
+    level: 1,
+    currentXP: 0,
+    baseXPToLevel: 100,
+    attributes: {
+      strength: 5,
+      agility: 5,
+      intelligence: 5,
+      health: 100,
+    },
+    // Store base attributes for respec reset
+    baseAttributes: {
+      strength: 5,
+      agility: 5,
+      intelligence: 5,
+      health: 100,
+    },
+    // Calculate XP needed for next level (exponential growth)
+    xpToNextLevel() {
+      return Math.floor(this.baseXPToLevel * Math.pow(1.5, this.level - 1));
+    },
+  };
+
+  // Skill tree data structure
+  // Each skill has:
+  // id, name, description, requiredLevel, prerequisites (array of skill ids),
+  // maxLevel (for enhancements), currentLevel, effect (function to apply skill effect)
+  const skills = [
+    {
+      id: "skill_1",
+      name: "Power Strike",
+      description: "Unlocks a powerful melee attack increasing Strength by 3.",
+      requiredLevel: 2,
+      prerequisites: [],
+      maxLevel: 1,
+      currentLevel: 0,
+      effect: () => {
+        character.attributes.strength += 3;
+      },
+      enhanceEffect: null,
+    },
+    {
+      id: "skill_2",
+      name: "Swift Foot",
+      description: "Unlocks a skill to increase Agility by 2.",
+      requiredLevel: 3,
+      prerequisites: ["skill_1"],
+      maxLevel: 2,
+      currentLevel: 0,
+      effect: () => {
+        character.attributes.agility += 2;
+      },
+      enhanceEffect: () => {
+        character.attributes.agility += 1;
+      },
+    },
+    {
+      id: "skill_3",
+      name: "Arcane Knowledge",
+      description: "Unlocks magical knowledge increasing Intelligence by 4.",
+      requiredLevel: 4,
+      prerequisites: ["skill_1"],
+      maxLevel: 1,
+      currentLevel: 0,
+      effect: () => {
+        character.attributes.intelligence += 4;
+      },
+      enhanceEffect: null,
+    },
+    {
+      id: "skill_4",
+      name: "Endurance",
+      description: "Increases Health by 30.",
+      requiredLevel: 5,
+      prerequisites: ["skill_2", "skill_3"],
+      maxLevel: 3,
+      currentLevel: 0,
+      effect: () => {
+        character.attributes.health += 30;
+      },
+      enhanceEffect: () => {
+        character.attributes.health += 10;
+      },
+    },
+    {
+      id: "skill_5",
+      name: "Critical Focus",
+      description: "Increases chance of critical hits by 5%.",
+      requiredLevel: 6,
+      prerequisites: ["skill_4"],
+      maxLevel: 1,
+      currentLevel: 0,
+      effect: () => {
+        // For demo, just a placeholder attribute
+        character.criticalChance = 5;
+      },
+      enhanceEffect: null,
+    },
+  ];
+
+  // DOM references
+  const dom = {
+    charName: document.getElementById("char-name"),
+    charLevel: document.getElementById("char-level"),
+    xpBar: document.getElementById("xp-bar"),
+    xpText: document.getElementById("xp-text"),
+    gainXPBtn: document.getElementById("gain-xp-btn"),
+    respecBtn: document.getElementById("respec-btn"),
+    attrStrength: document.getElementById("attr-strength"),
+    attrAgility: document.getElementById("attr-agility"),
+    attrIntelligence: document.getElementById("attr-intelligence"),
+    attrHealth: document.getElementById("attr-health"),
+    skillsContainer: document.getElementById("skills-container"),
+    skillLinesSVG: document.getElementById("skill-lines"),
+    tooltip: document.getElementById("tooltip"),
+    levelUpAnimation: document.getElementById("level-up-animation"),
+  };
+
+  // Initialize character display
+  function updateCharacterDisplay() {
+    dom.charName.textContent = character.name;
+    dom.charLevel.textContent = character.level;
+    const xpNeeded = character.xpToNextLevel();
+    const xpPercent = Math.min((character.currentXP / xpNeeded) * 100, 100);
+    dom.xpBar.style.width = xpPercent + "%";
+    dom.xpText.textContent = `${character.currentXP} / ${xpNeeded} XP`;
+
+    dom.attrStrength.textContent = character.attributes.strength;
+    dom.attrAgility.textContent = character.attributes.agility;
+    dom.attrIntelligence.textContent = character.attributes.intelligence;
+    dom.attrHealth.textContent = character.attributes.health;
+
+    // Disable gain XP button if max level reached (for demo max level 10)
+    dom.gainXPBtn.disabled = character.level >= 10;
+
+    // Disable respec button if not enough XP or no skills unlocked
+    const anySkillUnlocked = skills.some(s => s.currentLevel > 0);
+    dom.respecBtn.disabled = character.currentXP < 50 || !anySkillUnlocked;
+  }
+
+  // Level up character if XP threshold reached
+  function tryLevelUp() {
+    let leveledUp = false;
+    while (character.currentXP >= character.xpToNextLevel() && character.level < 10) {
+      character.currentXP -= character.xpToNextLevel();
+      character.level++;
+      leveledUp = true;
+      // On level up, increase base attributes slightly
+      character.attributes.strength += 1;
+      character.attributes.agility += 1;
+      character.attributes.intelligence += 1;
+      character.attributes.health += 10;
+    }
+    if (leveledUp) {
+      showLevelUpAnimation();
+      updateCharacterDisplay();
+      updateSkillTree();
+    }
+  }
+
+  // Show level up animation
+  function showLevelUpAnimation() {
+    const anim = dom.levelUpAnimation;
+    anim.textContent = `Level Up! You are now Level ${character.level}`;
+    anim.classList.add("show");
+    setTimeout(() => {
+      anim.classList.remove("show");
+    }, 2000);
+  }
+
+  // Gain XP button handler with input validation and debouncing
+  let gainXPTimeout = null;
+  dom.gainXPBtn.addEventListener("click", () => {
+    // Prevent rapid clicks causing issues
+    if (gainXPTimeout) return;
+    gainXPTimeout = setTimeout(() => {
+      gainXPTimeout = null;
+    }, 300);
+
+    // Gain 30 XP per click, ensure no negative or NaN
+    if (typeof character.currentXP !== "number" || character.currentXP < 0) {
+      character.currentXP = 0;
+    }
+    character.currentXP += 30;
+    if (character.currentXP < 0) character.currentXP = 0;
+
+    tryLevelUp();
+    updateCharacterDisplay();
+  });
+
+  // Check if skill prerequisites are met
+  function arePrerequisitesMet(skill) {
+    return skill.prerequisites.every((preId) => {
+      const preSkill = skills.find((s) => s.id === preId);
+      return preSkill && preSkill.currentLevel > 0;
+    });
+  }
+
+  // Check if skill can be unlocked
+  function canUnlockSkill(skill) {
+    return (
+      character.level >= skill.requiredLevel &&
+      arePrerequisitesMet(skill) &&
+      skill.currentLevel === 0
+    );
+  }
+
+  // Check if skill can be enhanced
+  function canEnhanceSkill(skill) {
+    return (
+      skill.currentLevel > 0 &&
+      skill.currentLevel < skill.maxLevel
+    );
+  }
+
+  // Apply skill effect (only first unlock)
+  function applySkillEffect(skill) {
+    if (skill.effect) skill.effect();
+  }
+
+  // Apply skill enhancement effect (for levels > 1)
+  function applySkillEnhancement(skill) {
+    if (skill.enhanceEffect) skill.enhanceEffect();
+  }
+
+  // Create skill node DOM element
+  function createSkillNode(skill) {
+    const node = document.createElement("div");
+    node.classList.add("skill-node");
+    node.setAttribute("tabindex", "0");
+    node.setAttribute("role", "button");
+    node.setAttribute("aria-pressed", "false");
+    node.dataset.skillId = skill.id;
+
+    // Determine skill state
+    if (skill.currentLevel === 0) {
+      if (canUnlockSkill(skill)) {
+        node.classList.remove("locked");
+      } else {
+        node.classList.add("locked");
+      }
+    } else if (skill.currentLevel === skill.maxLevel) {
+      node.classList.add("enhanced");
+    } else {
+      node.classList.add("unlocked");
+    }
+
+    // Skill title
+    const title = document.createElement("h3");
+    title.textContent = skill.name;
+    node.appendChild(title);
+
+    // Skill description
+    const desc = document.createElement("p");
+    desc.textContent = skill.description;
+    node.appendChild(desc);
+
+    // Skill level display
+    if (skill.maxLevel > 1) {
+      const levelText = document.createElement("div");
+      levelText.classList.add("level");
+      levelText.textContent = `Level: ${skill.currentLevel} / ${skill.maxLevel}`;
+      node.appendChild(levelText);
+    } else {
+      const statusText = document.createElement("small");
+      statusText.textContent = skill.currentLevel > 0 ? "Unlocked" : `Requires Level ${skill.requiredLevel}`;
+      node.appendChild(statusText);
+    }
+
+    // Click handler to unlock or enhance skill with error handling and animation
+    node.addEventListener("click", () => {
+      if (node.classList.contains("locked")) {
+        alert("Cannot unlock this skill yet. Check level and prerequisites.");
+        return;
+      }
+
+      if (skill.currentLevel === 0 && canUnlockSkill(skill)) {
+        // Unlock skill
+        skill.currentLevel = 1;
+        applySkillEffect(skill);
+        updateCharacterDisplay();
+        updateSkillTree();
+        animateSkillNode(node);
+      } else if (canEnhanceSkill(skill)) {
+        // Enhance skill
+        skill.currentLevel++;
+        applySkillEnhancement(skill);
+        updateCharacterDisplay();
+        updateSkillTree();
+        animateSkillNode(node);
+      } else {
+        alert("Skill cannot be enhanced further.");
+      }
+    });
+
+    // Keyboard accessibility: Enter or Space to activate
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        node.click();
+      }
+    });
+
+    // Tooltip handlers
+    node.addEventListener("mouseenter", (e) => {
+      showTooltip(skill, e);
+    });
+    node.addEventListener("mousemove", (e) => {
+      moveTooltip(e);
+    });
+    node.addEventListener("mouseleave", () => {
+      hideTooltip();
+    });
+
+    return node;
+  }
+
+  // Animate skill node on unlock/enhance
+  function animateSkillNode(node) {
+    node.classList.add("unlock-anim");
+    setTimeout(() => {
+      node.classList.remove("unlock-anim");
+    }, 800);
+  }
+
+  // Render skill tree nodes
+  function renderSkillTree() {
+    dom.skillsContainer.innerHTML = "";
+    skills.forEach((skill) => {
+      const node = createSkillNode(skill);
+      dom.skillsContainer.appendChild(node);
+    });
+    drawSkillLines();
+  }
+
+  // Update skill tree nodes (refresh states)
+  function updateSkillTree() {
+    // Clear container and re-render nodes
+    renderSkillTree();
+  }
+
+  // Draw lines between skills to show dependencies
+  function drawSkillLines() {
+    const svg = dom.skillLinesSVG;
+    svg.innerHTML = "";
+    const containerRect = dom.skillsContainer.getBoundingClientRect();
+
+    // Map skill id to node center coordinates
+    const skillPositions = {};
+    skills.forEach((skill) => {
+      const node = dom.skillsContainer.querySelector(`[data-skill-id="${skill.id}"]`);
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      skillPositions[skill.id] = {
+        x: rect.left + rect.width / 2 - containerRect.left,
+        y: rect.top + rect.height / 2 - containerRect.top,
+      };
+    });
+
+    // For each skill, draw lines to prerequisites
+    skills.forEach((skill) => {
+      skill.prerequisites.forEach((preId) => {
+        if (!(skillPositions[skill.id] && skillPositions[preId])) return;
+        const from = skillPositions[preId];
+        const to = skillPositions[skill.id];
+
+        // Create a line element
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", from.x);
+        line.setAttribute("y1", from.y);
+        line.setAttribute("x2", to.x);
+        line.setAttribute("y2", to.y);
+        line.setAttribute("stroke-width", "3");
+        line.setAttribute("stroke-linecap", "round");
+
+        // Color line based on if prerequisite is unlocked
+        const preSkill = skills.find(s => s.id === preId);
+        if (preSkill && preSkill.currentLevel > 0) {
+          line.setAttribute("stroke", "#4caf50");
+        } else {
+          line.setAttribute("stroke", "#555");
+          line.setAttribute("stroke-dasharray", "6 4");
+        }
+
+        svg.appendChild(line);
+      });
+    });
+
+    // Resize SVG to container size
+    svg.style.width = containerRect.width + "px";
+    svg.style.height = containerRect.height + "px";
+  }
+
+  // Tooltip functions
+  function showTooltip(skill, event) {
+    const tooltip = dom.tooltip;
+    let content = `<strong>${skill.name}</strong><br>${skill.description}<br>`;
+    if (skill.currentLevel > 0) {
+      content += `<em>Level: ${skill.currentLevel} / ${skill.maxLevel}</em>`;
+    } else {
+      content += `<em>Requires Level ${skill.requiredLevel}</em>`;
+    }
+    tooltip.innerHTML = content;
+    tooltip.style.opacity = "1";
+    moveTooltip(event);
+  }
+  function moveTooltip(event) {
+    const tooltip = dom.tooltip;
+    const padding = 12;
+    let x = event.clientX + padding;
+    let y = event.clientY + padding;
+
+    // Prevent tooltip from going off screen right/bottom
+    const tooltipRect = tooltip.getBoundingClientRect();
+    if (x + tooltipRect.width > window.innerWidth) {
+      x = event.clientX - tooltipRect.width - padding;
+    }
+    if (y + tooltipRect.height > window.innerHeight) {
+      y = event.clientY - tooltipRect.height - padding;
+    }
+    tooltip.style.left = x + "px";
+    tooltip.style.top = y + "px";
+  }
+  function hideTooltip() {
+    dom.tooltip.style.opacity = "0";
+  }
+
+  // On window resize, redraw skill lines
+  window.addEventListener("resize", () => {
+    drawSkillLines();
+  });
+
+  // Respec function: reset skills and attributes with confirmation and cost
+  function respecSkills() {
+    if (character.currentXP < 50) {
+      alert("Not enough XP to respec skills. You need at least 50 XP.");
+      return;
+    }
+    if (!skills.some(s => s.currentLevel > 0)) {
+      alert("No skills to respec.");
+      return;
+    }
+    if (!confirm("Are you sure you want to reset all skills and attributes? This will cost 50 XP.")) {
+      return;
+    }
+
+    // Deduct XP cost
+    character.currentXP -= 50;
+    if (character.currentXP < 0) character.currentXP = 0;
+
+    // Reset skills
+    skills.forEach(skill => {
+      skill.currentLevel = 0;
+    });
+
+    // Reset attributes to base + level up increments
+    character.attributes.strength = character.baseAttributes.strength + (character.level - 1);
+    character.attributes.agility = character.baseAttributes.agility + (character.level - 1);
+    character.attributes.intelligence = character.baseAttributes.intelligence + (character.level - 1);
+    character.attributes.health = character.baseAttributes.health + 10 * (character.level - 1);
+
+    // Reset any special attributes
+    if (character.criticalChance) {
+      delete character.criticalChance;
+    }
+
+    updateCharacterDisplay();
+    updateSkillTree();
+    alert("Skills and attributes have been reset.");
+  }
+
+  dom.respecBtn.addEventListener("click", respecSkills);
+
+  // Initial setup
+  updateCharacterDisplay();
+  renderSkillTree();
+})();
+</script>
+</body>
+</html>

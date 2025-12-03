@@ -1,0 +1,2816 @@
+2025-12-02 20:11:14 - INFO - 
+================================================================================
+2025-12-02 20:11:14 - INFO - MULTI-CANDIDATE ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-12-02 20:11:14 - INFO - ================================================================================
+2025-12-02 20:11:14 - INFO - Task ID: 8
+2025-12-02 20:11:14 - INFO - Task Class: Game Development-Action/Rhythm
+2025-12-02 20:11:14 - INFO - Task Difficulty: hard
+2025-12-02 20:11:14 - INFO - Improvement Threshold: 7.0
+2025-12-02 20:11:14 - INFO - Max Iterations: 2
+2025-12-02 20:11:14 - INFO - Start Time: 2025-12-02 20:11:14
+2025-12-02 20:11:14 - INFO - Model: gpt-4.1-mini
+2025-12-02 20:11:14 - INFO - Screenshots Enabled: True
+2025-12-02 20:11:14 - INFO - Use Screenshots in Evaluation: True
+2025-12-02 20:11:14 - INFO - Multi-Candidate Generation: ENABLED
+2025-12-02 20:11:14 - INFO - ================================================================================
+2025-12-02 20:11:14 - INFO - 
+================================================================================
+2025-12-02 20:11:14 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-12-02 20:11:14 - INFO - ================================================================================
+2025-12-02 20:11:14 - INFO - 
+================================================================================
+2025-12-02 20:11:14 - INFO - GENERATING INITIAL CODE...
+2025-12-02 20:11:14 - INFO - ================================================================================
+2025-12-02 20:11:14 - INFO - Model: gpt-4.1-mini
+2025-12-02 20:11:14 - INFO - Temperature: 0.0
+2025-12-02 20:11:14 - INFO - Task Question (first 200 chars): You are a code expert, please use your professional knowledge to generate accurate and professional responses. Make sure the generated code is executable for demonstration purposes.
+
+Please use HTML a...
+2025-12-02 20:12:47 - INFO - ✓ Initial code generated (took 92.45 seconds)
+2025-12-02 20:12:47 - INFO - Generated code length: 21025 characters
+2025-12-02 20:12:47 - INFO - Response length: 21025 characters
+2025-12-02 20:12:47 - INFO - 
+================================================================================
+2025-12-02 20:12:47 - INFO - INITIAL HTML CODE
+2025-12-02 20:12:47 - INFO - ================================================================================
+2025-12-02 20:12:47 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Dance!</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #111;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  /* Container */
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #222 0%, #000 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  /* Stage */
+  #stage {
+    position: relative;
+    width: 640px;
+    height: 360px;
+    margin-top: 20px;
+    background: #222;
+    border: 4px solid #555;
+    box-shadow:
+      0 0 10px #0ff,
+      inset 0 0 20px #0ff;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel dancer container */
+  #dancer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel art style canvas */
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent;
+  }
+
+  /* Arrow prompts container */
+  #prompts {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    user-select: none;
+  }
+
+  /* Each arrow prompt */
+  .arrow {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    background: #003344;
+    filter: drop-shadow(0 0 3px #0ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: default;
+  }
+  .arrow.active {
+    background: #0ff;
+    border-color: #0ff;
+    filter: drop-shadow(0 0 10px #0ff);
+  }
+  .arrow.correct {
+    background: #0f0;
+    border-color: #0f0;
+    filter: drop-shadow(0 0 10px #0f0);
+  }
+  .arrow.wrong {
+    background: #f00;
+    border-color: #f00;
+    filter: drop-shadow(0 0 10px #f00);
+  }
+
+  /* Arrow SVG icons */
+  .arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #0ff;
+    pointer-events: none;
+  }
+  .arrow.correct svg {
+    fill: #0f0;
+  }
+  .arrow.wrong svg {
+    fill: #f00;
+  }
+
+  /* Score and info */
+  #info {
+    margin-top: 12px;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-align: center;
+    color: #0ff;
+    text-shadow:
+      0 0 5px #0ff,
+      0 0 10px #0ff;
+  }
+  #score {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 6px;
+    color: #0f0;
+    text-shadow:
+      0 0 8px #0f0,
+      0 0 15px #0f0;
+  }
+
+  /* Start screen overlay */
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  #startScreen button {
+    margin-top: 20px;
+    background: #0ff;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow:
+      0 0 10px #0ff;
+    transition: background 0.3s ease;
+  }
+  #startScreen button:hover {
+    background: #0cc;
+  }
+
+  /* Pixel flicker effect on stage */
+  @keyframes pixelFlicker {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.2) contrast(1.1); }
+  }
+  #stage {
+    animation: pixelFlicker 3s infinite ease-in-out;
+  }
+
+  /* Pixel dancer animation frames */
+  .frame-0 { opacity: 1; }
+  .frame-1 { opacity: 0; }
+  .frame-2 { opacity: 0; }
+  .frame-3 { opacity: 0; }
+  .frame-4 { opacity: 0; }
+  .frame-5 { opacity: 0; }
+  .frame-6 { opacity: 0; }
+  .frame-7 { opacity: 0; }
+
+  /* Pixel font for score */
+  #score {
+    font-family: 'Press Start 2P', monospace;
+  }
+</style>
+</head>
+<body>
+<div id="game" role="main" aria-label="Pixel Dance rhythm game">
+  <div id="stage" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <canvas id="dancer" width="32" height="32" aria-label="Dancing character"></canvas>
+    <div id="prompts" aria-label="Dance move prompts" role="list"></div>
+  </div>
+  <div id="info" aria-live="polite" aria-atomic="true">
+    Press arrow keys in sequence and SPACE at the right moment to dance!
+  </div>
+  <div id="score" aria-live="polite" aria-atomic="true" aria-label="Current score">Score: 0</div>
+  <div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle" aria-describedby="startDesc">
+    <h1 id="startTitle">Pixel Dance!</h1>
+    <p id="startDesc">
+      Follow the arrow prompts and press SPACE at the right beat to perform dance moves.<br />
+      Try to keep in rhythm and get the highest score possible!<br />
+      Use arrow keys + SPACE to play.<br />
+      Press Start to begin.
+    </p>
+    <button id="startBtn" aria-label="Start the game">Start</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Constants for directions
+  const DIRECTIONS = ['left', 'down', 'up', 'right'];
+  const KEY_TO_DIR = {
+    'ArrowLeft': 'left',
+    'ArrowDown': 'down',
+    'ArrowUp': 'up',
+    'ArrowRight': 'right',
+  };
+
+  // Timing constants
+  const BEAT_INTERVAL = 600; // ms between beats (100 BPM)
+  const PROMPT_DISPLAY_TIME = 2000; // ms prompts stay visible before timing out
+  const INPUT_WINDOW = 250; // ms before/after beat to accept input
+
+  // Game state
+  let score = 0;
+  let combo = 0;
+  let currentStep = 0;
+  let gameStarted = false;
+  let beatTimer = null;
+  let lastBeatTime = 0;
+  let inputBuffer = [];
+  let awaitingSpace = false;
+  let currentPrompt = null;
+  let promptTimeout = null;
+  let animationFrameId = null;
+
+  // Elements
+  const startScreen = document.getElementById('startScreen');
+  const startBtn = document.getElementById('startBtn');
+  const promptsContainer = document.getElementById('prompts');
+  const scoreDisplay = document.getElementById('score');
+  const infoDisplay = document.getElementById('info');
+  const dancerCanvas = document.getElementById('dancer');
+  const ctx = dancerCanvas.getContext('2d');
+
+  // Audio context and buffers
+  let audioCtx = null;
+  let musicBuffer = null;
+  let musicSource = null;
+  let musicStartTime = 0;
+
+  // Dance move sequence generator
+  // Each step: array of directions + space press at beat
+  // For simplicity, each step is a sequence of 1-3 arrows + space
+  // We'll generate a fixed length sequence for demo
+  const SEQUENCE_LENGTH = 30;
+  let danceSequence = [];
+
+  // Pixel art dancer frames (8 frames for simple dance animation)
+  // Each frame is a 32x32 pixel grid with color codes
+  // We'll draw pixel rectangles on canvas for pixel art style
+  // Colors: transparent, skin, shirt, pants, shoes, hair, eyes
+  // We'll define frames as arrays of color indices per pixel row
+  // For simplicity, 16x16 pixels scaled 2x to 32x32 canvas
+
+  // Color palette
+  const COLORS = {
+    0: null, // transparent
+    1: '#f9c9a7', // skin
+    2: '#0ff', // shirt cyan
+    3: '#005577', // pants dark cyan
+    4: '#222', // shoes black
+    5: '#a52a2a', // hair brown
+    6: '#000', // eyes black
+    7: '#0f0', // green highlight (for success)
+    8: '#f00', // red highlight (for fail)
+  };
+
+  // Define 8 frames of a simple pixel dancer animation (16x16)
+  // Each frame is a 16x16 array of color indices
+  // We'll create a simple dancing character with arm/leg movement
+
+  // For brevity, define a base frame and then variations for limbs
+  // Base frame (frame 0)
+  const baseFrame = [
+    // 16 rows, each 16 pixels
+    // 0=transparent, 1=skin, 2=shirt, 3=pants, 4=shoes, 5=hair, 6=eyes
+    // We'll create a simple humanoid pixel art
+    [0,0,0,0,0,5,5,5,5,5,5,0,0,0,0,0], // hair top
+    [0,0,0,0,5,5,5,5,5,5,5,5,0,0,0,0], // hair top
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0], // face row 1
+    [0,0,0,1,6,1,1,1,1,1,6,1,1,0,0,0], // face row 2 eyes
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt top
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt mid
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt bottom
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants top
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants mid
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants bottom
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+  ];
+
+  // We'll create 8 frames by shifting arms and legs pixels
+  // For simplicity, only move some pixels in arms and legs area
+
+  // Helper to clone 2D array
+  function cloneFrame(frame) {
+    return frame.map(row => row.slice());
+  }
+
+  // Create frames array
+  const frames = [];
+
+  // Frame 0: base
+  frames.push(cloneFrame(baseFrame));
+
+  // Frame 1: left arm up, right leg forward
+  let f1 = cloneFrame(baseFrame);
+  // Left arm pixels (row 4-6, col 3)
+  f1[4][3] = 0; f1[5][3] = 1; f1[6][3] = 1;
+  // Right leg forward (row 9-11, col 12)
+  f1[9][12] = 4; f1[10][12] = 4; f1[11][12] = 4;
+  frames.push(f1);
+
+  // Frame 2: left arm down, right leg back
+  let f2 = cloneFrame(baseFrame);
+  // Left arm pixels down (row 7-9, col 3)
+  f2[7][3] = 1; f2[8][3] = 1; f2[9][3] = 0;
+  // Right leg back (row 9-11, col 11)
+  f2[9][11] = 4; f2[10][11] = 4; f2[11][11] = 4;
+  frames.push(f2);
+
+  // Frame 3: right arm up, left leg forward
+  let f3 = cloneFrame(baseFrame);
+  // Right arm pixels (row 4-6, col 12)
+  f3[4][12] = 0; f3[5][12] = 1; f3[6][12] = 1;
+  // Left leg forward (row 9-11, col 3)
+  f3[9][3] = 4; f3[10][3] = 4; f3[11][3] = 4;
+  frames.push(f3);
+
+  // Frame 4: right arm down, left leg back
+  let f4 = cloneFrame(baseFrame);
+  // Right arm pixels down (row 7-9, col 12)
+  f4[7][12] = 1; f4[8][12] = 1; f4[9][12] = 0;
+  // Left leg back (row 9-11, col 4)
+  f4[9][4] = 4; f4[10][4] = 4; f4[11][4] = 4;
+  frames.push(f4);
+
+  // Frame 5: both arms up
+  let f5 = cloneFrame(baseFrame);
+  f5[4][3] = 0; f5[5][3] = 1; f5[6][3] = 1;
+  f5[4][12] = 0; f5[5][12] = 1; f5[6][12] = 1;
+  frames.push(f5);
+
+  // Frame 6: both arms down
+  let f6 = cloneFrame(baseFrame);
+  f6[7][3] = 1; f6[8][3] = 1; f6[9][3] = 0;
+  f6[7][12] = 1; f6[8][12] = 1; f6[9][12] = 0;
+  frames.push(f6);
+
+  // Frame 7: jump pose (arms and legs spread)
+  let f7 = cloneFrame(baseFrame);
+  // Arms spread
+  f7[4][2] = 1; f7[5][1] = 1; f7[6][0] = 1;
+  f7[4][13] = 1; f7[5][14] = 1; f7[6][15] = 1;
+  // Legs spread
+  f7[9][2] = 4; f7[10][1] = 4; f7[11][0] = 4;
+  f7[9][13] = 4; f7[10][14] = 4; f7[11][15] = 4;
+  frames.push(f7);
+
+  // Draw a frame on canvas
+  function drawFrame(frame, highlight = null) {
+    const pixelSize = 2; // 16x16 * 2 = 32x32 canvas
+    ctx.clearRect(0, 0, dancerCanvas.width, dancerCanvas.height);
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        let colorIndex = frame[y][x];
+        if (colorIndex === 0) continue;
+        let color = COLORS[colorIndex];
+        if (highlight === 'correct') color = COLORS[7];
+        else if (highlight === 'wrong') color = COLORS[8];
+        ctx.fillStyle = color;
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+
+  // Arrow SVG icons for prompts
+  const ARROW_SVGS = {
+    left: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 19l-7-7 7-7"/></svg>`,
+    down: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 9l-7 7-7-7"/></svg>`,
+    up: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 15l-7-7-7 7"/></svg>`,
+    right: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>`,
+  };
+
+  // Create prompt elements for a step
+  function createPromptElements(directions) {
+    promptsContainer.innerHTML = '';
+    directions.forEach(dir => {
+      const div = document.createElement('div');
+      div.classList.add('arrow');
+      div.dataset.direction = dir;
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('aria-label', `Press ${dir.toUpperCase()} arrow`);
+      div.innerHTML = ARROW_SVGS[dir];
+      promptsContainer.appendChild(div);
+    });
+  }
+
+  // Highlight prompt arrows for feedback
+  function highlightPrompt(direction, result) {
+    // result: 'correct' or 'wrong'
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      if (arrow.dataset.direction === direction) {
+        arrow.classList.remove('active');
+        arrow.classList.add(result);
+      }
+    });
+  }
+
+  // Clear prompt highlights
+  function clearPromptHighlights() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      arrow.classList.remove('correct', 'wrong', 'active');
+    });
+  }
+
+  // Activate prompts (glow)
+  function activatePrompts() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => arrow.classList.add('active'));
+  }
+
+  // Generate a random dance step (1-3 directions)
+  function generateStep() {
+    const count = Math.floor(Math.random() * 3) + 1; // 1 to 3 arrows
+    const stepDirs = [];
+    while (stepDirs.length < count) {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      if (!stepDirs.includes(dir)) stepDirs.push(dir);
+    }
+    return stepDirs;
+  }
+
+  // Generate full dance sequence
+  function generateSequence() {
+    danceSequence = [];
+    for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+      danceSequence.push(generateStep());
+    }
+  }
+
+  // Play background music (simple beat)
+  // We'll generate a simple beep rhythm using Web Audio API
+  function playMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+    // Create a simple beat sound buffer
+    const sampleRate = audioCtx.sampleRate;
+    const duration = 0.1; // 100ms beep
+    const frameCount = sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frameCount; i++) {
+      // Simple sine wave beep 440Hz with fade out
+      data[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * (1 - i / frameCount);
+    }
+    musicBuffer = buffer;
+
+    // Create a buffer source and loop it every BEAT_INTERVAL
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = musicBuffer;
+    musicSource.loop = true;
+    musicSource.loopStart = 0;
+    musicSource.loopEnd = duration;
+    musicSource.connect(audioCtx.destination);
+    musicSource.start();
+
+    musicStartTime = audioCtx.currentTime;
+  }
+
+  // Stop music
+  function stopMusic() {
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+  }
+
+  // Get current music time in ms
+  function getMusicTime() {
+    if (!audioCtx) return 0;
+    return (audioCtx.currentTime - musicStartTime) * 1000;
+  }
+
+  // Game loop: handle beats and prompts
+  function gameLoop(timestamp) {
+    if (!gameStarted) return;
+
+    const now = getMusicTime();
+
+    // Check if it's time for next beat
+    if (now - lastBeatTime >= BEAT_INTERVAL) {
+      lastBeatTime += BEAT_INTERVAL;
+
+      // Show next prompt
+      if (currentStep < danceSequence.length) {
+        currentPrompt = danceSequence[currentStep];
+        createPromptElements(currentPrompt);
+        activatePrompts();
+        awaitingSpace = true;
+        inputBuffer = [];
+        clearPromptHighlights();
+
+        // Set timeout to fail if no input in time
+        if (promptTimeout) clearTimeout(promptTimeout);
+        promptTimeout = setTimeout(() => {
+          // If player didn't press space in time, fail step
+          if (awaitingSpace) {
+            failStep();
+          }
+        }, PROMPT_DISPLAY_TIME);
+
+        currentStep++;
+      } else {
+        // Sequence finished - end game
+        endGame();
+        return;
+      }
+    }
+
+    // Animate dancer based on current step and time
+    animateDancer(now);
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // Animate dancer frames synced to beat
+  function animateDancer(now) {
+    if (!currentPrompt) {
+      drawFrame(frames[0]);
+      return;
+    }
+    // Calculate frame index based on time within beat interval
+    const beatProgress = ((now - lastBeatTime) % BEAT_INTERVAL) / BEAT_INTERVAL;
+    // 8 frames per beat cycle
+    const frameIndex = Math.floor(beatProgress * 8) % 8;
+    drawFrame(frames[frameIndex]);
+  }
+
+  // Handle player input
+  function handleInput(e) {
+    if (!gameStarted) return;
+
+    if (e.repeat) return; // ignore held keys
+
+    const key = e.key;
+
+    if (key === ' ') {
+      // Space pressed - check if input matches prompt
+      if (!awaitingSpace) return;
+
+      // Check timing window
+      const now = getMusicTime();
+      const delta = Math.abs(now - lastBeatTime);
+      if (delta > INPUT_WINDOW) {
+        // Too early or late
+        failStep();
+        return;
+      }
+
+      // Check if all directions were input correctly
+      if (arraysEqualUnordered(inputBuffer, currentPrompt)) {
+        // Success
+        successStep();
+      } else {
+        // Fail
+        failStep();
+      }
+    } else if (KEY_TO_DIR[key]) {
+      // Direction key pressed
+      if (!awaitingSpace) return;
+
+      // Add to input buffer if not already present
+      const dir = KEY_TO_DIR[key];
+      if (!inputBuffer.includes(dir)) {
+        inputBuffer.push(dir);
+        // Highlight pressed arrow
+        highlightPressedArrow(dir);
+      }
+    }
+  }
+
+  // Highlight pressed arrow in prompts
+  function highlightPressedArrow(dir) {
+    const arrow = promptsContainer.querySelector(`.arrow[data-direction="${dir}"]`);
+    if (!arrow) return;
+    arrow.classList.add('active');
+  }
+
+  // Compare two arrays ignoring order
+  function arraysEqualUnordered(a, b) {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    for (let i = 0; i < sortedA.length; i++) {
+      if (sortedA[i] !== sortedB[i]) return false;
+    }
+    return true;
+  }
+
+  // Success step feedback
+  function successStep() {
+    awaitingSpace = false;
+    combo++;
+    score += 100 + combo * 10;
+    updateScore();
+    infoDisplay.textContent = `Great! Combo x${combo}`;
+    // Highlight prompts green
+    currentPrompt.forEach(dir => highlightPrompt(dir, 'correct'));
+    // Flash dancer green
+    flashDancer('correct');
+    clearTimeout(promptTimeout);
+  }
+
+  // Fail step feedback
+  function failStep() {
+    awaitingSpace = false;
+    combo = 0;
+    infoDisplay.textContent = `Miss! Try to keep the rhythm!`;
+    // Highlight prompts red
+    if (currentPrompt) currentPrompt.forEach(dir => highlightPrompt(dir, 'wrong'));
+    // Flash dancer red
+    flashDancer('wrong');
+    clearTimeout(promptTimeout);
+  }
+
+  // Flash dancer with highlight color for 400ms
+  let flashTimeout = null;
+  function flashDancer(type) {
+    drawFrame(frames[0], type);
+    if (flashTimeout) clearTimeout(flashTimeout);
+    flashTimeout = setTimeout(() => {
+      drawFrame(frames[0]);
+    }, 400);
+  }
+
+  // Update score display
+  function updateScore() {
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  // Start game
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    score = 0;
+    combo = 0;
+    currentStep = 0;
+    updateScore();
+    infoDisplay.textContent = 'Get ready...';
+    generateSequence();
+    playMusic();
+    lastBeatTime = getMusicTime();
+    currentPrompt = null;
+    inputBuffer = [];
+    awaitingSpace = false;
+    promptsContainer.innerHTML = '';
+    startScreen.style.display = 'none';
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // End game
+  function endGame() {
+    gameStarted = false;
+    stopMusic();
+    promptsContainer.innerHTML = '';
+    infoDisplay.textContent = `Game Over! Final Score: ${score}`;
+    startScreen.style.display = 'flex';
+    startBtn.textContent = 'Restart';
+    drawFrame(frames[0]);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', handleInput);
+  startBtn.addEventListener('click', () => {
+    if (!audioCtx) {
+      // Resume audio context on user interaction
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx.resume();
+    }
+    startGame();
+  });
+
+  // Initial draw
+  drawFrame(frames[0]);
+
+  // Accessibility: focus start button on load
+  window.addEventListener('load', () => {
+    startBtn.focus();
+  });
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:12:47 - INFO - ================================================================================
+2025-12-02 20:12:47 - INFO - 
+✓ Initial code saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8/iteration_0_initial.html
+2025-12-02 20:12:47 - INFO - 
+================================================================================
+2025-12-02 20:12:47 - INFO - EVALUATING INITIAL CODE
+2025-12-02 20:12:47 - INFO - ================================================================================
+2025-12-02 20:12:47 - INFO - Generating screenshots for initial code...
+2025-12-02 20:12:56 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 1,
+  "blank_canvases": 0,
+  "canvas_details": [
+    {
+      "width": 32,
+      "height": 32,
+      "has_content": true
+    }
+  ]
+}
+2025-12-02 20:12:56 - INFO - Evaluating initial code...
+2025-12-02 20:13:12 - INFO - Initial evaluation completed in 15.99 seconds
+2025-12-02 20:13:12 - INFO - 
+Initial Scores:
+2025-12-02 20:13:12 - INFO - Individual Scores (JSON):
+{
+  "Is the core rhythm-based input system fully implemented?": 9.0,
+  "Is the music synchronization mechanism properly implemented?": 8.0,
+  "Is the dance animation system responsive and visually satisfying?": 8.0,
+  "Is the scoring and feedback system comprehensive?": 8.0,
+  "Is the code robust?": 5.0,
+  "Are there any innovative features that are eye-catching?": 0.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 7.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-12-02 20:13:12 - INFO - Initial Calculated Sum: 73.0
+2025-12-02 20:13:12 - INFO - 
+================================================================================
+2025-12-02 20:13:12 - INFO - STEP 2: MULTI-CANDIDATE ITERATIVE IMPROVEMENT LOOP
+2025-12-02 20:13:12 - INFO - ================================================================================
+2025-12-02 20:13:12 - INFO - 
+================================================================================
+2025-12-02 20:13:12 - INFO - ITERATION 1
+2025-12-02 20:13:12 - INFO - ================================================================================
+2025-12-02 20:13:12 - INFO - Iteration Start Time: 2025-12-02 20:13:12
+2025-12-02 20:13:12 - INFO - 
+Generating screenshots for iteration 1...
+2025-12-02 20:13:20 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 1,
+  "blank_canvases": 0,
+  "canvas_details": [
+    {
+      "width": 32,
+      "height": 32,
+      "has_content": true
+    }
+  ]
+}
+2025-12-02 20:13:20 - INFO - 
+Evaluating code for iteration 1...
+2025-12-02 20:13:41 - INFO - Evaluation completed in 20.13 seconds
+2025-12-02 20:13:41 - INFO - 
+================================================================================
+2025-12-02 20:13:41 - INFO - EVALUATION RESULTS - ITERATION 1
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - Individual Scores (JSON):
+{
+  "Is the core rhythm-based input system fully implemented?": 9.0,
+  "Is the music synchronization mechanism properly implemented?": 7.0,
+  "Is the dance animation system responsive and visually satisfying?": 8.0,
+  "Is the scoring and feedback system comprehensive?": 8.0,
+  "Is the code robust?": 5.0,
+  "Are there any innovative features that are eye-catching?": 0.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 7.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-12-02 20:13:41 - INFO - Calculated Sum: 71.0
+2025-12-02 20:13:41 - INFO - Overall Score (from LLM): 71.0
+2025-12-02 20:13:41 - INFO - 
+================================================================================
+2025-12-02 20:13:41 - INFO - FULL EVALUATION FEEDBACK - ITERATION 1
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - ```json
+{
+  "Is the core rhythm-based input system fully implemented?": "9",
+  "Is the music synchronization mechanism properly implemented?": "7",
+  "Is the dance animation system responsive and visually satisfying?": "8",
+  "Is the scoring and feedback system comprehensive?": "8",
+  "Is the code robust?": "5",
+  "Are there any innovative features that are eye-catching?": "0",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "7",
+  "Does the interface vision meet professional design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "8",
+  "Overall Score": "71"
+}
+```
+
+Reason:
+
+1. **Is the core rhythm-based input system fully implemented? (9/10)**  
+   The code implements a rhythm-based input system that detects arrow keys and space bar presses. It uses a timing window (`INPUT_WINDOW = 250ms`) to judge input accuracy relative to beats, and categorizes inputs as success or fail. The system requires players to input all arrows in the prompt before pressing space, which is a good mechanic. Visual feedback on prompts and dancer flashes are provided.  
+   However, the grading scale mentions "Perfect", "Good", or "Miss" categories, but this implementation only has a binary success/fail system without finer gradation of timing accuracy. This prevents a perfect score.
+
+2. **Is the music synchronization mechanism properly implemented? (7/10)**  
+   The music is generated via Web Audio API as a simple beep sound looped every beat interval (600ms). The timing is based on `audioCtx.currentTime` and the code uses this to schedule beats and prompts. This is a reasonable approach for demo purposes.  
+   However, there is no explicit calibration or offset adjustment for audio latency, which is important for rhythm games. Also, the music is a simple beep, not a full song, limiting the demonstration of synchronization complexity. There is no explicit preloading mechanism since the sound is generated on the fly, which is acceptable but not ideal for real music.  
+   The timing appears stable, but the lack of latency handling and calibration deducts points.
+
+3. **Is the dance animation system responsive and visually satisfying? (8/10)**  
+   The pixel art dancer is drawn on a canvas with 8 frames of simple but clear pixel art animation. The animation cycles smoothly synced to the beat. The dancer flashes green/red on success/fail, providing visual feedback.  
+   The pixel art is consistent and charming, though simple. The animation matches the rhythm beat cycle well.  
+   Points are deducted because the animation is quite basic and limited to simple frame shifts; no complex or fluid animations are present. Also, the dancer only flashes on success/fail but does not have distinct animations for different move qualities.
+
+4. **Is the scoring and feedback system comprehensive? (8/10)**  
+   The game tracks score and combo, updating the display accordingly. Feedback messages ("Great! Combo xN", "Miss!") appear promptly. Prompts highlight green/red on success/fail.  
+   However, there is no "Perfect" or "Good" distinction, only success/fail. The combo system is present and functional. The end-game summary is shown on the info display and start screen.  
+   Visual feedback is timely and clear. Audio feedback is minimal (only the beep sound).  
+   Minor deduction for lack of graded feedback and richer audio cues.
+
+5. **Is the code robust? (5/10)**  
+   The code handles basic user input and prevents repeated key presses. It resumes the AudioContext on user interaction, which is good practice.  
+   However, it lacks error handling for audio loading failures (though it generates audio dynamically), unsupported browsers, or unexpected key presses beyond ignoring repeats. There are no fallback messages or recovery mechanisms for audio context failures or unsupported features.  
+   The code is stable for normal use but not robust against edge cases.
+
+6. **Are there any innovative features that are eye-catching? (0/10)**  
+   The implementation is straightforward and does not include advanced features such as custom difficulty, custom song import, multiplayer, or replay.  
+   No extra innovative features are present.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean and focused on the core gameplay. There are no redundant input detection systems, unrelated mini-games, or excessive visual effects causing performance issues.  
+   The pixel flicker effect on the stage is subtle and does not interfere with gameplay.  
+   No redundancy detected.
+
+8. **Does the code have engineering quality? (7/10)**  
+   The code is modularly structured within an IIFE, separating concerns reasonably (input handling, animation, audio, UI updates).  
+   There is no global state pollution.  
+   However, there is no unit test coverage or build automation (not expected in a single HTML file demo but still a factor).  
+   Some duplication exists in frame definitions but is minimal and justified for pixel art frames.  
+   The code uses clear naming and comments, aiding maintainability.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The pixel art style is consistent with a limited color palette and proper pixel scaling (16x16 scaled 2x).  
+   The UI elements have good contrast and do not obstruct gameplay.  
+   The layout is clean and uncluttered.  
+   The font choice and color scheme fit the pixel art aesthetic well.  
+   Minor deduction for the somewhat plain UI and lack of more dynamic visual polish.
+
+10. **Is the dynamic interaction smooth and seamless? (8/10)**  
+    The game runs at 60fps with smooth animation transitions.  
+    Input lag appears minimal, with input handling tied closely to the audio context time.  
+    Transitions between dance frames are smooth.  
+    Minor deduction because the input window is somewhat large (250ms), which may reduce precision feel, and the animation is basic.
+
+**Summary:**  
+This is a solid, well-structured, and visually coherent implementation of a pixel-art rhythm game demo. It covers the core gameplay mechanics with good visual and audio synchronization, though it lacks advanced features, fine-grained input grading, and robust error handling. The pixel art and UI design are professional and consistent. The code quality is good for a demo but could be improved with testing and build automation.
+
+Overall, the implementation meets the problem requirements well and demonstrates a clear understanding of rhythm game mechanics and pixel art style, but it leaves room for enhancements in robustness, innovation, and polish.
+
+---
+
+**Final note:** The overall score is the sum of all criteria: 9 + 7 + 8 + 8 + 5 + 0 + 10 + 7 + 9 + 8 = 71.
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - 
+================================================================================
+2025-12-02 20:13:41 - INFO - HTML CODE - ITERATION 1
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Dance!</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #111;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  /* Container */
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #222 0%, #000 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  /* Stage */
+  #stage {
+    position: relative;
+    width: 640px;
+    height: 360px;
+    margin-top: 20px;
+    background: #222;
+    border: 4px solid #555;
+    box-shadow:
+      0 0 10px #0ff,
+      inset 0 0 20px #0ff;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel dancer container */
+  #dancer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel art style canvas */
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent;
+  }
+
+  /* Arrow prompts container */
+  #prompts {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    user-select: none;
+  }
+
+  /* Each arrow prompt */
+  .arrow {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    background: #003344;
+    filter: drop-shadow(0 0 3px #0ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: default;
+  }
+  .arrow.active {
+    background: #0ff;
+    border-color: #0ff;
+    filter: drop-shadow(0 0 10px #0ff);
+  }
+  .arrow.correct {
+    background: #0f0;
+    border-color: #0f0;
+    filter: drop-shadow(0 0 10px #0f0);
+  }
+  .arrow.wrong {
+    background: #f00;
+    border-color: #f00;
+    filter: drop-shadow(0 0 10px #f00);
+  }
+
+  /* Arrow SVG icons */
+  .arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #0ff;
+    pointer-events: none;
+  }
+  .arrow.correct svg {
+    fill: #0f0;
+  }
+  .arrow.wrong svg {
+    fill: #f00;
+  }
+
+  /* Score and info */
+  #info {
+    margin-top: 12px;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-align: center;
+    color: #0ff;
+    text-shadow:
+      0 0 5px #0ff,
+      0 0 10px #0ff;
+  }
+  #score {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 6px;
+    color: #0f0;
+    text-shadow:
+      0 0 8px #0f0,
+      0 0 15px #0f0;
+  }
+
+  /* Start screen overlay */
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  #startScreen button {
+    margin-top: 20px;
+    background: #0ff;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow:
+      0 0 10px #0ff;
+    transition: background 0.3s ease;
+  }
+  #startScreen button:hover {
+    background: #0cc;
+  }
+
+  /* Pixel flicker effect on stage */
+  @keyframes pixelFlicker {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.2) contrast(1.1); }
+  }
+  #stage {
+    animation: pixelFlicker 3s infinite ease-in-out;
+  }
+
+  /* Pixel dancer animation frames */
+  .frame-0 { opacity: 1; }
+  .frame-1 { opacity: 0; }
+  .frame-2 { opacity: 0; }
+  .frame-3 { opacity: 0; }
+  .frame-4 { opacity: 0; }
+  .frame-5 { opacity: 0; }
+  .frame-6 { opacity: 0; }
+  .frame-7 { opacity: 0; }
+
+  /* Pixel font for score */
+  #score {
+    font-family: 'Press Start 2P', monospace;
+  }
+</style>
+</head>
+<body>
+<div id="game" role="main" aria-label="Pixel Dance rhythm game">
+  <div id="stage" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <canvas id="dancer" width="32" height="32" aria-label="Dancing character"></canvas>
+    <div id="prompts" aria-label="Dance move prompts" role="list"></div>
+  </div>
+  <div id="info" aria-live="polite" aria-atomic="true">
+    Press arrow keys in sequence and SPACE at the right moment to dance!
+  </div>
+  <div id="score" aria-live="polite" aria-atomic="true" aria-label="Current score">Score: 0</div>
+  <div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle" aria-describedby="startDesc">
+    <h1 id="startTitle">Pixel Dance!</h1>
+    <p id="startDesc">
+      Follow the arrow prompts and press SPACE at the right beat to perform dance moves.<br />
+      Try to keep in rhythm and get the highest score possible!<br />
+      Use arrow keys + SPACE to play.<br />
+      Press Start to begin.
+    </p>
+    <button id="startBtn" aria-label="Start the game">Start</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Constants for directions
+  const DIRECTIONS = ['left', 'down', 'up', 'right'];
+  const KEY_TO_DIR = {
+    'ArrowLeft': 'left',
+    'ArrowDown': 'down',
+    'ArrowUp': 'up',
+    'ArrowRight': 'right',
+  };
+
+  // Timing constants
+  const BEAT_INTERVAL = 600; // ms between beats (100 BPM)
+  const PROMPT_DISPLAY_TIME = 2000; // ms prompts stay visible before timing out
+  const INPUT_WINDOW = 250; // ms before/after beat to accept input
+
+  // Game state
+  let score = 0;
+  let combo = 0;
+  let currentStep = 0;
+  let gameStarted = false;
+  let beatTimer = null;
+  let lastBeatTime = 0;
+  let inputBuffer = [];
+  let awaitingSpace = false;
+  let currentPrompt = null;
+  let promptTimeout = null;
+  let animationFrameId = null;
+
+  // Elements
+  const startScreen = document.getElementById('startScreen');
+  const startBtn = document.getElementById('startBtn');
+  const promptsContainer = document.getElementById('prompts');
+  const scoreDisplay = document.getElementById('score');
+  const infoDisplay = document.getElementById('info');
+  const dancerCanvas = document.getElementById('dancer');
+  const ctx = dancerCanvas.getContext('2d');
+
+  // Audio context and buffers
+  let audioCtx = null;
+  let musicBuffer = null;
+  let musicSource = null;
+  let musicStartTime = 0;
+
+  // Dance move sequence generator
+  // Each step: array of directions + space press at beat
+  // For simplicity, each step is a sequence of 1-3 arrows + space
+  // We'll generate a fixed length sequence for demo
+  const SEQUENCE_LENGTH = 30;
+  let danceSequence = [];
+
+  // Pixel art dancer frames (8 frames for simple dance animation)
+  // Each frame is a 32x32 pixel grid with color codes
+  // We'll draw pixel rectangles on canvas for pixel art style
+  // Colors: transparent, skin, shirt, pants, shoes, hair, eyes
+  // We'll define frames as arrays of color indices per pixel row
+  // For simplicity, 16x16 pixels scaled 2x to 32x32 canvas
+
+  // Color palette
+  const COLORS = {
+    0: null, // transparent
+    1: '#f9c9a7', // skin
+    2: '#0ff', // shirt cyan
+    3: '#005577', // pants dark cyan
+    4: '#222', // shoes black
+    5: '#a52a2a', // hair brown
+    6: '#000', // eyes black
+    7: '#0f0', // green highlight (for success)
+    8: '#f00', // red highlight (for fail)
+  };
+
+  // Define 8 frames of a simple pixel dancer animation (16x16)
+  // Each frame is a 16x16 array of color indices
+  // We'll create a simple dancing character with arm/leg movement
+
+  // For brevity, define a base frame and then variations for limbs
+  // Base frame (frame 0)
+  const baseFrame = [
+    // 16 rows, each 16 pixels
+    // 0=transparent, 1=skin, 2=shirt, 3=pants, 4=shoes, 5=hair, 6=eyes
+    // We'll create a simple humanoid pixel art
+    [0,0,0,0,0,5,5,5,5,5,5,0,0,0,0,0], // hair top
+    [0,0,0,0,5,5,5,5,5,5,5,5,0,0,0,0], // hair top
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0], // face row 1
+    [0,0,0,1,6,1,1,1,1,1,6,1,1,0,0,0], // face row 2 eyes
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt top
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt mid
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt bottom
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants top
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants mid
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants bottom
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+  ];
+
+  // We'll create 8 frames by shifting arms and legs pixels
+  // For simplicity, only move some pixels in arms and legs area
+
+  // Helper to clone 2D array
+  function cloneFrame(frame) {
+    return frame.map(row => row.slice());
+  }
+
+  // Create frames array
+  const frames = [];
+
+  // Frame 0: base
+  frames.push(cloneFrame(baseFrame));
+
+  // Frame 1: left arm up, right leg forward
+  let f1 = cloneFrame(baseFrame);
+  // Left arm pixels (row 4-6, col 3)
+  f1[4][3] = 0; f1[5][3] = 1; f1[6][3] = 1;
+  // Right leg forward (row 9-11, col 12)
+  f1[9][12] = 4; f1[10][12] = 4; f1[11][12] = 4;
+  frames.push(f1);
+
+  // Frame 2: left arm down, right leg back
+  let f2 = cloneFrame(baseFrame);
+  // Left arm pixels down (row 7-9, col 3)
+  f2[7][3] = 1; f2[8][3] = 1; f2[9][3] = 0;
+  // Right leg back (row 9-11, col 11)
+  f2[9][11] = 4; f2[10][11] = 4; f2[11][11] = 4;
+  frames.push(f2);
+
+  // Frame 3: right arm up, left leg forward
+  let f3 = cloneFrame(baseFrame);
+  // Right arm pixels (row 4-6, col 12)
+  f3[4][12] = 0; f3[5][12] = 1; f3[6][12] = 1;
+  // Left leg forward (row 9-11, col 3)
+  f3[9][3] = 4; f3[10][3] = 4; f3[11][3] = 4;
+  frames.push(f3);
+
+  // Frame 4: right arm down, left leg back
+  let f4 = cloneFrame(baseFrame);
+  // Right arm pixels down (row 7-9, col 12)
+  f4[7][12] = 1; f4[8][12] = 1; f4[9][12] = 0;
+  // Left leg back (row 9-11, col 4)
+  f4[9][4] = 4; f4[10][4] = 4; f4[11][4] = 4;
+  frames.push(f4);
+
+  // Frame 5: both arms up
+  let f5 = cloneFrame(baseFrame);
+  f5[4][3] = 0; f5[5][3] = 1; f5[6][3] = 1;
+  f5[4][12] = 0; f5[5][12] = 1; f5[6][12] = 1;
+  frames.push(f5);
+
+  // Frame 6: both arms down
+  let f6 = cloneFrame(baseFrame);
+  f6[7][3] = 1; f6[8][3] = 1; f6[9][3] = 0;
+  f6[7][12] = 1; f6[8][12] = 1; f6[9][12] = 0;
+  frames.push(f6);
+
+  // Frame 7: jump pose (arms and legs spread)
+  let f7 = cloneFrame(baseFrame);
+  // Arms spread
+  f7[4][2] = 1; f7[5][1] = 1; f7[6][0] = 1;
+  f7[4][13] = 1; f7[5][14] = 1; f7[6][15] = 1;
+  // Legs spread
+  f7[9][2] = 4; f7[10][1] = 4; f7[11][0] = 4;
+  f7[9][13] = 4; f7[10][14] = 4; f7[11][15] = 4;
+  frames.push(f7);
+
+  // Draw a frame on canvas
+  function drawFrame(frame, highlight = null) {
+    const pixelSize = 2; // 16x16 * 2 = 32x32 canvas
+    ctx.clearRect(0, 0, dancerCanvas.width, dancerCanvas.height);
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        let colorIndex = frame[y][x];
+        if (colorIndex === 0) continue;
+        let color = COLORS[colorIndex];
+        if (highlight === 'correct') color = COLORS[7];
+        else if (highlight === 'wrong') color = COLORS[8];
+        ctx.fillStyle = color;
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+
+  // Arrow SVG icons for prompts
+  const ARROW_SVGS = {
+    left: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 19l-7-7 7-7"/></svg>`,
+    down: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 9l-7 7-7-7"/></svg>`,
+    up: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 15l-7-7-7 7"/></svg>`,
+    right: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>`,
+  };
+
+  // Create prompt elements for a step
+  function createPromptElements(directions) {
+    promptsContainer.innerHTML = '';
+    directions.forEach(dir => {
+      const div = document.createElement('div');
+      div.classList.add('arrow');
+      div.dataset.direction = dir;
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('aria-label', `Press ${dir.toUpperCase()} arrow`);
+      div.innerHTML = ARROW_SVGS[dir];
+      promptsContainer.appendChild(div);
+    });
+  }
+
+  // Highlight prompt arrows for feedback
+  function highlightPrompt(direction, result) {
+    // result: 'correct' or 'wrong'
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      if (arrow.dataset.direction === direction) {
+        arrow.classList.remove('active');
+        arrow.classList.add(result);
+      }
+    });
+  }
+
+  // Clear prompt highlights
+  function clearPromptHighlights() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      arrow.classList.remove('correct', 'wrong', 'active');
+    });
+  }
+
+  // Activate prompts (glow)
+  function activatePrompts() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => arrow.classList.add('active'));
+  }
+
+  // Generate a random dance step (1-3 directions)
+  function generateStep() {
+    const count = Math.floor(Math.random() * 3) + 1; // 1 to 3 arrows
+    const stepDirs = [];
+    while (stepDirs.length < count) {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      if (!stepDirs.includes(dir)) stepDirs.push(dir);
+    }
+    return stepDirs;
+  }
+
+  // Generate full dance sequence
+  function generateSequence() {
+    danceSequence = [];
+    for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+      danceSequence.push(generateStep());
+    }
+  }
+
+  // Play background music (simple beat)
+  // We'll generate a simple beep rhythm using Web Audio API
+  function playMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+    // Create a simple beat sound buffer
+    const sampleRate = audioCtx.sampleRate;
+    const duration = 0.1; // 100ms beep
+    const frameCount = sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frameCount; i++) {
+      // Simple sine wave beep 440Hz with fade out
+      data[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * (1 - i / frameCount);
+    }
+    musicBuffer = buffer;
+
+    // Create a buffer source and loop it every BEAT_INTERVAL
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = musicBuffer;
+    musicSource.loop = true;
+    musicSource.loopStart = 0;
+    musicSource.loopEnd = duration;
+    musicSource.connect(audioCtx.destination);
+    musicSource.start();
+
+    musicStartTime = audioCtx.currentTime;
+  }
+
+  // Stop music
+  function stopMusic() {
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+  }
+
+  // Get current music time in ms
+  function getMusicTime() {
+    if (!audioCtx) return 0;
+    return (audioCtx.currentTime - musicStartTime) * 1000;
+  }
+
+  // Game loop: handle beats and prompts
+  function gameLoop(timestamp) {
+    if (!gameStarted) return;
+
+    const now = getMusicTime();
+
+    // Check if it's time for next beat
+    if (now - lastBeatTime >= BEAT_INTERVAL) {
+      lastBeatTime += BEAT_INTERVAL;
+
+      // Show next prompt
+      if (currentStep < danceSequence.length) {
+        currentPrompt = danceSequence[currentStep];
+        createPromptElements(currentPrompt);
+        activatePrompts();
+        awaitingSpace = true;
+        inputBuffer = [];
+        clearPromptHighlights();
+
+        // Set timeout to fail if no input in time
+        if (promptTimeout) clearTimeout(promptTimeout);
+        promptTimeout = setTimeout(() => {
+          // If player didn't press space in time, fail step
+          if (awaitingSpace) {
+            failStep();
+          }
+        }, PROMPT_DISPLAY_TIME);
+
+        currentStep++;
+      } else {
+        // Sequence finished - end game
+        endGame();
+        return;
+      }
+    }
+
+    // Animate dancer based on current step and time
+    animateDancer(now);
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // Animate dancer frames synced to beat
+  function animateDancer(now) {
+    if (!currentPrompt) {
+      drawFrame(frames[0]);
+      return;
+    }
+    // Calculate frame index based on time within beat interval
+    const beatProgress = ((now - lastBeatTime) % BEAT_INTERVAL) / BEAT_INTERVAL;
+    // 8 frames per beat cycle
+    const frameIndex = Math.floor(beatProgress * 8) % 8;
+    drawFrame(frames[frameIndex]);
+  }
+
+  // Handle player input
+  function handleInput(e) {
+    if (!gameStarted) return;
+
+    if (e.repeat) return; // ignore held keys
+
+    const key = e.key;
+
+    if (key === ' ') {
+      // Space pressed - check if input matches prompt
+      if (!awaitingSpace) return;
+
+      // Check timing window
+      const now = getMusicTime();
+      const delta = Math.abs(now - lastBeatTime);
+      if (delta > INPUT_WINDOW) {
+        // Too early or late
+        failStep();
+        return;
+      }
+
+      // Check if all directions were input correctly
+      if (arraysEqualUnordered(inputBuffer, currentPrompt)) {
+        // Success
+        successStep();
+      } else {
+        // Fail
+        failStep();
+      }
+    } else if (KEY_TO_DIR[key]) {
+      // Direction key pressed
+      if (!awaitingSpace) return;
+
+      // Add to input buffer if not already present
+      const dir = KEY_TO_DIR[key];
+      if (!inputBuffer.includes(dir)) {
+        inputBuffer.push(dir);
+        // Highlight pressed arrow
+        highlightPressedArrow(dir);
+      }
+    }
+  }
+
+  // Highlight pressed arrow in prompts
+  function highlightPressedArrow(dir) {
+    const arrow = promptsContainer.querySelector(`.arrow[data-direction="${dir}"]`);
+    if (!arrow) return;
+    arrow.classList.add('active');
+  }
+
+  // Compare two arrays ignoring order
+  function arraysEqualUnordered(a, b) {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    for (let i = 0; i < sortedA.length; i++) {
+      if (sortedA[i] !== sortedB[i]) return false;
+    }
+    return true;
+  }
+
+  // Success step feedback
+  function successStep() {
+    awaitingSpace = false;
+    combo++;
+    score += 100 + combo * 10;
+    updateScore();
+    infoDisplay.textContent = `Great! Combo x${combo}`;
+    // Highlight prompts green
+    currentPrompt.forEach(dir => highlightPrompt(dir, 'correct'));
+    // Flash dancer green
+    flashDancer('correct');
+    clearTimeout(promptTimeout);
+  }
+
+  // Fail step feedback
+  function failStep() {
+    awaitingSpace = false;
+    combo = 0;
+    infoDisplay.textContent = `Miss! Try to keep the rhythm!`;
+    // Highlight prompts red
+    if (currentPrompt) currentPrompt.forEach(dir => highlightPrompt(dir, 'wrong'));
+    // Flash dancer red
+    flashDancer('wrong');
+    clearTimeout(promptTimeout);
+  }
+
+  // Flash dancer with highlight color for 400ms
+  let flashTimeout = null;
+  function flashDancer(type) {
+    drawFrame(frames[0], type);
+    if (flashTimeout) clearTimeout(flashTimeout);
+    flashTimeout = setTimeout(() => {
+      drawFrame(frames[0]);
+    }, 400);
+  }
+
+  // Update score display
+  function updateScore() {
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  // Start game
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    score = 0;
+    combo = 0;
+    currentStep = 0;
+    updateScore();
+    infoDisplay.textContent = 'Get ready...';
+    generateSequence();
+    playMusic();
+    lastBeatTime = getMusicTime();
+    currentPrompt = null;
+    inputBuffer = [];
+    awaitingSpace = false;
+    promptsContainer.innerHTML = '';
+    startScreen.style.display = 'none';
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // End game
+  function endGame() {
+    gameStarted = false;
+    stopMusic();
+    promptsContainer.innerHTML = '';
+    infoDisplay.textContent = `Game Over! Final Score: ${score}`;
+    startScreen.style.display = 'flex';
+    startBtn.textContent = 'Restart';
+    drawFrame(frames[0]);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', handleInput);
+  startBtn.addEventListener('click', () => {
+    if (!audioCtx) {
+      // Resume audio context on user interaction
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx.resume();
+    }
+    startGame();
+  });
+
+  // Initial draw
+  drawFrame(frames[0]);
+
+  // Accessibility: focus start button on load
+  window.addEventListener('load', () => {
+    startBtn.focus();
+  });
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - 
+================================================================================
+2025-12-02 20:13:41 - INFO - SCORE SUMMARY - ITERATION 1
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - ✓ Is the core rhythm-based input system fully implemented?: 9.0/10
+2025-12-02 20:13:41 - INFO - ✓ Is the music synchronization mechanism properly implemented?: 7.0/10
+2025-12-02 20:13:41 - INFO - ✓ Is the dance animation system responsive and visually satisfying?: 8.0/10
+2025-12-02 20:13:41 - INFO - ✓ Is the scoring and feedback system comprehensive?: 8.0/10
+2025-12-02 20:13:41 - INFO - ✗ Is the code robust?: 5.0/10
+2025-12-02 20:13:41 - INFO - ✗ Are there any innovative features that are eye-catching?: 0.0/10
+2025-12-02 20:13:41 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-12-02 20:13:41 - INFO - ✓ Does the code have engineering quality?: 7.0/10
+2025-12-02 20:13:41 - INFO - ✓ Does the interface vision meet professional design standards?: 9.0/10
+2025-12-02 20:13:41 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 8.0/10
+2025-12-02 20:13:41 - INFO - 
+⚠ Found 2 area(s) needing improvement:
+2025-12-02 20:13:41 - INFO -   - Are there any innovative features that are eye-catching?: 0.0/10
+2025-12-02 20:13:41 - INFO -   - Is the code robust?: 5.0/10
+2025-12-02 20:13:41 - INFO - 
+================================================================================
+2025-12-02 20:13:41 - INFO - MULTI-CANDIDATE GENERATION - ITERATION 1
+2025-12-02 20:13:41 - INFO - ================================================================================
+2025-12-02 20:13:41 - INFO - Generating 2 candidate(s) (one per weak item)...
+2025-12-02 20:13:41 - INFO - 
+  Candidate 1/2: Are there any innovative features that are eye-catching? (current score: 0.0/10)
+2025-12-02 20:13:41 - INFO - 
+  Generating candidate 1...
+2025-12-02 20:15:34 - INFO -   ✓ Candidate 1 generated (took 113.20 seconds)
+2025-12-02 20:15:34 - INFO -   ✓ Candidate 1 generated for Are there any innovative features that are eye-catching?
+2025-12-02 20:15:34 - INFO - 
+  Candidate 2/2: Is the code robust? (current score: 5.0/10)
+2025-12-02 20:15:34 - INFO - 
+  Generating candidate 2...
+2025-12-02 20:17:00 - INFO -   ✓ Candidate 2 generated (took 86.73 seconds)
+2025-12-02 20:17:00 - INFO -   ✓ Candidate 2 generated for Is the code robust?
+2025-12-02 20:17:00 - INFO - 
+================================================================================
+2025-12-02 20:17:00 - INFO - EVALUATING 2 CANDIDATE(S)
+2025-12-02 20:17:00 - INFO - ================================================================================
+2025-12-02 20:17:00 - INFO - 
+  Evaluating candidate 1/2 (focus: Are there any innovative features that are eye-catching?)...
+2025-12-02 20:17:25 - INFO -   ✓ Candidate 1 evaluated: Total Score = 88.0
+2025-12-02 20:17:25 - INFO - 
+  Evaluating candidate 2/2 (focus: Is the code robust?)...
+2025-12-02 20:17:52 - INFO -   ✓ Candidate 2 evaluated: Total Score = 73.0
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - SCORE REGRESSION CHECK
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - ✓ Candidate 1: No score regressions detected
+2025-12-02 20:17:52 - INFO - ✓ Candidate 2: No score regressions detected
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - CANDIDATE COMPARISON
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - Candidate 1 (Focus: Are there any innovative features that are eye-catching?):
+2025-12-02 20:17:52 - INFO -   Total Score: 88.0
+2025-12-02 20:17:52 - INFO -   Focus Item Improvement: 0.0 → 9.0 (Δ +9.0)
+2025-12-02 20:17:52 - INFO -   ✓ No regressions
+2025-12-02 20:17:52 - INFO - Candidate 2 (Focus: Is the code robust?):
+2025-12-02 20:17:52 - INFO -   Total Score: 73.0
+2025-12-02 20:17:52 - INFO -   Focus Item Improvement: 5.0 → 7.0 (Δ +2.0)
+2025-12-02 20:17:52 - INFO -   ✓ No regressions
+2025-12-02 20:17:52 - INFO - 
+✓ Selected Candidate 1 (Focus: Are there any innovative features that are eye-catching?)
+2025-12-02 20:17:52 - INFO -   Total Score: 88.0
+2025-12-02 20:17:52 - INFO - ✓ Selected candidate saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8/iteration_1.html
+2025-12-02 20:17:52 - INFO - 
+✓ Selected candidate meets all thresholds (7.0)!
+2025-12-02 20:17:52 - INFO - Improvement process complete.
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - FINAL EVALUATION RESULTS
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - Individual Scores (JSON):
+{
+  "Is the core rhythm-based input system fully implemented?": 10.0,
+  "Is the music synchronization mechanism properly implemented?": 9.0,
+  "Is the dance animation system responsive and visually satisfying?": 8.0,
+  "Is the scoring and feedback system comprehensive?": 9.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 9.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-12-02 20:17:52 - INFO - Final Calculated Sum: 88.0
+2025-12-02 20:17:52 - INFO - Final Overall Score: 84.0
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - ```json
+{
+  "Is the core rhythm-based input system fully implemented?": 10,
+  "Is the music synchronization mechanism properly implemented?": 9,
+  "Is the dance animation system responsive and visually satisfying?": 8,
+  "Is the scoring and feedback system comprehensive?": 9,
+  "Is the code robust?": 7,
+  "Are there any innovative features that are eye-catching?": 9,
+  "Are there any redundant features?": 10,
+  "Does the code have engineering quality?": 8,
+  "Does the interface vision meet professional design standards?": 9,
+  "Is the dynamic interaction smooth and seamless?": 9,
+  "Overall Score": 84
+}
+```
+
+Reason:
+
+1. **Core rhythm-based input system (10/10)**  
+   The code fully implements a rhythm-based input system that detects arrow keys and space bar presses. It uses timing windows (INPUT_WINDOW) to judge input accuracy, distinguishing success and failure. The input buffer collects multiple directions per step, and pressing space triggers evaluation. Visual feedback on prompts and dancer animation is tightly coupled with input correctness. This meets the highest standard.
+
+2. **Music synchronization mechanism (9/10)**  
+   The game uses Web Audio API with AudioContext for music playback and timing. Beat intervals are calculated from BPM, and prompts are displayed in sync with music time. There is a prompt display time and input window to handle timing precision. The code supports custom song loading with audio decoding. However, there is no explicit calibration or offset adjustment for audio latency, which is a minor deduction. Audio preloading is handled well.
+
+3. **Dance animation system (8/10)**  
+   The pixel art dancer is animated on a canvas with 8 frames cycling in sync with the beat. The animation changes color briefly to indicate success or failure, providing visual feedback. The pixel art style is consistent and charming. However, the animation frames are simple opacity toggles rather than complex dance moves, and transitions are basic. The animation matches rhythm but could be more dynamic or varied.
+
+4. **Scoring and feedback system (9/10)**  
+   The game provides clear feedback: arrows highlight as active, correct, or wrong. The score updates with combo multipliers, and info text shows combo or miss messages promptly. The combo system is implemented and affects scoring. An end-game summary is displayed on the start screen after game over. Visual feedback is immediate. Minor deduction for lack of audio feedback on input quality.
+
+5. **Code robustness (7/10)**  
+   The code handles audio loading failures gracefully with user messages. It prevents repeated key events and ignores inputs when not awaiting them. It supports unsupported browsers by fallback to basic beep sound. However, it lacks explicit error handling for unsupported key presses beyond ignoring them, and no fallback UI for unsupported AudioContext. Also, no try-catch around some async operations except for audio/chart loading. Overall robustness is good but not exceptional.
+
+6. **Innovative features (9/10)**  
+   The game includes multiple advanced features:  
+   - Difficulty selector with BPM and timing window adjustments.  
+   - Custom song and chart import supporting WAV and JSON files.  
+   - Replay functionality to watch previous gameplay.  
+   These features significantly enhance the experience and are well integrated. Missing multiplayer or performance replay export, so max 9 points.
+
+7. **Redundant features (10/10)**  
+   No redundant or unrelated features found. The code is focused on rhythm gameplay. No duplicated input systems or unrelated mini-games. Visual effects are tasteful and do not degrade performance. No penalties.
+
+8. **Engineering quality (8/10)**  
+   The code is modularly structured within an IIFE, separating concerns reasonably (input, audio, rendering, game logic). Global pollution is avoided. Some duplication in frame definitions but minimal. No unit tests or build automation mentioned, so minor deductions. The code is well-commented and readable.
+
+9. **Interface vision (9/10)**  
+   The pixel art style is consistent with a limited color palette and pixelated rendering. UI elements have good contrast and do not obstruct gameplay. Layout is clean and intuitive. The start screen and controls are visually coherent. Minor deduction for slightly dense text in custom song input area.
+
+10. **Dynamic interaction smoothness (9/10)**  
+    The game runs at 60fps with requestAnimationFrame. Input lag is minimized by using AudioContext time for synchronization. Transitions between animations are smooth with no noticeable jitter. Minor deduction for potential slight delay in prompt highlight transitions.
+
+**Summary:**  
+This is a very well-executed rhythm game implementation with strong core mechanics, good synchronization, and thoughtful features like custom song import and replay. The pixel art and UI are polished and professional. Minor improvements could be made in animation complexity, audio latency calibration, and robustness edge cases. Overall, an excellent and comprehensive solution.
+
+---
+
+If you want, I can also provide suggestions for improvement or refactoring.
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - FINAL HTML CODE
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Dance!</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #111;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  /* Container */
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #222 0%, #000 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  /* Stage */
+  #stage {
+    position: relative;
+    width: 640px;
+    height: 360px;
+    margin-top: 20px;
+    background: #222;
+    border: 4px solid #555;
+    box-shadow:
+      0 0 10px #0ff,
+      inset 0 0 20px #0ff;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel dancer container */
+  #dancer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel art style canvas */
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent;
+  }
+
+  /* Arrow prompts container */
+  #prompts {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    user-select: none;
+  }
+
+  /* Each arrow prompt */
+  .arrow {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    background: #003344;
+    filter: drop-shadow(0 0 3px #0ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: default;
+  }
+  .arrow.active {
+    background: #0ff;
+    border-color: #0ff;
+    filter: drop-shadow(0 0 10px #0ff);
+  }
+  .arrow.correct {
+    background: #0f0;
+    border-color: #0f0;
+    filter: drop-shadow(0 0 10px #0f0);
+  }
+  .arrow.wrong {
+    background: #f00;
+    border-color: #f00;
+    filter: drop-shadow(0 0 10px #f00);
+  }
+
+  /* Arrow SVG icons */
+  .arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #0ff;
+    pointer-events: none;
+  }
+  .arrow.correct svg {
+    fill: #0f0;
+  }
+  .arrow.wrong svg {
+    fill: #f00;
+  }
+
+  /* Score and info */
+  #info {
+    margin-top: 12px;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-align: center;
+    color: #0ff;
+    text-shadow:
+      0 0 5px #0ff,
+      0 0 10px #0ff;
+  }
+  #score {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 6px;
+    color: #0f0;
+    text-shadow:
+      0 0 8px #0f0,
+      0 0 15px #0f0;
+  }
+
+  /* Start screen overlay */
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  #startScreen button {
+    margin-top: 20px;
+    background: #0ff;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow:
+      0 0 10px #0ff;
+    transition: background 0.3s ease;
+  }
+  #startScreen button:hover {
+    background: #0cc;
+  }
+
+  /* Pixel flicker effect on stage */
+  @keyframes pixelFlicker {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.2) contrast(1.1); }
+  }
+  #stage {
+    animation: pixelFlicker 3s infinite ease-in-out;
+  }
+
+  /* Pixel dancer animation frames */
+  .frame-0 { opacity: 1; }
+  .frame-1 { opacity: 0; }
+  .frame-2 { opacity: 0; }
+  .frame-3 { opacity: 0; }
+  .frame-4 { opacity: 0; }
+  .frame-5 { opacity: 0; }
+  .frame-6 { opacity: 0; }
+  .frame-7 { opacity: 0; }
+
+  /* Pixel font for score */
+  #score {
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  /* Difficulty selector */
+  #difficultySelector {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #003344;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    user-select: none;
+    z-index: 11;
+  }
+  #difficultySelector label {
+    margin-right: 8px;
+  }
+  #difficultySelector select {
+    background: #0ff;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Replay button */
+  #replayBtn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #0ff;
+    border: none;
+    padding: 8px 16px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow:
+      0 0 10px #0ff;
+    transition: background 0.3s ease;
+    z-index: 11;
+    display: none;
+  }
+  #replayBtn:hover {
+    background: #0cc;
+  }
+
+  /* Custom song input */
+  #customSongInput {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: #003344;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    user-select: none;
+    z-index: 11;
+    width: 200px;
+  }
+  #customSongInput label {
+    display: block;
+    margin-bottom: 6px;
+  }
+  #customSongInput input[type="file"] {
+    width: 100%;
+    cursor: pointer;
+  }
+  #customSongInput p {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #0cc;
+  }
+</style>
+</head>
+<body>
+<div id="game" role="main" aria-label="Pixel Dance rhythm game">
+  <div id="stage" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <canvas id="dancer" width="32" height="32" aria-label="Dancing character"></canvas>
+    <div id="prompts" aria-label="Dance move prompts" role="list"></div>
+  </div>
+  <div id="info" aria-live="polite" aria-atomic="true">
+    Press arrow keys in sequence and SPACE at the right moment to dance!
+  </div>
+  <div id="score" aria-live="polite" aria-atomic="true" aria-label="Current score">Score: 0</div>
+  <div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle" aria-describedby="startDesc">
+    <h1 id="startTitle">Pixel Dance!</h1>
+    <p id="startDesc">
+      Follow the arrow prompts and press SPACE at the right beat to perform dance moves.<br />
+      Try to keep in rhythm and get the highest score possible!<br />
+      Use arrow keys + SPACE to play.<br />
+      Press Start to begin.
+    </p>
+    <button id="startBtn" aria-label="Start the game">Start</button>
+  </div>
+
+  <!-- Difficulty selector -->
+  <div id="difficultySelector" aria-label="Select game difficulty">
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty" aria-describedby="difficultyDesc">
+      <option value="easy">Easy (80 BPM)</option>
+      <option value="normal" selected>Normal (100 BPM)</option>
+      <option value="hard">Hard (130 BPM)</option>
+      <option value="expert">Expert (160 BPM)</option>
+    </select>
+    <div id="difficultyDesc" style="display:none;">Select the game difficulty to adjust speed and complexity.</div>
+  </div>
+
+  <!-- Replay button -->
+  <button id="replayBtn" aria-label="Replay last game">Replay</button>
+
+  <!-- Custom song input -->
+  <div id="customSongInput" aria-label="Import custom song and chart">
+    <label for="songFile">Import WAV song file:</label>
+    <input type="file" id="songFile" accept="audio/wav,audio/wave,audio/x-wav" aria-describedby="songFileDesc" />
+    <label for="chartFile" style="margin-top:8px;">Import chart JSON file:</label>
+    <input type="file" id="chartFile" accept="application/json" aria-describedby="chartFileDesc" />
+    <p id="songFileDesc">Optional: Import your own song and dance chart to play custom levels.</p>
+    <p id="chartFileDesc">Chart JSON format: array of steps, each step is array of directions (left, down, up, right).</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Constants for directions
+  const DIRECTIONS = ['left', 'down', 'up', 'right'];
+  const KEY_TO_DIR = {
+    'ArrowLeft': 'left',
+    'ArrowDown': 'down',
+    'ArrowUp': 'up',
+    'ArrowRight': 'right',
+  };
+
+  // Timing constants per difficulty (BPM to ms per beat)
+  const DIFFICULTY_SETTINGS = {
+    easy: { bpm: 80, promptTime: 2500, inputWindow: 350 },
+    normal: { bpm: 100, promptTime: 2000, inputWindow: 250 },
+    hard: { bpm: 130, promptTime: 1500, inputWindow: 200 },
+    expert: { bpm: 160, promptTime: 1200, inputWindow: 150 },
+  };
+
+  // Game state
+  let score = 0;
+  let combo = 0;
+  let currentStep = 0;
+  let gameStarted = false;
+  let lastBeatTime = 0;
+  let inputBuffer = [];
+  let awaitingSpace = false;
+  let currentPrompt = null;
+  let promptTimeout = null;
+  let animationFrameId = null;
+  let replayData = null; // For replay feature
+  let replayIndex = 0;
+  let replayMode = false;
+
+  // Elements
+  const startScreen = document.getElementById('startScreen');
+  const startBtn = document.getElementById('startBtn');
+  const promptsContainer = document.getElementById('prompts');
+  const scoreDisplay = document.getElementById('score');
+  const infoDisplay = document.getElementById('info');
+  const dancerCanvas = document.getElementById('dancer');
+  const ctx = dancerCanvas.getContext('2d');
+  const difficultySelect = document.getElementById('difficulty');
+  const replayBtn = document.getElementById('replayBtn');
+  const songFileInput = document.getElementById('songFile');
+  const chartFileInput = document.getElementById('chartFile');
+
+  // Audio context and buffers
+  let audioCtx = null;
+  let musicBuffer = null;
+  let musicSource = null;
+  let musicStartTime = 0;
+
+  // Dance move sequence
+  const SEQUENCE_LENGTH = 30;
+  let danceSequence = [];
+
+  // Current difficulty settings
+  let BEAT_INTERVAL = 600; // default 100 BPM
+  let PROMPT_DISPLAY_TIME = 2000;
+  let INPUT_WINDOW = 250;
+
+  // Color palette and frames (unchanged from original)
+  const COLORS = {
+    0: null,
+    1: '#f9c9a7',
+    2: '#0ff',
+    3: '#005577',
+    4: '#222',
+    5: '#a52a2a',
+    6: '#000',
+    7: '#0f0',
+    8: '#f00',
+  };
+
+  const baseFrame = [
+    [0,0,0,0,0,5,5,5,5,5,5,0,0,0,0,0],
+    [0,0,0,0,5,5,5,5,5,5,5,5,0,0,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,0,1,6,1,1,1,1,1,6,1,1,0,0,0],
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0],
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0],
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0],
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0],
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0],
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0],
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0],
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  ];
+
+  function cloneFrame(frame) {
+    return frame.map(row => row.slice());
+  }
+
+  const frames = [];
+
+  frames.push(cloneFrame(baseFrame));
+
+  let f1 = cloneFrame(baseFrame);
+  f1[4][3] = 0; f1[5][3] = 1; f1[6][3] = 1;
+  f1[9][12] = 4; f1[10][12] = 4; f1[11][12] = 4;
+  frames.push(f1);
+
+  let f2 = cloneFrame(baseFrame);
+  f2[7][3] = 1; f2[8][3] = 1; f2[9][3] = 0;
+  f2[9][11] = 4; f2[10][11] = 4; f2[11][11] = 4;
+  frames.push(f2);
+
+  let f3 = cloneFrame(baseFrame);
+  f3[4][12] = 0; f3[5][12] = 1; f3[6][12] = 1;
+  f3[9][3] = 4; f3[10][3] = 4; f3[11][3] = 4;
+  frames.push(f3);
+
+  let f4 = cloneFrame(baseFrame);
+  f4[7][12] = 1; f4[8][12] = 1; f4[9][12] = 0;
+  f4[9][4] = 4; f4[10][4] = 4; f4[11][4] = 4;
+  frames.push(f4);
+
+  let f5 = cloneFrame(baseFrame);
+  f5[4][3] = 0; f5[5][3] = 1; f5[6][3] = 1;
+  f5[4][12] = 0; f5[5][12] = 1; f5[6][12] = 1;
+  frames.push(f5);
+
+  let f6 = cloneFrame(baseFrame);
+  f6[7][3] = 1; f6[8][3] = 1; f6[9][3] = 0;
+  f6[7][12] = 1; f6[8][12] = 1; f6[9][12] = 0;
+  frames.push(f6);
+
+  let f7 = cloneFrame(baseFrame);
+  f7[4][2] = 1; f7[5][1] = 1; f7[6][0] = 1;
+  f7[4][13] = 1; f7[5][14] = 1; f7[6][15] = 1;
+  f7[9][2] = 4; f7[10][1] = 4; f7[11][0] = 4;
+  f7[9][13] = 4; f7[10][14] = 4; f7[11][15] = 4;
+  frames.push(f7);
+
+  function drawFrame(frame, highlight = null) {
+    const pixelSize = 2;
+    ctx.clearRect(0, 0, dancerCanvas.width, dancerCanvas.height);
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        let colorIndex = frame[y][x];
+        if (colorIndex === 0) continue;
+        let color = COLORS[colorIndex];
+        if (highlight === 'correct') color = COLORS[7];
+        else if (highlight === 'wrong') color = COLORS[8];
+        ctx.fillStyle = color;
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+
+  const ARROW_SVGS = {
+    left: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 19l-7-7 7-7"/></svg>`,
+    down: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 9l-7 7-7-7"/></svg>`,
+    up: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 15l-7-7-7 7"/></svg>`,
+    right: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>`,
+  };
+
+  function createPromptElements(directions) {
+    promptsContainer.innerHTML = '';
+    directions.forEach(dir => {
+      const div = document.createElement('div');
+      div.classList.add('arrow');
+      div.dataset.direction = dir;
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('aria-label', `Press ${dir.toUpperCase()} arrow`);
+      div.innerHTML = ARROW_SVGS[dir];
+      promptsContainer.appendChild(div);
+    });
+  }
+
+  function highlightPrompt(direction, result) {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      if (arrow.dataset.direction === direction) {
+        arrow.classList.remove('active');
+        arrow.classList.add(result);
+      }
+    });
+  }
+
+  function clearPromptHighlights() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      arrow.classList.remove('correct', 'wrong', 'active');
+    });
+  }
+
+  function activatePrompts() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => arrow.classList.add('active'));
+  }
+
+  function generateStep() {
+    const count = Math.floor(Math.random() * 3) + 1;
+    const stepDirs = [];
+    while (stepDirs.length < count) {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      if (!stepDirs.includes(dir)) stepDirs.push(dir);
+    }
+    return stepDirs;
+  }
+
+  function generateSequence() {
+    danceSequence = [];
+    for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+      danceSequence.push(generateStep());
+    }
+  }
+
+  // Play background music (simple beep)
+  function playMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+    const sampleRate = audioCtx.sampleRate;
+    const duration = 0.1;
+    const frameCount = sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frameCount; i++) {
+      data[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * (1 - i / frameCount);
+    }
+    musicBuffer = buffer;
+
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = musicBuffer;
+    musicSource.loop = true;
+    musicSource.loopStart = 0;
+    musicSource.loopEnd = duration;
+    musicSource.connect(audioCtx.destination);
+    musicSource.start();
+
+    musicStartTime = audioCtx.currentTime;
+  }
+
+  function stopMusic() {
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+  }
+
+  function getMusicTime() {
+    if (!audioCtx) return 0;
+    return (audioCtx.currentTime - musicStartTime) * 1000;
+  }
+
+  function gameLoop(timestamp) {
+    if (!gameStarted) return;
+
+    const now = getMusicTime();
+
+    if (now - lastBeatTime >= BEAT_INTERVAL) {
+      lastBeatTime += BEAT_INTERVAL;
+
+      if (currentStep < danceSequence.length) {
+        currentPrompt = danceSequence[currentStep];
+        createPromptElements(currentPrompt);
+        activatePrompts();
+        awaitingSpace = true;
+        inputBuffer = [];
+        clearPromptHighlights();
+
+        if (promptTimeout) clearTimeout(promptTimeout);
+        promptTimeout = setTimeout(() => {
+          if (awaitingSpace) {
+            failStep();
+          }
+        }, PROMPT_DISPLAY_TIME);
+
+        // Record step for replay
+        if (!replayMode) {
+          replayData.push({
+            step: currentStep,
+            prompt: currentPrompt.slice(),
+            timestamp: now,
+            input: [],
+            success: null,
+          });
+        }
+
+        currentStep++;
+      } else {
+        endGame();
+        return;
+      }
+    }
+
+    animateDancer(now);
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function animateDancer(now) {
+    if (!currentPrompt) {
+      drawFrame(frames[0]);
+      return;
+    }
+    const beatProgress = ((now - lastBeatTime) % BEAT_INTERVAL) / BEAT_INTERVAL;
+    const frameIndex = Math.floor(beatProgress * 8) % 8;
+    drawFrame(frames[frameIndex]);
+  }
+
+  function handleInput(e) {
+    if (!gameStarted) return;
+    if (e.repeat) return;
+
+    const key = e.key;
+
+    if (key === ' ') {
+      if (!awaitingSpace) return;
+
+      const now = getMusicTime();
+      const delta = Math.abs(now - lastBeatTime);
+      if (delta > INPUT_WINDOW) {
+        failStep();
+        return;
+      }
+
+      if (arraysEqualUnordered(inputBuffer, currentPrompt)) {
+        successStep();
+      } else {
+        failStep();
+      }
+    } else if (KEY_TO_DIR[key]) {
+      if (!awaitingSpace) return;
+
+      const dir = KEY_TO_DIR[key];
+      if (!inputBuffer.includes(dir)) {
+        inputBuffer.push(dir);
+        highlightPressedArrow(dir);
+      }
+    }
+  }
+
+  function highlightPressedArrow(dir) {
+    const arrow = promptsContainer.querySelector(`.arrow[data-direction="${dir}"]`);
+    if (!arrow) return;
+    arrow.classList.add('active');
+  }
+
+  function arraysEqualUnordered(a, b) {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    for (let i = 0; i < sortedA.length; i++) {
+      if (sortedA[i] !== sortedB[i]) return false;
+    }
+    return true;
+  }
+
+  function successStep() {
+    awaitingSpace = false;
+    combo++;
+    score += 100 + combo * 10;
+    updateScore();
+    infoDisplay.textContent = `Great! Combo x${combo}`;
+    currentPrompt.forEach(dir => highlightPrompt(dir, 'correct'));
+    flashDancer('correct');
+    clearTimeout(promptTimeout);
+
+    // Record success for replay
+    if (!replayMode && replayData.length > 0) {
+      replayData[replayData.length - 1].input = inputBuffer.slice();
+      replayData[replayData.length - 1].success = true;
+    }
+  }
+
+  function failStep() {
+    awaitingSpace = false;
+    combo = 0;
+    infoDisplay.textContent = `Miss! Try to keep the rhythm!`;
+    if (currentPrompt) currentPrompt.forEach(dir => highlightPrompt(dir, 'wrong'));
+    flashDancer('wrong');
+    clearTimeout(promptTimeout);
+
+    // Record fail for replay
+    if (!replayMode && replayData.length > 0) {
+      replayData[replayData.length - 1].input = inputBuffer.slice();
+      replayData[replayData.length - 1].success = false;
+    }
+  }
+
+  let flashTimeout = null;
+  function flashDancer(type) {
+    drawFrame(frames[0], type);
+    if (flashTimeout) clearTimeout(flashTimeout);
+    flashTimeout = setTimeout(() => {
+      drawFrame(frames[0]);
+    }, 400);
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    score = 0;
+    combo = 0;
+    currentStep = 0;
+    updateScore();
+    infoDisplay.textContent = 'Get ready...';
+
+    // Set difficulty parameters
+    const diff = difficultySelect.value;
+    const settings = DIFFICULTY_SETTINGS[diff] || DIFFICULTY_SETTINGS.normal;
+    BEAT_INTERVAL = 60000 / settings.bpm;
+    PROMPT_DISPLAY_TIME = settings.promptTime;
+    INPUT_WINDOW = settings.inputWindow;
+
+    // If custom chart loaded, use it; else generate sequence
+    if (customChart && customChart.length > 0) {
+      danceSequence = customChart.slice(0, SEQUENCE_LENGTH);
+    } else {
+      generateSequence();
+    }
+
+    playMusic();
+    lastBeatTime = getMusicTime();
+    currentPrompt = null;
+    inputBuffer = [];
+    awaitingSpace = false;
+    promptsContainer.innerHTML = '';
+    startScreen.style.display = 'none';
+    replayBtn.style.display = 'none';
+    replayData = [];
+    replayMode = false;
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function endGame() {
+    gameStarted = false;
+    stopMusic();
+    promptsContainer.innerHTML = '';
+    infoDisplay.textContent = `Game Over! Final Score: ${score}`;
+    startScreen.style.display = 'flex';
+    startBtn.textContent = 'Restart';
+    drawFrame(frames[0]);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    replayBtn.style.display = replayData && replayData.length > 0 ? 'inline-block' : 'none';
+  }
+
+  // Replay functionality
+  function startReplay() {
+    if (!replayData || replayData.length === 0) return;
+    replayMode = true;
+    score = 0;
+    combo = 0;
+    currentStep = 0;
+    updateScore();
+    infoDisplay.textContent = 'Replaying last game...';
+    danceSequence = replayData.map(r => r.prompt);
+    lastBeatTime = 0;
+    currentPrompt = null;
+    inputBuffer = [];
+    awaitingSpace = false;
+    promptsContainer.innerHTML = '';
+    startScreen.style.display = 'none';
+    replayBtn.style.display = 'none';
+    replayIndex = 0;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    playMusic();
+    musicStartTime = audioCtx.currentTime;
+    lastBeatTime = 0;
+    animationFrameId = requestAnimationFrame(replayLoop);
+  }
+
+  function replayLoop(timestamp) {
+    if (!replayMode) return;
+    const now = getMusicTime();
+
+    if (replayIndex < replayData.length) {
+      const stepData = replayData[replayIndex];
+      if (now >= stepData.timestamp) {
+        currentPrompt = stepData.prompt;
+        createPromptElements(currentPrompt);
+        clearPromptHighlights();
+        // Highlight inputs and results
+        if (stepData.input && stepData.input.length > 0) {
+          stepData.input.forEach(dir => highlightPressedArrow(dir));
+        }
+        if (stepData.success === true) {
+          stepData.prompt.forEach(dir => highlightPrompt(dir, 'correct'));
+          combo++;
+          score += 100 + combo * 10;
+        } else if (stepData.success === false) {
+          stepData.prompt.forEach(dir => highlightPrompt(dir, 'wrong'));
+          combo = 0;
+        }
+        updateScore();
+        replayIndex++;
+        lastBeatTime = stepData.timestamp;
+      }
+    } else {
+      // Replay finished
+      replayMode = false;
+      stopMusic();
+      infoDisplay.textContent = `Replay finished. Final Score: ${score}`;
+      startScreen.style.display = 'flex';
+      startBtn.textContent = 'Restart';
+      replayBtn.style.display = 'inline-block';
+      drawFrame(frames[0]);
+      return;
+    }
+
+    animateDancer(now);
+    animationFrameId = requestAnimationFrame(replayLoop);
+  }
+
+  // Custom song and chart import
+  let customAudioBuffer = null;
+  let customChart = null;
+
+  songFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await file.arrayBuffer();
+    try {
+      customAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      infoDisplay.textContent = `Custom song loaded: ${file.name}`;
+    } catch {
+      infoDisplay.textContent = 'Failed to load custom song audio.';
+      customAudioBuffer = null;
+    }
+  });
+
+  chartFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && parsed.every(step => Array.isArray(step) && step.every(dir => DIRECTIONS.includes(dir)))) {
+        customChart = parsed;
+        infoDisplay.textContent = `Custom chart loaded: ${file.name}`;
+      } else {
+        throw new Error('Invalid chart format');
+      }
+    } catch {
+      infoDisplay.textContent = 'Failed to load custom chart JSON.';
+      customChart = null;
+    }
+  });
+
+  // Override playMusic to play custom song if loaded
+  function playMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+    if (customAudioBuffer) {
+      musicSource = audioCtx.createBufferSource();
+      musicSource.buffer = customAudioBuffer;
+      musicSource.loop = true;
+      musicSource.connect(audioCtx.destination);
+      musicSource.start();
+      musicStartTime = audioCtx.currentTime;
+    } else {
+      // Default beep sound
+      const sampleRate = audioCtx.sampleRate;
+      const duration = 0.1;
+      const frameCount = sampleRate * duration;
+      const buffer = audioCtx.createBuffer(1, frameCount, sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < frameCount; i++) {
+        data[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * (1 - i / frameCount);
+      }
+      musicBuffer = buffer;
+
+      musicSource = audioCtx.createBufferSource();
+      musicSource.buffer = musicBuffer;
+      musicSource.loop = true;
+      musicSource.loopStart = 0;
+      musicSource.loopEnd = duration;
+      musicSource.connect(audioCtx.destination);
+      musicSource.start();
+
+      musicStartTime = audioCtx.currentTime;
+    }
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', handleInput);
+  startBtn.addEventListener('click', () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx.resume();
+    }
+    startGame();
+  });
+  replayBtn.addEventListener('click', () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx.resume();
+    }
+    startReplay();
+  });
+
+  // Initial draw
+  drawFrame(frames[0]);
+
+  // Accessibility: focus start button on load
+  window.addEventListener('load', () => {
+    startBtn.focus();
+  });
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - ✓ Final code saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8/final.html
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - MULTI-CANDIDATE ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - End Time: 2025-12-02 20:17:52
+2025-12-02 20:17:52 - INFO - Total Duration: 397.74 seconds (6.63 minutes)
+2025-12-02 20:17:52 - INFO - Total Iterations: 3
+2025-12-02 20:17:52 - INFO - Final Total Score: 88.0
+2025-12-02 20:17:52 - INFO - Log file saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8/run_log.txt
+2025-12-02 20:17:52 - INFO - All files saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8
+2025-12-02 20:17:52 - INFO - 
+================================================================================
+2025-12-02 20:17:52 - INFO - TOKEN USAGE SUMMARY
+2025-12-02 20:17:52 - INFO - ================================================================================
+2025-12-02 20:17:52 - INFO - Total Requests: 66
+2025-12-02 20:17:52 - INFO - Total Input Tokens: 571,290
+2025-12-02 20:17:52 - INFO - Total Output Tokens: 208,079
+2025-12-02 20:17:52 - INFO - Total Tokens: 779,369
+2025-12-02 20:17:52 - INFO - 
+Breakdown by Operation:
+2025-12-02 20:17:52 - INFO -   code_generation: 1 requests, 8,101 tokens
+2025-12-02 20:17:52 - INFO -   evaluation: 38 requests, 506,488 tokens
+2025-12-02 20:17:52 - INFO -   initial_code_generation: 8 requests, 43,526 tokens
+2025-12-02 20:17:52 - INFO -   code_improvement_iteration_1_candidate_0: 8 requests, 102,127 tokens
+2025-12-02 20:17:52 - INFO -   code_improvement_iteration_1_candidate_1: 6 requests, 66,161 tokens
+2025-12-02 20:17:52 - INFO -   code_improvement_iteration_1_candidate_2: 3 requests, 30,587 tokens
+2025-12-02 20:17:52 - INFO -   code_improvement_iteration_1_candidate_3: 1 requests, 11,455 tokens
+2025-12-02 20:17:52 - INFO -   code_improvement_iteration_1_candidate_4: 1 requests, 10,924 tokens
+2025-12-02 20:17:52 - INFO - 
+✓ Token usage saved to: artifacts_output/multi_candidate_generation/Game Development-Action-Rhythm/task_8/token_usage.json
+2025-12-02 20:17:52 - INFO - ✓ Task token usage saved to token_usage_multi_candidate.json
+2025-12-02 20:17:52 - INFO - ================================================================================

@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Capture and Collection Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #a0d8f7, #f0f9ff);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  header {
+    background-color: #0077cc;
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    user-select: none;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  /* Game area styles */
+  #game-area {
+    flex: 3;
+    background: #d0f0ff;
+    border: 3px solid #0077cc;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  /* Creature styles */
+  .creature {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+  /* Net styles */
+  #net {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    opacity: 0.8;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 10;
+  }
+  /* Collection panel styles */
+  #collection-panel {
+    flex: 1;
+    background: #ffffffcc;
+    border: 3px solid #0077cc;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  #collection-panel h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #004a80;
+    text-align: center;
+  }
+  #collection-list {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+    padding: 0.25rem;
+  }
+  .collected-item {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #0077cc;
+    border-radius: 8px;
+    background-color: #e0f4ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #004a80;
+    user-select: none;
+    position: relative;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+  }
+  .collected-item:hover, .collected-item:focus {
+    box-shadow: 0 0 8px 3px #0077ccaa;
+    outline: none;
+  }
+  .collected-item img {
+    max-width: 40px;
+    max-height: 40px;
+    pointer-events: none;
+  }
+  .collected-count {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    background: #0077cc;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0 4px;
+    user-select: none;
+  }
+  /* Controls panel */
+  #controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  #throw-net-btn {
+    background-color: #0077cc;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #throw-net-btn:disabled {
+    background-color: #a0c8f7;
+    cursor: not-allowed;
+  }
+  #throw-net-btn:hover:not(:disabled) {
+    background-color: #005fa3;
+  }
+  /* Tooltip for creatures */
+  .tooltip {
+    position: absolute;
+    background: #004a80cc;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    transform: translate(-50%, -120%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .creature:hover .tooltip {
+    opacity: 1;
+  }
+  /* Responsive adjustments */
+  @media (max-width: 700px) {
+    main {
+      flex-direction: column;
+    }
+    #game-area {
+      flex: none;
+      height: 300px;
+      margin-bottom: 1rem;
+    }
+    #collection-panel {
+      flex: none;
+      height: 200px;
+    }
+  }
+  /* Photo mode overlay */
+  #photo-mode-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  #photo-mode-content {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 15px #0077ccaa;
+    user-select: none;
+  }
+  #photo-mode-content svg {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 1rem;
+  }
+  #photo-mode-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: #004a80;
+  }
+  #photo-mode-content p {
+    margin: 0 0 1rem 0;
+    color: #333;
+  }
+  #photo-mode-close-btn {
+    background-color: #0077cc;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #photo-mode-close-btn:hover {
+    background-color: #005fa3;
+  }
+  /* Mini-game modal */
+  #mini-game-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  #mini-game-content {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 15px #0077ccaa;
+    user-select: none;
+  }
+  #mini-game-content h3 {
+    margin: 0 0 1rem 0;
+    color: #004a80;
+  }
+  #mini-game-canvas {
+    background: #e0f4ff;
+    border: 2px solid #0077cc;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 1rem auto;
+  }
+  #mini-game-message {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #004a80;
+  }
+  #mini-game-close-btn {
+    background-color: #0077cc;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #mini-game-close-btn:hover {
+    background-color: #005fa3;
+  }
+</style>
+</head>
+<body>
+<header>Capture and Collection Game</header>
+<main>
+  <section id="game-area" aria-label="Game area where creatures appear and can be captured" tabindex="0">
+    <!-- Creatures will be dynamically added here -->
+    <!-- Net visual -->
+    <img id="net" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNSIgc3Ryb2tlPSIjMDA3N2NjIiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9IiNmZmYiLz4KICA8bGluZSB4MT0iMTUiIHkxPSIxNSIgeDI9IjY1IiB5Mj0iNjUiIHN0cm9rZT0iIzAwNzdjYyIgc3Ryb2tlLXdpZHRoPSIzIi8+Cjwvc3ZnPgo=" alt="Net icon" />
+  </section>
+  <aside id="collection-panel" aria-label="Player's collection panel">
+    <h2>Your Collection</h2>
+    <div id="collection-list" aria-live="polite" aria-relevant="additions"></div>
+    <div id="controls">
+      <button id="throw-net-btn" aria-pressed="false" aria-label="Throw net to capture creatures">Throw Net</button>
+    </div>
+  </aside>
+</main>
+
+<!-- Photo Mode Overlay -->
+<div id="photo-mode-overlay" role="dialog" aria-modal="true" aria-labelledby="photo-mode-title" tabindex="-1">
+  <div id="photo-mode-content">
+    <h3 id="photo-mode-title">Creature Photo</h3>
+    <div id="photo-mode-svg-container" aria-hidden="true"></div>
+    <p id="photo-mode-description"></p>
+    <button id="photo-mode-close-btn" aria-label="Close photo mode">Close</button>
+  </div>
+</div>
+
+<!-- Mini-game Modal -->
+<div id="mini-game-modal" role="dialog" aria-modal="true" aria-labelledby="mini-game-title" tabindex="-1">
+  <div id="mini-game-content">
+    <h3 id="mini-game-title">Capture Mini-Game</h3>
+    <canvas id="mini-game-canvas" width="300" height="150" aria-label="Mini-game canvas"></canvas>
+    <div id="mini-game-message" aria-live="polite"></div>
+    <button id="mini-game-close-btn" aria-label="Close mini-game" disabled>Close</button>
+  </div>
+</div>
+
+<script>
+/**
+ * Capture and Collection Game with Innovative Features
+ * 
+ * Added innovative features:
+ * 1. Photo Mode: Click collected creatures to view a detailed photo with description.
+ * 2. Mini-Game: For difficult captures (rare creatures), a mini-game must be completed to succeed.
+ * 3. Environmental Interaction: Weather affects capture success rates.
+ * 
+ * Existing functionality is preserved.
+ */
+
+// Game configuration constants
+const CREATURE_TYPES = [
+  {
+    id: 'butterfly',
+    name: 'Butterfly',
+    color: '#ff6f91',
+    svgPath: 'M10 10c5 0 5 10 0 10s-5-10 0-10z', // simplified wing shape
+    rarity: 'common',
+    description: 'A delicate butterfly fluttering gracefully.'
+  },
+  {
+    id: 'frog',
+    name: 'Frog',
+    color: '#4caf50',
+    svgPath: 'M5 15c5-10 15-10 10 0s-10 10-10 0z', // simplified frog shape
+    rarity: 'common',
+    description: 'A lively green frog hopping around.'
+  },
+  {
+    id: 'bird',
+    name: 'Bird',
+    color: '#2196f3',
+    svgPath: 'M10 10l10 5-10 5z', // simplified bird shape
+    rarity: 'rare',
+    description: 'A swift blue bird soaring in the sky.'
+  },
+  {
+    id: 'ladybug',
+    name: 'Ladybug',
+    color: '#e91e63',
+    svgPath: 'M10 10a10 10 0 1 1 0 20a10 10 0 1 1 0-20z', // circle shape
+    rarity: 'rare',
+    description: 'A charming ladybug with black spots.'
+  }
+];
+const CREATURE_SIZE = 50; // px width and height
+const SPAWN_INTERVAL = 2500; // ms between spawns
+const MAX_CREATURES = 12; // max creatures on screen
+const NET_RADIUS = 40; // radius of net capture area in px
+const NET_THROW_COOLDOWN = 1500; // ms cooldown between net throws
+
+// Environmental states affecting capture rates
+const ENVIRONMENTS = [
+  { name: 'Sunny', captureModifier: 1.0, color: '#a0d8f7' },
+  { name: 'Rainy', captureModifier: 0.7, color: '#7aa7d9' },
+  { name: 'Windy', captureModifier: 0.85, color: '#8fbce6' },
+  { name: 'Foggy', captureModifier: 0.6, color: '#9db3c9' }
+];
+let currentEnvironmentIndex = 0;
+
+// DOM references
+const gameArea = document.getElementById('game-area');
+const collectionList = document.getElementById('collection-list');
+const throwNetBtn = document.getElementById('throw-net-btn');
+const netVisual = document.getElementById('net');
+const photoModeOverlay = document.getElementById('photo-mode-overlay');
+const photoModeSvgContainer = document.getElementById('photo-mode-svg-container');
+const photoModeDescription = document.getElementById('photo-mode-description');
+const photoModeCloseBtn = document.getElementById('photo-mode-close-btn');
+const miniGameModal = document.getElementById('mini-game-modal');
+const miniGameCanvas = document.getElementById('mini-game-canvas');
+const miniGameMessage = document.getElementById('mini-game-message');
+const miniGameCloseBtn = document.getElementById('mini-game-close-btn');
+
+// Game state
+let creatures = []; // array of creature objects currently on screen
+let collection = {}; // map of creatureId -> count
+let netMode = false; // whether player is currently throwing a net
+let lastNetThrowTime = 0; // timestamp of last net throw
+
+// Mini-game state
+let miniGameActive = false;
+let miniGameSuccessCallback = null;
+let miniGameFailCallback = null;
+
+// Utility function to create SVG element for a creature
+function createCreatureSVG(type) {
+  const xmlns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(xmlns, "svg");
+  svg.setAttribute("width", CREATURE_SIZE);
+  svg.setAttribute("height", CREATURE_SIZE);
+  svg.setAttribute("viewBox", "0 0 30 30");
+  svg.setAttribute("aria-label", type.name);
+  svg.setAttribute("role", "img");
+  svg.style.userSelect = "none";
+
+  // Background circle for ladybug or base shape
+  if (type.id === 'ladybug') {
+    const circle = document.createElementNS(xmlns, "circle");
+    circle.setAttribute("cx", "15");
+    circle.setAttribute("cy", "15");
+    circle.setAttribute("r", "14");
+    circle.setAttribute("fill", type.color);
+    circle.setAttribute("stroke", "#880e4f");
+    circle.setAttribute("stroke-width", "2");
+    svg.appendChild(circle);
+
+    // Black spots
+    for (let i = 0; i < 5; i++) {
+      const spot = document.createElementNS(xmlns, "circle");
+      const angle = (i * 72) * Math.PI / 180;
+      const r = 6;
+      const cx = 15 + Math.cos(angle) * 7;
+      const cy = 15 + Math.sin(angle) * 7;
+      spot.setAttribute("cx", cx);
+      spot.setAttribute("cy", cy);
+      spot.setAttribute("r", r);
+      spot.setAttribute("fill", "#000");
+      svg.appendChild(spot);
+    }
+  } else {
+    // For other creatures, create a path with fill color
+    const path = document.createElementNS(xmlns, "path");
+    path.setAttribute("d", type.svgPath);
+    path.setAttribute("fill", type.color);
+    path.setAttribute("stroke", "#333");
+    path.setAttribute("stroke-width", "1");
+    svg.appendChild(path);
+  }
+
+  return svg;
+}
+
+// Creature class to manage individual creatures
+class Creature {
+  constructor(type, x, y) {
+    this.type = type;
+    this.x = x; // top-left x in px relative to game area
+    this.y = y; // top-left y in px relative to game area
+    this.speedX = (Math.random() * 0.6 + 0.2) * (Math.random() < 0.5 ? -1 : 1); // horizontal speed px/frame
+    this.speedY = (Math.random() * 0.4 + 0.1) * (Math.random() < 0.5 ? -1 : 1); // vertical speed px/frame
+    this.element = document.createElement('div');
+    this.element.classList.add('creature');
+    this.element.style.width = CREATURE_SIZE + 'px';
+    this.element.style.height = CREATURE_SIZE + 'px';
+    this.element.style.left = this.x + 'px';
+    this.element.style.top = this.y + 'px';
+    this.element.setAttribute('tabindex', '-1');
+    this.element.setAttribute('aria-label', this.type.name + ' creature');
+    this.element.setAttribute('role', 'img');
+    this.element.style.position = 'absolute';
+    this.element.style.userSelect = 'none';
+
+    // Append SVG inside creature div
+    const svg = createCreatureSVG(type);
+    this.element.appendChild(svg);
+
+    // Tooltip
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('tooltip');
+    tooltip.textContent = type.name;
+    this.element.appendChild(tooltip);
+
+    // Add to game area
+    gameArea.appendChild(this.element);
+  }
+
+  // Update position based on speed and bounce off edges
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // Bounce horizontally
+    if (this.x <= 0) {
+      this.x = 0;
+      this.speedX = -this.speedX;
+    } else if (this.x + CREATURE_SIZE >= gameArea.clientWidth) {
+      this.x = gameArea.clientWidth - CREATURE_SIZE;
+      this.speedX = -this.speedX;
+    }
+    // Bounce vertically
+    if (this.y <= 0) {
+      this.y = 0;
+      this.speedY = -this.speedY;
+    } else if (this.y + CREATURE_SIZE >= gameArea.clientHeight) {
+      this.y = gameArea.clientHeight - CREATURE_SIZE;
+      this.speedY = -this.speedY;
+    }
+
+    this.element.style.left = this.x + 'px';
+    this.element.style.top = this.y + 'px';
+  }
+
+  // Get center coordinates of creature for collision detection
+  getCenter() {
+    return {
+      x: this.x + CREATURE_SIZE / 2,
+      y: this.y + CREATURE_SIZE / 2
+    };
+  }
+
+  // Remove creature from DOM
+  remove() {
+    if (this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
+    }
+  }
+}
+
+// Spawn a new creature at a random position inside the game area
+function spawnCreature() {
+  if (creatures.length >= MAX_CREATURES) return;
+
+  const type = CREATURE_TYPES[Math.floor(Math.random() * CREATURE_TYPES.length)];
+  const maxX = gameArea.clientWidth - CREATURE_SIZE;
+  const maxY = gameArea.clientHeight - CREATURE_SIZE;
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  const creature = new Creature(type, x, y);
+  creatures.push(creature);
+}
+
+// Update all creatures positions
+function updateCreatures() {
+  creatures.forEach(creature => creature.update());
+}
+
+// Capture creatures inside net radius at given coordinates
+// For rare creatures, trigger mini-game to determine capture success
+function captureCreaturesAt(x, y) {
+  // Find creatures within NET_RADIUS of (x,y)
+  const candidates = [];
+  creatures.forEach(creature => {
+    const center = creature.getCenter();
+    const dx = center.x - x;
+    const dy = center.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance <= NET_RADIUS) {
+      candidates.push(creature);
+    }
+  });
+
+  if (candidates.length === 0) {
+    return false; // no capture
+  }
+
+  // Separate rare and common creatures
+  const rareCreatures = candidates.filter(c => c.type.rarity === 'rare');
+  const commonCreatures = candidates.filter(c => c.type.rarity !== 'rare');
+
+  // Capture common creatures immediately
+  commonCreatures.forEach(creature => {
+    creature.remove();
+    creatures = creatures.filter(c => c !== creature);
+    addToCollection(creature.type.id);
+  });
+
+  // For rare creatures, start mini-game for each one sequentially
+  if (rareCreatures.length > 0) {
+    // Pause game loop updates during mini-game
+    pauseGameLoop();
+
+    // Process rare creatures one by one
+    let index = 0;
+    function processNextRare() {
+      if (index >= rareCreatures.length) {
+        resumeGameLoop();
+        return;
+      }
+      const creature = rareCreatures[index];
+      startMiniGame(creature, success => {
+        if (success) {
+          creature.remove();
+          creatures = creatures.filter(c => c !== creature);
+          addToCollection(creature.type.id);
+          flashGameArea('#a0f7a0');
+        } else {
+          flashGameArea('#f7a0a0');
+        }
+        index++;
+        processNextRare();
+      });
+    }
+    processNextRare();
+  }
+
+  return true;
+}
+
+// Add a creature type to the player's collection
+function addToCollection(creatureId) {
+  if (!collection[creatureId]) {
+    collection[creatureId] = 0;
+  }
+  collection[creatureId]++;
+  renderCollection();
+}
+
+// Render the collection panel
+function renderCollection() {
+  collectionList.innerHTML = '';
+  // Sort by name alphabetically
+  const sortedTypes = CREATURE_TYPES.slice().sort((a, b) => a.name.localeCompare(b.name));
+  sortedTypes.forEach(type => {
+    if (collection[type.id]) {
+      const count = collection[type.id];
+      const item = document.createElement('div');
+      item.classList.add('collected-item');
+      item.setAttribute('aria-label', `${type.name} x${count}`);
+      item.setAttribute('tabindex', '0');
+      item.dataset.creatureId = type.id;
+
+      // Create SVG icon for collection item (smaller)
+      const svg = createCreatureSVG(type);
+      svg.setAttribute('width', '40');
+      svg.setAttribute('height', '40');
+      item.appendChild(svg);
+
+      // Count badge
+      const countBadge = document.createElement('div');
+      countBadge.classList.add('collected-count');
+      countBadge.textContent = count;
+      item.appendChild(countBadge);
+
+      collectionList.appendChild(item);
+    }
+  });
+}
+
+// Handle net throw button toggle
+function toggleNetMode() {
+  netMode = !netMode;
+  throwNetBtn.setAttribute('aria-pressed', netMode.toString());
+  throwNetBtn.textContent = netMode ? 'Cancel Net' : 'Throw Net';
+  if (!netMode) {
+    netVisual.style.display = 'none';
+  }
+}
+
+// Handle game area click when in net mode
+function onGameAreaClick(event) {
+  if (!netMode) return;
+
+  const now = Date.now();
+  if (now - lastNetThrowTime < NET_THROW_COOLDOWN) {
+    // Cooldown active, ignore throw
+    return;
+  }
+  lastNetThrowTime = now;
+
+  // Get click coordinates relative to game area
+  const rect = gameArea.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  // Show net visual at click position
+  netVisual.style.left = clickX + 'px';
+  netVisual.style.top = clickY + 'px';
+  netVisual.style.display = 'block';
+
+  // Animate net throw (scale up and fade out)
+  netVisual.style.transition = 'none';
+  netVisual.style.transform = 'translate(-50%, -50%) scale(0.5)';
+  netVisual.style.opacity = '0.8';
+  requestAnimationFrame(() => {
+    netVisual.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+    netVisual.style.transform = 'translate(-50%, -50%) scale(1.2)';
+    netVisual.style.opacity = '0';
+  });
+
+  // After animation, hide net visual
+  setTimeout(() => {
+    netVisual.style.display = 'none';
+    netVisual.style.opacity = '0.8';
+    netVisual.style.transform = 'translate(-50%, -50%) scale(1)';
+  }, 400);
+
+  // Check for captures with environmental modifier
+  const captureSuccess = attemptCaptureWithEnvironment(clickX, clickY);
+
+  // Provide feedback
+  if (captureSuccess) {
+    // Flash game area green briefly
+    flashGameArea('#a0f7a0');
+  } else {
+    // Flash game area red briefly
+    flashGameArea('#f7a0a0');
+  }
+
+  // Exit net mode after throw
+  toggleNetMode();
+}
+
+// Attempt capture considering environment and mini-game for rares
+function attemptCaptureWithEnvironment(x, y) {
+  // Environmental capture modifier
+  const env = ENVIRONMENTS[currentEnvironmentIndex];
+  // We simulate environment affecting capture chance by adjusting success chance for common creatures
+  // Rare creatures require mini-game, so environment affects mini-game success chance indirectly
+
+  // Find creatures within NET_RADIUS of (x,y)
+  const candidates = [];
+  creatures.forEach(creature => {
+    const center = creature.getCenter();
+    const dx = center.x - x;
+    const dy = center.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance <= NET_RADIUS) {
+      candidates.push(creature);
+    }
+  });
+
+  if (candidates.length === 0) {
+    return false; // no capture
+  }
+
+  // For common creatures, apply environment capture chance
+  const commonCreatures = candidates.filter(c => c.type.rarity !== 'rare');
+  const rareCreatures = candidates.filter(c => c.type.rarity === 'rare');
+
+  let anyCaptured = false;
+
+  // Capture common creatures with environment chance
+  commonCreatures.forEach(creature => {
+    const baseChance = 1.0; // common creatures always captured if in net
+    const chance = baseChance * env.captureModifier;
+    if (Math.random() <= chance) {
+      creature.remove();
+      creatures = creatures.filter(c => c !== creature);
+      addToCollection(creature.type.id);
+      anyCaptured = true;
+    }
+  });
+
+  // For rare creatures, start mini-game for each one sequentially
+  if (rareCreatures.length > 0) {
+    // Pause game loop updates during mini-game
+    pauseGameLoop();
+
+    // Process rare creatures one by one
+    let index = 0;
+    function processNextRare() {
+      if (index >= rareCreatures.length) {
+        resumeGameLoop();
+        return;
+      }
+      const creature = rareCreatures[index];
+      startMiniGame(creature, success => {
+        if (success) {
+          creature.remove();
+          creatures = creatures.filter(c => c !== creature);
+          addToCollection(creature.type.id);
+          flashGameArea('#a0f7a0');
+          anyCaptured = true;
+        } else {
+          flashGameArea('#f7a0a0');
+        }
+        index++;
+        processNextRare();
+      }, env.captureModifier);
+    }
+    processNextRare();
+  }
+
+  return anyCaptured;
+}
+
+// Flash the game area background color briefly for feedback
+function flashGameArea(color) {
+  const original = gameArea.style.backgroundColor || '#d0f0ff';
+  gameArea.style.backgroundColor = color;
+  setTimeout(() => {
+    gameArea.style.backgroundColor = original;
+  }, 300);
+}
+
+// Game loop for updating creatures
+let gameLoopId = null;
+function gameLoop() {
+  updateCreatures();
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+function pauseGameLoop() {
+  if (gameLoopId !== null) {
+    cancelAnimationFrame(gameLoopId);
+    gameLoopId = null;
+  }
+}
+function resumeGameLoop() {
+  if (gameLoopId === null) {
+    gameLoop();
+  }
+}
+
+// Spawn creatures periodically
+setInterval(spawnCreature, SPAWN_INTERVAL);
+
+// Event listeners
+throwNetBtn.addEventListener('click', () => {
+  toggleNetMode();
+});
+
+gameArea.addEventListener('click', onGameAreaClick);
+
+// Keyboard accessibility: allow space/enter to toggle net mode when button focused
+throwNetBtn.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    toggleNetMode();
+  }
+});
+
+// Collection item click to open photo mode
+collectionList.addEventListener('click', event => {
+  const item = event.target.closest('.collected-item');
+  if (!item) return;
+  const creatureId = item.dataset.creatureId;
+  if (!creatureId) return;
+  openPhotoMode(creatureId);
+});
+collectionList.addEventListener('keydown', event => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    const item = event.target.closest('.collected-item');
+    if (!item) return;
+    const creatureId = item.dataset.creatureId;
+    if (!creatureId) return;
+    openPhotoMode(creatureId);
+  }
+});
+
+// Photo mode functions
+function openPhotoMode(creatureId) {
+  const type = CREATURE_TYPES.find(t => t.id === creatureId);
+  if (!type) return;
+  photoModeSvgContainer.innerHTML = '';
+  const svg = createCreatureSVG(type);
+  svg.setAttribute('width', '150');
+  svg.setAttribute('height', '150');
+  photoModeSvgContainer.appendChild(svg);
+  photoModeDescription.textContent = type.description || '';
+  photoModeOverlay.style.display = 'flex';
+  photoModeOverlay.focus();
+}
+function closePhotoMode() {
+  photoModeOverlay.style.display = 'none';
+  photoModeSvgContainer.innerHTML = '';
+  photoModeDescription.textContent = '';
+  throwNetBtn.focus();
+}
+photoModeCloseBtn.addEventListener('click', closePhotoMode);
+photoModeOverlay.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closePhotoMode();
+  }
+});
+
+// Mini-game implementation: simple "Click the moving target" game
+function startMiniGame(creature, callback, envModifier = 1.0) {
+  miniGameActive = true;
+  miniGameModal.style.display = 'flex';
+  miniGameMessage.textContent = 'Click the moving target to capture the ' + creature.type.name + '!';
+  miniGameCloseBtn.disabled = true;
+  miniGameCloseBtn.textContent = 'Close';
+  miniGameCloseBtn.setAttribute('aria-disabled', 'true');
+
+  const ctx = miniGameCanvas.getContext('2d');
+  const width = miniGameCanvas.width;
+  const height = miniGameCanvas.height;
+
+  // Target properties
+  const targetRadius = 15;
+  let targetX = Math.random() * (width - 2 * targetRadius) + targetRadius;
+  let targetY = Math.random() * (height - 2 * targetRadius) + targetRadius;
+  let speedX = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1);
+  let speedY = (Math.random() * 1.5 + 0.5) * (Math.random() < 0.5 ? -1 : 1);
+
+  let animationFrameId = null;
+  let gameOver = false;
+  let timeLeft = 8000; // 8 seconds to catch
+  let lastTime = null;
+
+  // Adjust difficulty by environment modifier (lower modifier = harder)
+  // We reduce target size and increase speed if modifier is low
+  const difficultyScale = 1 / envModifier;
+  const adjustedRadius = Math.max(8, targetRadius / difficultyScale);
+  const adjustedSpeedMultiplier = difficultyScale;
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw target (circle with creature color)
+    ctx.beginPath();
+    ctx.arc(targetX, targetY, adjustedRadius, 0, Math.PI * 2);
+    ctx.fillStyle = creature.type.color;
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw eyes or simple pattern for fun
+    ctx.beginPath();
+    ctx.arc(targetX - adjustedRadius / 3, targetY - adjustedRadius / 4, adjustedRadius / 5, 0, Math.PI * 2);
+    ctx.arc(targetX + adjustedRadius / 3, targetY - adjustedRadius / 4, adjustedRadius / 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+  }
+
+  function update(delta) {
+    targetX += speedX * adjustedSpeedMultiplier;
+    targetY += speedY * adjustedSpeedMultiplier;
+
+    if (targetX - adjustedRadius <= 0) {
+      targetX = adjustedRadius;
+      speedX = -speedX;
+    } else if (targetX + adjustedRadius >= width) {
+      targetX = width - adjustedRadius;
+      speedX = -speedX;
+    }
+    if (targetY - adjustedRadius <= 0) {
+      targetY = adjustedRadius;
+      speedY = -speedY;
+    } else if (targetY + adjustedRadius >= height) {
+      targetY = height - adjustedRadius;
+      speedY = -speedY;
+    }
+  }
+
+  function gameLoopMini(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    const delta = timestamp - lastTime;
+    lastTime = timestamp;
+
+    if (gameOver) return;
+
+    timeLeft -= delta;
+    if (timeLeft <= 0) {
+      endGame(false);
+      return;
+    }
+
+    update(delta);
+    draw();
+    animationFrameId = requestAnimationFrame(gameLoopMini);
+  }
+
+  function endGame(success) {
+    gameOver = true;
+    miniGameCloseBtn.disabled = false;
+    miniGameCloseBtn.setAttribute('aria-disabled', 'false');
+    miniGameMessage.textContent = success ? 'Success! You captured the ' + creature.type.name + '!' : 'Failed to capture the ' + creature.type.name + '.';
+    miniGameCloseBtn.focus();
+    if (callback) callback(success);
+  }
+
+  function onCanvasClick(e) {
+    if (gameOver) return;
+    const rect = miniGameCanvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    const dist = Math.sqrt((clickX - targetX) ** 2 + (clickY - targetY) ** 2);
+    if (dist <= adjustedRadius) {
+      endGame(true);
+    }
+  }
+
+  function onCloseClick() {
+    if (!gameOver) {
+      // If closed early, treat as failure
+      endGame(false);
+    } else {
+      closeMiniGame();
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      onCloseClick();
+    }
+  }
+
+  function closeMiniGame() {
+    miniGameModal.style.display = 'none';
+    miniGameCanvas.removeEventListener('click', onCanvasClick);
+    miniGameCloseBtn.removeEventListener('click', onCloseClick);
+    miniGameModal.removeEventListener('keydown', onKeyDown);
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    miniGameActive = false;
+    resumeGameLoop();
+    throwNetBtn.focus();
+  }
+
+  miniGameCanvas.addEventListener('click', onCanvasClick);
+  miniGameCloseBtn.addEventListener('click', onCloseClick);
+  miniGameModal.addEventListener('keydown', onKeyDown);
+
+  // Start game loop
+  animationFrameId = requestAnimationFrame(gameLoopMini);
+}
+
+// Close mini-game modal when close button clicked after game over
+miniGameCloseBtn.addEventListener('click', () => {
+  if (miniGameActive) return; // prevent closing before game over
+  miniGameModal.style.display = 'none';
+  throwNetBtn.focus();
+});
+
+// Environmental cycle: change environment every 30 seconds
+function cycleEnvironment() {
+  currentEnvironmentIndex = (currentEnvironmentIndex + 1) % ENVIRONMENTS.length;
+  const env = ENVIRONMENTS[currentEnvironmentIndex];
+  // Update game area background gradient to reflect environment
+  gameArea.style.background = `linear-gradient(135deg, ${env.color}, #f0f9ff)`;
+  // Show environment name briefly
+  showEnvironmentNotification(env.name);
+}
+setInterval(cycleEnvironment, 30000);
+cycleEnvironment(); // initial call
+
+// Show environment notification
+function showEnvironmentNotification(name) {
+  const notif = document.createElement('div');
+  notif.textContent = `Environment: ${name}`;
+  notif.style.position = 'absolute';
+  notif.style.top = '10px';
+  notif.style.left = '50%';
+  notif.style.transform = 'translateX(-50%)';
+  notif.style.background = '#0077cccc';
+  notif.style.color = 'white';
+  notif.style.padding = '4px 12px';
+  notif.style.borderRadius = '12px';
+  notif.style.fontWeight = '700';
+  notif.style.userSelect = 'none';
+  notif.style.zIndex = '20';
+  notif.style.opacity = '0';
+  notif.style.transition = 'opacity 0.5s ease';
+  gameArea.appendChild(notif);
+  requestAnimationFrame(() => {
+    notif.style.opacity = '1';
+  });
+  setTimeout(() => {
+    notif.style.opacity = '0';
+    setTimeout(() => {
+      if (notif.parentNode) notif.parentNode.removeChild(notif);
+    }, 500);
+  }, 2500);
+}
+
+// Initialize game
+function init() {
+  renderCollection();
+  gameLoop();
+  // Spawn initial creatures
+  for (let i = 0; i < 5; i++) {
+    spawnCreature();
+  }
+}
+init();
+</script>
+</body>
+</html>

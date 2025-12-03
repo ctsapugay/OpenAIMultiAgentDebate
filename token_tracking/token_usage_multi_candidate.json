@@ -1,0 +1,122 @@
+{
+  "Game Development-Puzzle": {
+    "tasks": {
+      "task_1": {
+        "input_tokens": 86910,
+        "output_tokens": 30483,
+        "total_tokens": 117393,
+        "cost_usd": 0.0313,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:32:17"
+      }
+    },
+    "total_cost_usd": 0.0313
+  },
+  "Game Development-Role-Playing": {
+    "tasks": {
+      "task_2": {
+        "input_tokens": 142298,
+        "output_tokens": 49766,
+        "total_tokens": 192064,
+        "cost_usd": 0.0512,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:37:14"
+      },
+      "task_3": {
+        "input_tokens": 179032,
+        "output_tokens": 62925,
+        "total_tokens": 241957,
+        "cost_usd": 0.0646,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:40:27"
+      }
+    },
+    "total_cost_usd": 0.1158
+  },
+  "Game Development-Strategy": {
+    "tasks": {
+      "task_4": {
+        "input_tokens": 292633,
+        "output_tokens": 102926,
+        "total_tokens": 395559,
+        "cost_usd": 0.1057,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:49:51"
+      },
+      "task_9": {
+        "input_tokens": 625562,
+        "output_tokens": 230955,
+        "total_tokens": 856517,
+        "cost_usd": 0.2324,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 20:23:53"
+      }
+    },
+    "total_cost_usd": 0.3381
+  },
+  "SVG Generation-SVG Images": {
+    "tasks": {
+      "task_5": {
+        "input_tokens": 341740,
+        "output_tokens": 118439,
+        "total_tokens": 460179,
+        "cost_usd": 0.1223,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:53:52"
+      }
+    },
+    "total_cost_usd": 0.1223
+  },
+  "Game Development-Casual": {
+    "tasks": {
+      "task_6": {
+        "input_tokens": 394752,
+        "output_tokens": 137024,
+        "total_tokens": 531776,
+        "cost_usd": 0.1414,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 19:58:36"
+      }
+    },
+    "total_cost_usd": 0.1414
+  },
+  "Game Development-Simulation/Management": {
+    "tasks": {
+      "task_7": {
+        "input_tokens": 504479,
+        "output_tokens": 182361,
+        "total_tokens": 686840,
+        "cost_usd": 0.1851,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 20:11:14"
+      }
+    },
+    "total_cost_usd": 0.1851
+  },
+  "Game Development-Action/Rhythm": {
+    "tasks": {
+      "task_8": {
+        "input_tokens": 571290,
+        "output_tokens": 208079,
+        "total_tokens": 779369,
+        "cost_usd": 0.2105,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 20:17:52"
+      }
+    },
+    "total_cost_usd": 0.2105
+  },
+  "Simulation & Modeling-Mathematical Abstraction": {
+    "tasks": {
+      "task_10": {
+        "input_tokens": 679394,
+        "output_tokens": 253029,
+        "total_tokens": 932423,
+        "cost_usd": 0.2537,
+        "model": "gpt-4.1-mini",
+        "timestamp": "2025-12-02 20:29:44"
+      }
+    },
+    "total_cost_usd": 0.2537
+  }
+}

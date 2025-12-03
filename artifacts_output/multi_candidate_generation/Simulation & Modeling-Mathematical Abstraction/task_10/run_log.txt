@@ -1,0 +1,2083 @@
+2025-12-02 20:23:53 - INFO - 
+================================================================================
+2025-12-02 20:23:53 - INFO - MULTI-CANDIDATE ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-12-02 20:23:53 - INFO - ================================================================================
+2025-12-02 20:23:53 - INFO - Task ID: 10
+2025-12-02 20:23:53 - INFO - Task Class: Simulation & Modeling-Mathematical Abstraction
+2025-12-02 20:23:53 - INFO - Task Difficulty: medium
+2025-12-02 20:23:53 - INFO - Improvement Threshold: 7.0
+2025-12-02 20:23:53 - INFO - Max Iterations: 2
+2025-12-02 20:23:53 - INFO - Start Time: 2025-12-02 20:23:53
+2025-12-02 20:23:53 - INFO - Model: gpt-4.1-mini
+2025-12-02 20:23:53 - INFO - Screenshots Enabled: True
+2025-12-02 20:23:53 - INFO - Use Screenshots in Evaluation: True
+2025-12-02 20:23:53 - INFO - Multi-Candidate Generation: ENABLED
+2025-12-02 20:23:53 - INFO - ================================================================================
+2025-12-02 20:23:53 - INFO - 
+================================================================================
+2025-12-02 20:23:53 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-12-02 20:23:53 - INFO - ================================================================================
+2025-12-02 20:23:53 - INFO - 
+================================================================================
+2025-12-02 20:23:53 - INFO - GENERATING INITIAL CODE...
+2025-12-02 20:23:53 - INFO - ================================================================================
+2025-12-02 20:23:53 - INFO - Model: gpt-4.1-mini
+2025-12-02 20:23:53 - INFO - Temperature: 0.0
+2025-12-02 20:23:53 - INFO - Task Question (first 200 chars): You are a code expert. Please use your professional knowledge to provide accurate and professional responses. Make sure the generated code is executable for demonstration purposes. I'd like to make a ...
+2025-12-02 20:24:46 - INFO - ✓ Initial code generated (took 52.89 seconds)
+2025-12-02 20:24:46 - INFO - Generated code length: 12557 characters
+2025-12-02 20:24:46 - INFO - Response length: 12557 characters
+2025-12-02 20:24:46 - INFO - 
+================================================================================
+2025-12-02 20:24:46 - INFO - INITIAL HTML CODE
+2025-12-02 20:24:46 - INFO - ================================================================================
+2025-12-02 20:24:46 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conway's Game of Life on a Sphere</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+  }
+  canvas {
+    display: block;
+    background: black;
+    cursor: grab;
+  }
+  canvas:active {
+    cursor: grabbing;
+  }
+</style>
+</head>
+<body>
+<canvas id="glcanvas"></canvas>
+<script>
+// Conway's Game of Life on a Sphere with multicolor cells
+
+(() => {
+  const canvas = document.getElementById('glcanvas');
+  const gl = canvas.getContext('webgl', {antialias: true});
+  if (!gl) {
+    alert('WebGL not supported');
+    return;
+  }
+
+  // Resize canvas to fill window
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Vertex shader source
+  const vertexSrc = `
+    attribute vec3 aPosition;
+    attribute vec3 aColor;
+    uniform mat4 uMVP;
+    varying vec3 vColor;
+    void main() {
+      gl_Position = uMVP * vec4(aPosition, 1.0);
+      vColor = aColor;
+      gl_PointSize = 4.0;
+    }
+  `;
+
+  // Fragment shader source
+  const fragmentSrc = `
+    precision mediump float;
+    varying vec3 vColor;
+    void main() {
+      // Draw small square points
+      gl_FragColor = vec4(vColor, 1.0);
+    }
+  `;
+
+  // Compile shader
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader compile failed:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  // Create program
+  function createProgram(vsSource, fsSource) {
+    const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+    const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Program link failed:', gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      return null;
+    }
+    return program;
+  }
+
+  const program = createProgram(vertexSrc, fragmentSrc);
+  gl.useProgram(program);
+
+  // Attributes and uniforms
+  const aPositionLoc = gl.getAttribLocation(program, 'aPosition');
+  const aColorLoc = gl.getAttribLocation(program, 'aColor');
+  const uMVPLoc = gl.getUniformLocation(program, 'uMVP');
+
+  // Sphere grid parameters
+  // We'll create a grid of cells on the sphere by subdividing latitude and longitude
+  // Each cell is a small square on the sphere surface defined by lat/lon ranges
+  // We'll store the state of each cell (alive/dead) and a color for alive cells
+
+  const LAT_DIV = 90;  // latitude divisions (from -90 to +90)
+  const LON_DIV = 180; // longitude divisions (from -180 to +180)
+  const CELL_COUNT = LAT_DIV * LON_DIV;
+
+  // Game state arrays
+  // 0 = dead, >0 = alive with color index
+  let currentState = new Uint8Array(CELL_COUNT);
+  let nextState = new Uint8Array(CELL_COUNT);
+
+  // Color palette for alive cells (multicolor)
+  // We'll pick a palette of bright colors
+  const palette = [
+    [1.0, 0.2, 0.2], // red
+    [0.2, 1.0, 0.2], // green
+    [0.2, 0.2, 1.0], // blue
+    [1.0, 1.0, 0.2], // yellow
+    [1.0, 0.2, 1.0], // magenta
+    [0.2, 1.0, 1.0], // cyan
+    [1.0, 0.6, 0.2], // orange
+    [0.6, 0.2, 1.0], // purple
+  ];
+  const PALETTE_SIZE = palette.length;
+
+  // Initialize with random alive cells
+  function randomInit() {
+    for(let i=0; i<CELL_COUNT; i++) {
+      if(Math.random() < 0.12) {
+        currentState[i] = 1 + Math.floor(Math.random() * PALETTE_SIZE);
+      } else {
+        currentState[i] = 0;
+      }
+    }
+  }
+  randomInit();
+
+  // Convert lat/lon indices to 3D position on unit sphere
+  // latIndex: 0..LAT_DIV-1, lonIndex: 0..LON_DIV-1
+  // lat from -90 to +90 degrees, lon from -180 to +180 degrees
+  function latLonToXYZ(latIndex, lonIndex) {
+    const lat = (latIndex / (LAT_DIV - 1)) * Math.PI - Math.PI/2; // -π/2 to +π/2
+    const lon = (lonIndex / (LON_DIV - 1)) * 2 * Math.PI - Math.PI; // -π to +π
+    const x = Math.cos(lat) * Math.cos(lon);
+    const y = Math.sin(lat);
+    const z = Math.cos(lat) * Math.sin(lon);
+    return [x, y, z];
+  }
+
+  // For each cell, we will render a small square on the sphere surface.
+  // Since points are small, we can render each cell as a GL_POINTS with point size 4.
+  // We'll send one vertex per alive cell with its position and color.
+
+  // Buffers
+  const positionBuffer = gl.createBuffer();
+  const colorBuffer = gl.createBuffer();
+
+  // Rotation state for sphere
+  let rotationX = 0;
+  let rotationY = 0;
+  let isDragging = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+  });
+  window.addEventListener('mouseup', e => {
+    isDragging = false;
+  });
+  window.addEventListener('mousemove', e => {
+    if(isDragging) {
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      rotationY += dx * 0.005;
+      rotationX += dy * 0.005;
+      rotationX = Math.min(Math.max(rotationX, -Math.PI/2), Math.PI/2);
+    }
+  });
+
+  // Matrix utilities
+  function createIdentity() {
+    return new Float32Array([
+      1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1
+    ]);
+  }
+  function multiplyMat4(a,b) {
+    const out = new Float32Array(16);
+    for(let i=0; i<4; i++) {
+      for(let j=0; j<4; j++) {
+        out[i*4+j] = 0;
+        for(let k=0; k<4; k++) {
+          out[i*4+j] += a[i*4+k]*b[k*4+j];
+        }
+      }
+    }
+    return out;
+  }
+  function perspective(fovy, aspect, near, far) {
+    const f = 1/Math.tan(fovy/2);
+    const nf = 1/(near - far);
+    const out = new Float32Array(16);
+    out[0] = f / aspect;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+
+    out[4] = 0;
+    out[5] = f;
+    out[6] = 0;
+    out[7] = 0;
+
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = (far + near) * nf;
+    out[11] = -1;
+
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = (2 * far * near) * nf;
+    out[15] = 0;
+    return out;
+  }
+  function translate(m, v) {
+    const out = new Float32Array(m);
+    out[12] += v[0];
+    out[13] += v[1];
+    out[14] += v[2];
+    return out;
+  }
+  function rotateX(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]; out[1] = m[1]; out[2] = m[2]; out[3] = m[3];
+    out[4] = m[4]*c + m[8]*s;
+    out[5] = m[5]*c + m[9]*s;
+    out[6] = m[6]*c + m[10]*s;
+    out[7] = m[7]*c + m[11]*s;
+    out[8] = m[8]*c - m[4]*s;
+    out[9] = m[9]*c - m[5]*s;
+    out[10] = m[10]*c - m[6]*s;
+    out[11] = m[11]*c - m[7]*s;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+  function rotateY(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]*c - m[8]*s;
+    out[1] = m[1]*c - m[9]*s;
+    out[2] = m[2]*c - m[10]*s;
+    out[3] = m[3]*c - m[11]*s;
+    out[4] = m[4]; out[5] = m[5]; out[6] = m[6]; out[7] = m[7];
+    out[8] = m[0]*s + m[8]*c;
+    out[9] = m[1]*s + m[9]*c;
+    out[10] = m[2]*s + m[10]*c;
+    out[11] = m[3]*s + m[11]*c;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+
+  // Game of Life rules on sphere grid
+  // Neighbors: 8 neighbors around each cell in lat/lon grid with wrapping on longitude
+  // Latitude does not wrap, but top and bottom rows have fewer neighbors
+  // We'll treat the grid as a torus in longitude, and capped at poles in latitude
+
+  function getIndex(lat, lon) {
+    // Clamp lat between 0 and LAT_DIV-1
+    if(lat < 0 || lat >= LAT_DIV) return -1;
+    // Wrap lon
+    lon = (lon + LON_DIV) % LON_DIV;
+    return lat * LON_DIV + lon;
+  }
+
+  function countAliveNeighbors(lat, lon) {
+    let count = 0;
+    let colors = {};
+    for(let dLat = -1; dLat <= 1; dLat++) {
+      for(let dLon = -1; dLon <= 1; dLon++) {
+        if(dLat === 0 && dLon === 0) continue;
+        const nLat = lat + dLat;
+        const nLon = lon + dLon;
+        const idx = getIndex(nLat, nLon);
+        if(idx >= 0 && currentState[idx] > 0) {
+          count++;
+          const c = currentState[idx];
+          colors[c] = (colors[c] || 0) + 1;
+        }
+      }
+    }
+    return {count, colors};
+  }
+
+  // For color of new born cell, pick the most frequent neighbor color
+  function mostFrequentColor(colors) {
+    let maxCount = 0;
+    let maxColor = 1;
+    for(const c in colors) {
+      if(colors[c] > maxCount) {
+        maxCount = colors[c];
+        maxColor = parseInt(c);
+      }
+    }
+    return maxColor;
+  }
+
+  // Update Game of Life state
+  function updateLife() {
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        const {count, colors} = countAliveNeighbors(lat, lon);
+        if(cell > 0) {
+          // Alive cell
+          if(count === 2 || count === 3) {
+            // Survives
+            nextState[idx] = cell;
+          } else {
+            // Dies
+            nextState[idx] = 0;
+          }
+        } else {
+          // Dead cell
+          if(count === 3) {
+            // Becomes alive with most frequent neighbor color
+            nextState[idx] = mostFrequentColor(colors);
+          } else {
+            nextState[idx] = 0;
+          }
+        }
+      }
+    }
+    // Swap states
+    let temp = currentState;
+    currentState = nextState;
+    nextState = temp;
+  }
+
+  // Prepare data for rendering
+  // For each alive cell, we create one vertex with position and color
+  // We'll update buffers each frame
+
+  function prepareRenderData() {
+    const positions = [];
+    const colors = [];
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        if(cell > 0) {
+          const pos = latLonToXYZ(lat, lon);
+          positions.push(...pos);
+          const cidx = (cell - 1) % PALETTE_SIZE;
+          const col = palette[cidx];
+          colors.push(...col);
+        }
+      }
+    }
+    return {positions: new Float32Array(positions), colors: new Float32Array(colors)};
+  }
+
+  // Setup buffers and attributes
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aColorLoc);
+
+  // Enable blending for nicer colors on black background
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // Clear color black
+  gl.clearColor(0,0,0,1);
+
+  // Timing for updates
+  let lastUpdate = 0;
+  const UPDATE_INTERVAL = 100; // ms
+
+  // Animation loop
+  function render(time=0) {
+    time = time|0;
+    if(time - lastUpdate > UPDATE_INTERVAL) {
+      updateLife();
+      lastUpdate = time;
+    }
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Prepare data
+    const {positions, colors} = prepareRenderData();
+
+    // Bind and upload position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Bind and upload color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Compute MVP matrix
+    const aspect = canvas.width / canvas.height;
+    let proj = perspective(Math.PI/4, aspect, 0.1, 100);
+    let view = createIdentity();
+    view = translate(view, [0, 0, -3]);
+    view = rotateX(view, rotationX);
+    view = rotateY(view, rotationY);
+    const mvp = multiplyMat4(proj, view);
+
+    gl.uniformMatrix4fv(uMVPLoc, false, mvp);
+
+    // Draw points
+    gl.drawArrays(gl.POINTS, 0, positions.length / 3);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:24:46 - INFO - ================================================================================
+2025-12-02 20:24:46 - INFO - 
+✓ Initial code saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10/iteration_0_initial.html
+2025-12-02 20:24:46 - INFO - 
+================================================================================
+2025-12-02 20:24:46 - INFO - EVALUATING INITIAL CODE
+2025-12-02 20:24:46 - INFO - ================================================================================
+2025-12-02 20:24:46 - INFO - Generating screenshots for initial code...
+2025-12-02 20:24:55 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": [
+    {
+      "width": 1280,
+      "height": 720,
+      "has_content": false
+    }
+  ]
+}
+2025-12-02 20:24:55 - INFO - Evaluating initial code...
+2025-12-02 20:25:14 - INFO - Initial evaluation completed in 18.46 seconds
+2025-12-02 20:25:14 - INFO - 
+Initial Scores:
+2025-12-02 20:25:14 - INFO - Individual Scores (JSON):
+{
+  "Is Conway's Game of Life algorithm correctly implemented?": 10.0,
+  "Is the spherical 3D visualization properly rendered?": 7.0,
+  "Are multicolor visual effects and animations implemented effectively?": 7.0,
+  "Is the grid resolution and performance optimization adequate?": 7.0,
+  "Is the code robust?": 5.0,
+  "Are there any innovative features that are eye-catching?": 4.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 7.0,
+  "Does the interface vision meet professional design standards?": 7.0,
+  "Is the dynamic interaction smooth and seamless?": 7.0
+}
+2025-12-02 20:25:14 - INFO - Initial Calculated Sum: 71.0
+2025-12-02 20:25:14 - INFO - 
+================================================================================
+2025-12-02 20:25:14 - INFO - STEP 2: MULTI-CANDIDATE ITERATIVE IMPROVEMENT LOOP
+2025-12-02 20:25:14 - INFO - ================================================================================
+2025-12-02 20:25:14 - INFO - 
+================================================================================
+2025-12-02 20:25:14 - INFO - ITERATION 1
+2025-12-02 20:25:14 - INFO - ================================================================================
+2025-12-02 20:25:14 - INFO - Iteration Start Time: 2025-12-02 20:25:14
+2025-12-02 20:25:14 - INFO - 
+Generating screenshots for iteration 1...
+2025-12-02 20:25:22 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": [
+    {
+      "width": 1280,
+      "height": 720,
+      "has_content": false
+    }
+  ]
+}
+2025-12-02 20:25:22 - INFO - 
+Evaluating code for iteration 1...
+2025-12-02 20:25:43 - INFO - Evaluation completed in 20.56 seconds
+2025-12-02 20:25:43 - INFO - 
+================================================================================
+2025-12-02 20:25:43 - INFO - EVALUATION RESULTS - ITERATION 1
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - Individual Scores (JSON):
+{
+  "Is Conway's Game of Life algorithm correctly implemented?": 10.0,
+  "Is the spherical 3D visualization properly rendered?": 7.0,
+  "Are multicolor visual effects and animations implemented effectively?": 7.0,
+  "Is the grid resolution and performance optimization adequate?": 7.0,
+  "Is the code robust?": 5.0,
+  "Are there any innovative features that are eye-catching?": 4.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 7.0,
+  "Does the interface vision meet professional design standards?": 7.0,
+  "Is the dynamic interaction smooth and seamless?": 7.0
+}
+2025-12-02 20:25:43 - INFO - Calculated Sum: 71.0
+2025-12-02 20:25:43 - INFO - Overall Score (from LLM): 69.0
+2025-12-02 20:25:43 - INFO - 
+================================================================================
+2025-12-02 20:25:43 - INFO - FULL EVALUATION FEEDBACK - ITERATION 1
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - ```json
+{
+  "Is Conway's Game of Life algorithm correctly implemented?": "10",
+  "Is the spherical 3D visualization properly rendered?": "7",
+  "Are multicolor visual effects and animations implemented effectively?": "7",
+  "Is the grid resolution and performance optimization adequate?": "7",
+  "Is the code robust?": "5",
+  "Are there any innovative features that are eye-catching?": "4",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "7",
+  "Does the interface vision meet professional design standards?": "7",
+  "Is the dynamic interaction smooth and seamless?": "7",
+  "Overall Score": "69"
+}
+```
+
+Reason:
+
+1. **Is Conway's Game of Life algorithm correctly implemented? (10/10)**  
+   The code correctly implements the core Conway's Game of Life rules on a latitude-longitude grid mapped to a sphere. It properly counts neighbors with longitude wrapping and latitude clamping (no wrap at poles), applies survival and birth rules accurately, and assigns colors to new cells based on the most frequent neighbor color. This is a faithful and complete implementation of the algorithm adapted to spherical topology.
+
+2. **Is the spherical 3D visualization properly rendered? (7/10)**  
+   The sphere is rendered using WebGL with a custom vertex shader projecting points on a unit sphere. The grid is mapped via lat/lon to 3D coordinates, and longitude wrapping is handled. However, the visualization uses GL_POINTS with fixed point size rather than actual small squares or quads, which limits the visual uniformity of cell size across the sphere. The poles are handled by latitude clamping but no special treatment to reduce distortion is evident. Camera controls (rotation) are implemented but no zoom control is present. Overall, a decent 3D sphere rendering but not fully polished or uniform in cell size.
+
+3. **Are multicolor visual effects and animations implemented effectively? (7/10)**  
+   The code uses a bright, varied color palette for alive cells and assigns colors dynamically based on neighbor colors, which is visually appealing. The background is black for good contrast. However, colors are static per cell state (no smooth transitions or age-based gradients). Animation runs at a fixed update interval (100ms) and uses requestAnimationFrame for rendering, likely smooth but no explicit frame rate control or interpolation. Cells are distinguishable but point rendering limits visual clarity compared to filled squares.
+
+4. **Is the grid resolution and performance optimization adequate? (7/10)**  
+   The grid resolution is 90x180 (16,200 cells), which meets the "lots of small squares" requirement. The neighbor calculation is straightforward but not optimized with spatial hashing or delta updates. The rendering uploads buffers every frame dynamically, which is acceptable but could be improved. No explicit performance metrics are given, but the approach should maintain reasonable frame rates on modern hardware. No memory leaks or unbounded growth observed.
+
+5. **Is the code robust? (5/10)**  
+   The code checks for WebGL support and alerts if unavailable, which is good. However, it lacks handling for WebGL context loss, browser compatibility fallbacks, or invalid input patterns. Extreme zoom is not supported (no zoom implemented). Error handling is minimal, and no recovery mechanisms are present. Robustness is average but could be improved.
+
+6. **Are there any innovative features that are eye-catching? (4/10)**  
+   The code includes multicolor cells with color inheritance from neighbors, which is a nice touch. It supports interactive sphere rotation with mouse drag. However, it lacks other common innovative features such as interactive seeding by clicking, multiple preset patterns, speed controls, generation counters, or export/import functionality. The color inheritance is a modest innovation.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is focused and minimal. No redundant rendering pipelines, unrelated modules, or fancy effects that degrade performance are present. The implementation is clean without unnecessary bloat.
+
+8. **Does the code have engineering quality? (7/10)**  
+   The code is reasonably modular with separation of shader compilation, matrix math, game logic, and rendering. Global state pollution is minimal and well contained inside an IIFE. Some magic numbers (e.g., point size, update interval) are hardcoded but not excessive. Code duplication is low. Overall maintainable but could benefit from further modularization (e.g., separate Game of Life engine from rendering).
+
+9. **Does the interface vision meet professional design standards? (7/10)**  
+   The black background with bright colors provides good contrast. Cell size (point size 4) is adequate but not ideal for distinguishing individual squares clearly on a sphere. The color palette is harmonious and visually pleasing. No UI controls are present, so the interface is minimalistic but clean. The sphere rotation cursor changes are a nice UX touch.
+
+10. **Is the dynamic interaction smooth and seamless? (7/10)**  
+    Sphere rotation with mouse drag is implemented and appears smooth. No zoom control is provided, limiting interaction. Animation timing is consistent with fixed update intervals and requestAnimationFrame. Controls respond immediately. Overall interaction is good but could be enhanced with zoom and more interactive features.
+
+---
+
+**Summary:**  
+This is a solid, well-executed implementation of Conway's Game of Life on a spherical surface with multicolor cells and 3D WebGL rendering. The core algorithm is correct and adapted properly to spherical topology. Visualization is good but limited by point rendering and lack of zoom. Multicolor effects are present but static. Performance and robustness are acceptable but could be improved. Interaction is smooth but basic. The code is clean and focused without redundancies. The overall experience is professional but could be enhanced with more advanced features and polish.
+
+Final overall score: 69/100.
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - 
+================================================================================
+2025-12-02 20:25:43 - INFO - HTML CODE - ITERATION 1
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conway's Game of Life on a Sphere</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+  }
+  canvas {
+    display: block;
+    background: black;
+    cursor: grab;
+  }
+  canvas:active {
+    cursor: grabbing;
+  }
+</style>
+</head>
+<body>
+<canvas id="glcanvas"></canvas>
+<script>
+// Conway's Game of Life on a Sphere with multicolor cells
+
+(() => {
+  const canvas = document.getElementById('glcanvas');
+  const gl = canvas.getContext('webgl', {antialias: true});
+  if (!gl) {
+    alert('WebGL not supported');
+    return;
+  }
+
+  // Resize canvas to fill window
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Vertex shader source
+  const vertexSrc = `
+    attribute vec3 aPosition;
+    attribute vec3 aColor;
+    uniform mat4 uMVP;
+    varying vec3 vColor;
+    void main() {
+      gl_Position = uMVP * vec4(aPosition, 1.0);
+      vColor = aColor;
+      gl_PointSize = 4.0;
+    }
+  `;
+
+  // Fragment shader source
+  const fragmentSrc = `
+    precision mediump float;
+    varying vec3 vColor;
+    void main() {
+      // Draw small square points
+      gl_FragColor = vec4(vColor, 1.0);
+    }
+  `;
+
+  // Compile shader
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader compile failed:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  // Create program
+  function createProgram(vsSource, fsSource) {
+    const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+    const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Program link failed:', gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      return null;
+    }
+    return program;
+  }
+
+  const program = createProgram(vertexSrc, fragmentSrc);
+  gl.useProgram(program);
+
+  // Attributes and uniforms
+  const aPositionLoc = gl.getAttribLocation(program, 'aPosition');
+  const aColorLoc = gl.getAttribLocation(program, 'aColor');
+  const uMVPLoc = gl.getUniformLocation(program, 'uMVP');
+
+  // Sphere grid parameters
+  // We'll create a grid of cells on the sphere by subdividing latitude and longitude
+  // Each cell is a small square on the sphere surface defined by lat/lon ranges
+  // We'll store the state of each cell (alive/dead) and a color for alive cells
+
+  const LAT_DIV = 90;  // latitude divisions (from -90 to +90)
+  const LON_DIV = 180; // longitude divisions (from -180 to +180)
+  const CELL_COUNT = LAT_DIV * LON_DIV;
+
+  // Game state arrays
+  // 0 = dead, >0 = alive with color index
+  let currentState = new Uint8Array(CELL_COUNT);
+  let nextState = new Uint8Array(CELL_COUNT);
+
+  // Color palette for alive cells (multicolor)
+  // We'll pick a palette of bright colors
+  const palette = [
+    [1.0, 0.2, 0.2], // red
+    [0.2, 1.0, 0.2], // green
+    [0.2, 0.2, 1.0], // blue
+    [1.0, 1.0, 0.2], // yellow
+    [1.0, 0.2, 1.0], // magenta
+    [0.2, 1.0, 1.0], // cyan
+    [1.0, 0.6, 0.2], // orange
+    [0.6, 0.2, 1.0], // purple
+  ];
+  const PALETTE_SIZE = palette.length;
+
+  // Initialize with random alive cells
+  function randomInit() {
+    for(let i=0; i<CELL_COUNT; i++) {
+      if(Math.random() < 0.12) {
+        currentState[i] = 1 + Math.floor(Math.random() * PALETTE_SIZE);
+      } else {
+        currentState[i] = 0;
+      }
+    }
+  }
+  randomInit();
+
+  // Convert lat/lon indices to 3D position on unit sphere
+  // latIndex: 0..LAT_DIV-1, lonIndex: 0..LON_DIV-1
+  // lat from -90 to +90 degrees, lon from -180 to +180 degrees
+  function latLonToXYZ(latIndex, lonIndex) {
+    const lat = (latIndex / (LAT_DIV - 1)) * Math.PI - Math.PI/2; // -π/2 to +π/2
+    const lon = (lonIndex / (LON_DIV - 1)) * 2 * Math.PI - Math.PI; // -π to +π
+    const x = Math.cos(lat) * Math.cos(lon);
+    const y = Math.sin(lat);
+    const z = Math.cos(lat) * Math.sin(lon);
+    return [x, y, z];
+  }
+
+  // For each cell, we will render a small square on the sphere surface.
+  // Since points are small, we can render each cell as a GL_POINTS with point size 4.
+  // We'll send one vertex per alive cell with its position and color.
+
+  // Buffers
+  const positionBuffer = gl.createBuffer();
+  const colorBuffer = gl.createBuffer();
+
+  // Rotation state for sphere
+  let rotationX = 0;
+  let rotationY = 0;
+  let isDragging = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+  });
+  window.addEventListener('mouseup', e => {
+    isDragging = false;
+  });
+  window.addEventListener('mousemove', e => {
+    if(isDragging) {
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      rotationY += dx * 0.005;
+      rotationX += dy * 0.005;
+      rotationX = Math.min(Math.max(rotationX, -Math.PI/2), Math.PI/2);
+    }
+  });
+
+  // Matrix utilities
+  function createIdentity() {
+    return new Float32Array([
+      1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1
+    ]);
+  }
+  function multiplyMat4(a,b) {
+    const out = new Float32Array(16);
+    for(let i=0; i<4; i++) {
+      for(let j=0; j<4; j++) {
+        out[i*4+j] = 0;
+        for(let k=0; k<4; k++) {
+          out[i*4+j] += a[i*4+k]*b[k*4+j];
+        }
+      }
+    }
+    return out;
+  }
+  function perspective(fovy, aspect, near, far) {
+    const f = 1/Math.tan(fovy/2);
+    const nf = 1/(near - far);
+    const out = new Float32Array(16);
+    out[0] = f / aspect;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+
+    out[4] = 0;
+    out[5] = f;
+    out[6] = 0;
+    out[7] = 0;
+
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = (far + near) * nf;
+    out[11] = -1;
+
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = (2 * far * near) * nf;
+    out[15] = 0;
+    return out;
+  }
+  function translate(m, v) {
+    const out = new Float32Array(m);
+    out[12] += v[0];
+    out[13] += v[1];
+    out[14] += v[2];
+    return out;
+  }
+  function rotateX(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]; out[1] = m[1]; out[2] = m[2]; out[3] = m[3];
+    out[4] = m[4]*c + m[8]*s;
+    out[5] = m[5]*c + m[9]*s;
+    out[6] = m[6]*c + m[10]*s;
+    out[7] = m[7]*c + m[11]*s;
+    out[8] = m[8]*c - m[4]*s;
+    out[9] = m[9]*c - m[5]*s;
+    out[10] = m[10]*c - m[6]*s;
+    out[11] = m[11]*c - m[7]*s;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+  function rotateY(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]*c - m[8]*s;
+    out[1] = m[1]*c - m[9]*s;
+    out[2] = m[2]*c - m[10]*s;
+    out[3] = m[3]*c - m[11]*s;
+    out[4] = m[4]; out[5] = m[5]; out[6] = m[6]; out[7] = m[7];
+    out[8] = m[0]*s + m[8]*c;
+    out[9] = m[1]*s + m[9]*c;
+    out[10] = m[2]*s + m[10]*c;
+    out[11] = m[3]*s + m[11]*c;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+
+  // Game of Life rules on sphere grid
+  // Neighbors: 8 neighbors around each cell in lat/lon grid with wrapping on longitude
+  // Latitude does not wrap, but top and bottom rows have fewer neighbors
+  // We'll treat the grid as a torus in longitude, and capped at poles in latitude
+
+  function getIndex(lat, lon) {
+    // Clamp lat between 0 and LAT_DIV-1
+    if(lat < 0 || lat >= LAT_DIV) return -1;
+    // Wrap lon
+    lon = (lon + LON_DIV) % LON_DIV;
+    return lat * LON_DIV + lon;
+  }
+
+  function countAliveNeighbors(lat, lon) {
+    let count = 0;
+    let colors = {};
+    for(let dLat = -1; dLat <= 1; dLat++) {
+      for(let dLon = -1; dLon <= 1; dLon++) {
+        if(dLat === 0 && dLon === 0) continue;
+        const nLat = lat + dLat;
+        const nLon = lon + dLon;
+        const idx = getIndex(nLat, nLon);
+        if(idx >= 0 && currentState[idx] > 0) {
+          count++;
+          const c = currentState[idx];
+          colors[c] = (colors[c] || 0) + 1;
+        }
+      }
+    }
+    return {count, colors};
+  }
+
+  // For color of new born cell, pick the most frequent neighbor color
+  function mostFrequentColor(colors) {
+    let maxCount = 0;
+    let maxColor = 1;
+    for(const c in colors) {
+      if(colors[c] > maxCount) {
+        maxCount = colors[c];
+        maxColor = parseInt(c);
+      }
+    }
+    return maxColor;
+  }
+
+  // Update Game of Life state
+  function updateLife() {
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        const {count, colors} = countAliveNeighbors(lat, lon);
+        if(cell > 0) {
+          // Alive cell
+          if(count === 2 || count === 3) {
+            // Survives
+            nextState[idx] = cell;
+          } else {
+            // Dies
+            nextState[idx] = 0;
+          }
+        } else {
+          // Dead cell
+          if(count === 3) {
+            // Becomes alive with most frequent neighbor color
+            nextState[idx] = mostFrequentColor(colors);
+          } else {
+            nextState[idx] = 0;
+          }
+        }
+      }
+    }
+    // Swap states
+    let temp = currentState;
+    currentState = nextState;
+    nextState = temp;
+  }
+
+  // Prepare data for rendering
+  // For each alive cell, we create one vertex with position and color
+  // We'll update buffers each frame
+
+  function prepareRenderData() {
+    const positions = [];
+    const colors = [];
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        if(cell > 0) {
+          const pos = latLonToXYZ(lat, lon);
+          positions.push(...pos);
+          const cidx = (cell - 1) % PALETTE_SIZE;
+          const col = palette[cidx];
+          colors.push(...col);
+        }
+      }
+    }
+    return {positions: new Float32Array(positions), colors: new Float32Array(colors)};
+  }
+
+  // Setup buffers and attributes
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aColorLoc);
+
+  // Enable blending for nicer colors on black background
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // Clear color black
+  gl.clearColor(0,0,0,1);
+
+  // Timing for updates
+  let lastUpdate = 0;
+  const UPDATE_INTERVAL = 100; // ms
+
+  // Animation loop
+  function render(time=0) {
+    time = time|0;
+    if(time - lastUpdate > UPDATE_INTERVAL) {
+      updateLife();
+      lastUpdate = time;
+    }
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Prepare data
+    const {positions, colors} = prepareRenderData();
+
+    // Bind and upload position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Bind and upload color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Compute MVP matrix
+    const aspect = canvas.width / canvas.height;
+    let proj = perspective(Math.PI/4, aspect, 0.1, 100);
+    let view = createIdentity();
+    view = translate(view, [0, 0, -3]);
+    view = rotateX(view, rotationX);
+    view = rotateY(view, rotationY);
+    const mvp = multiplyMat4(proj, view);
+
+    gl.uniformMatrix4fv(uMVPLoc, false, mvp);
+
+    // Draw points
+    gl.drawArrays(gl.POINTS, 0, positions.length / 3);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - 
+================================================================================
+2025-12-02 20:25:43 - INFO - SCORE SUMMARY - ITERATION 1
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - ✓ Is Conway's Game of Life algorithm correctly implemented?: 10.0/10
+2025-12-02 20:25:43 - INFO - ✓ Is the spherical 3D visualization properly rendered?: 7.0/10
+2025-12-02 20:25:43 - INFO - ✓ Are multicolor visual effects and animations implemented effectively?: 7.0/10
+2025-12-02 20:25:43 - INFO - ✓ Is the grid resolution and performance optimization adequate?: 7.0/10
+2025-12-02 20:25:43 - INFO - ✗ Is the code robust?: 5.0/10
+2025-12-02 20:25:43 - INFO - ✗ Are there any innovative features that are eye-catching?: 4.0/10
+2025-12-02 20:25:43 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-12-02 20:25:43 - INFO - ✓ Does the code have engineering quality?: 7.0/10
+2025-12-02 20:25:43 - INFO - ✓ Does the interface vision meet professional design standards?: 7.0/10
+2025-12-02 20:25:43 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 7.0/10
+2025-12-02 20:25:43 - INFO - 
+⚠ Found 2 area(s) needing improvement:
+2025-12-02 20:25:43 - INFO -   - Are there any innovative features that are eye-catching?: 4.0/10
+2025-12-02 20:25:43 - INFO -   - Is the code robust?: 5.0/10
+2025-12-02 20:25:43 - INFO - 
+================================================================================
+2025-12-02 20:25:43 - INFO - MULTI-CANDIDATE GENERATION - ITERATION 1
+2025-12-02 20:25:43 - INFO - ================================================================================
+2025-12-02 20:25:43 - INFO - Generating 2 candidate(s) (one per weak item)...
+2025-12-02 20:25:43 - INFO - 
+  Candidate 1/2: Are there any innovative features that are eye-catching? (current score: 4.0/10)
+2025-12-02 20:25:43 - INFO - 
+  Generating candidate 1...
+2025-12-02 20:27:50 - INFO -   ✓ Candidate 1 generated (took 127.48 seconds)
+2025-12-02 20:27:50 - INFO -   ✓ Candidate 1 generated for Are there any innovative features that are eye-catching?
+2025-12-02 20:27:50 - INFO - 
+  Candidate 2/2: Is the code robust? (current score: 5.0/10)
+2025-12-02 20:27:50 - INFO - 
+  Generating candidate 2...
+2025-12-02 20:28:47 - INFO -   ✓ Candidate 2 generated (took 56.75 seconds)
+2025-12-02 20:28:47 - INFO -   ✓ Candidate 2 generated for Is the code robust?
+2025-12-02 20:28:47 - INFO - 
+================================================================================
+2025-12-02 20:28:47 - INFO - EVALUATING 2 CANDIDATE(S)
+2025-12-02 20:28:47 - INFO - ================================================================================
+2025-12-02 20:28:47 - INFO - 
+  Evaluating candidate 1/2 (focus: Are there any innovative features that are eye-catching?)...
+2025-12-02 20:29:17 - INFO -   ✓ Candidate 1 evaluated: Total Score = 89.0
+2025-12-02 20:29:17 - INFO - 
+  Evaluating candidate 2/2 (focus: Is the code robust?)...
+2025-12-02 20:29:44 - INFO -   ✓ Candidate 2 evaluated: Total Score = 78.0
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - SCORE REGRESSION CHECK
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - ✓ Candidate 1: No score regressions detected
+2025-12-02 20:29:44 - INFO - ✓ Candidate 2: No score regressions detected
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - CANDIDATE COMPARISON
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - Candidate 1 (Focus: Are there any innovative features that are eye-catching?):
+2025-12-02 20:29:44 - INFO -   Total Score: 89.0
+2025-12-02 20:29:44 - INFO -   Focus Item Improvement: 4.0 → 10.0 (Δ +6.0)
+2025-12-02 20:29:44 - INFO -   ✓ No regressions
+2025-12-02 20:29:44 - INFO - Candidate 2 (Focus: Is the code robust?):
+2025-12-02 20:29:44 - INFO -   Total Score: 78.0
+2025-12-02 20:29:44 - INFO -   Focus Item Improvement: 5.0 → 8.0 (Δ +3.0)
+2025-12-02 20:29:44 - INFO -   ✓ No regressions
+2025-12-02 20:29:44 - INFO - 
+✓ Selected Candidate 1 (Focus: Are there any innovative features that are eye-catching?)
+2025-12-02 20:29:44 - INFO -   Total Score: 89.0
+2025-12-02 20:29:44 - INFO - ✓ Selected candidate saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10/iteration_1.html
+2025-12-02 20:29:44 - INFO - 
+✓ Selected candidate meets all thresholds (7.0)!
+2025-12-02 20:29:44 - INFO - Improvement process complete.
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - FINAL EVALUATION RESULTS
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - Individual Scores (JSON):
+{
+  "Is Conway's Game of Life algorithm correctly implemented?": 10.0,
+  "Is the spherical 3D visualization properly rendered?": 9.0,
+  "Are multicolor visual effects and animations implemented effectively?": 9.0,
+  "Is the grid resolution and performance optimization adequate?": 8.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 10.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-12-02 20:29:44 - INFO - Final Calculated Sum: 89.0
+2025-12-02 20:29:44 - INFO - Final Overall Score: 89.0
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - ```json
+{
+  "Is Conway's Game of Life algorithm correctly implemented?": 10,
+  "Is the spherical 3D visualization properly rendered?": 9,
+  "Are multicolor visual effects and animations implemented effectively?": 9,
+  "Is the grid resolution and performance optimization adequate?": 8,
+  "Is the code robust?": 7,
+  "Are there any innovative features that are eye-catching?": 10,
+  "Are there any redundant features?": 10,
+  "Does the code have engineering quality?": 8,
+  "Does the interface vision meet professional design standards?": 9,
+  "Is the dynamic interaction smooth and seamless?": 9,
+  "Overall Score": 89
+}
+```
+
+Reason:
+
+1. **Is Conway's Game of Life algorithm correctly implemented? (10/10)**  
+   The code correctly implements the core Conway's Game of Life rules on a spherical grid: live cells survive with 2 or 3 neighbors, dead cells become alive with exactly 3 neighbors, others die or remain dead. The neighbor counting respects spherical topology by wrapping longitude and clamping latitude, avoiding invalid indices. The code handles poles by limiting latitude indices and wrapping longitude, which is appropriate for a latitude-longitude grid on a sphere. The color inheritance from neighbors is a nice touch but does not affect correctness. This is a full and accurate implementation.
+
+2. **Is the spherical 3D visualization properly rendered? (9/10)**  
+   The visualization uses raw WebGL with custom shaders to render points on a unit sphere, computed from latitude and longitude indices. The sphere is rendered as a point cloud with small squares (via gl_PointSize). The UV mapping is implicit via lat/lon to XYZ conversion. The cell size is consistent as points, but some distortion near poles is inevitable due to latitude-longitude grid nature; however, the code clamps latitude and uses a high resolution (90x180) to minimize distortion. Camera controls (rotation with mouse drag) are implemented well. Zoom is fixed at a translation along Z, which is acceptable but could be improved with zoom controls. No severe pole distortion is visible, so a minor 1-point deduction for inherent lat-lon grid distortion.
+
+3. **Are multicolor visual effects and animations implemented effectively? (9/10)**  
+   The code uses a palette of 8 colors for alive cells, assigns colors randomly on birth, and applies an age-based brightness fade to create smooth color transitions. The colors are bright and distinct on a black background, enhancing visibility. Animation runs via requestAnimationFrame with generation updates controlled by a speed slider, targeting smooth updates. The points are clearly distinguishable. Minor deduction for no explicit frame rate limiting or adaptive performance tuning, but overall very good.
+
+4. **Is the grid resolution and performance optimization adequate? (8/10)**  
+   The grid is 90x180 (16,200 cells), which meets the "lots of small squares" requirement. The code uses typed arrays and double buffering for states, which is efficient. Neighbor counting is done naively with 8 neighbors per cell, which is acceptable at this scale but could be optimized with caching or delta updates. WebGL batching is done by uploading all alive cells each frame, which is efficient for sparse populations. Performance should be smooth on modern hardware, but no explicit frame rate or memory usage monitoring is implemented. Minor deduction for lack of advanced optimization.
+
+5. **Is the code robust? (7/10)**  
+   The code handles WebGL context creation failure gracefully by alerting the user. It includes error handling for shader compilation and program linking. The import pattern feature includes JSON parsing error handling with user alert. However, it lacks explicit handling for WebGL context loss events, browser compatibility fallbacks, or extreme zoom levels (zoom is fixed). The UI disables toggling during drag to prevent accidental toggles, which is good. Overall robustness is above average but could be improved with more comprehensive error and edge case handling.
+
+6. **Are there any innovative features that are eye-catching? (10/10)**  
+   The code includes multiple advanced features:  
+   - Interactive seeding by clicking on the sphere to toggle cells.  
+   - Multiple preset patterns adapted for spherical topology.  
+   - Speed control slider for generations per second.  
+   - Generation counter display.  
+   - Cell age visualization with color brightness gradients.  
+   - Export/import pattern functionality via JSON files.  
+   These features greatly enhance usability and user experience, earning full points.
+
+7. **Are there any redundant features? (10/10)**  
+   No redundant or unrelated features are present. The code is focused on the Game of Life simulation and visualization. No audio players or unrelated modules. No fancy effects that degrade performance. The code is clean and purposeful.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modularly structured within an IIFE, separating concerns reasonably: shaders, game logic, rendering, input handling, and UI controls. The Game of Life logic is cleanly separated from rendering code. Some minor global state usage (e.g., global constants) is acceptable in this context. There is some code duplication in matrix operations that could be refactored into a utility module. Magic numbers (like palette colors, grid sizes) are mostly declared as constants. Overall maintainable and readable, but could be improved with further modularization and utility abstractions.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The UI uses a pure black background with bright, high-contrast colors for cells, ensuring excellent visibility. Cell size (4px points) is appropriate for distinguishing individual cells. The color palette is harmonious and varied. UI controls are minimal, clean, and unobtrusive with consistent styling. The generation counter and instructions are clear. Minor deduction for lack of zoom controls or more advanced UI polish, but overall very professional.
+
+10. **Is the dynamic interaction smooth and seamless? (9/10)**  
+    Sphere rotation with mouse drag is smooth and intuitive, with cursor changes indicating drag state. Zoom is fixed but the camera is positioned well to keep cells visible. Animation timing is consistent with speed control. Click toggling provides immediate visual feedback. No noticeable lag or stutter in typical usage. Minor deduction for lack of pinch zoom or touch gestures, but interaction is fluid and meets expectations.
+
+**Summary:**  
+This is a very well-executed, professional, and feature-rich implementation of Conway's Game of Life on a spherical surface with multicolor visualization and interactive controls. Minor improvements could be made in robustness, zoom controls, and code modularity, but overall it is an excellent solution.
+
+Final overall score: 89/100.
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - FINAL HTML CODE
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conway's Game of Life on a Sphere</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+    color: white;
+    font-family: monospace, monospace;
+  }
+  canvas {
+    display: block;
+    background: black;
+    cursor: grab;
+  }
+  canvas:active {
+    cursor: grabbing;
+  }
+  #ui {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    user-select: none;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  #ui > * {
+    margin: 4px 0;
+    display: block;
+  }
+  button, select {
+    background: #222;
+    border: 1px solid #555;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover, select:hover {
+    border-color: #aaa;
+  }
+  #generationCounter {
+    font-size: 14px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<canvas id="glcanvas"></canvas>
+<div id="ui">
+  <div>
+    <label for="speedRange">Speed: <span id="speedValue">10</span> gen/s</label>
+    <input type="range" id="speedRange" min="1" max="60" value="10" />
+  </div>
+  <div>
+    <label for="patternSelect">Preset Patterns:</label>
+    <select id="patternSelect">
+      <option value="">-- Select Pattern --</option>
+      <option value="glider">Glider</option>
+      <option value="blinker">Blinker</option>
+      <option value="toad">Toad</option>
+      <option value="beacon">Beacon</option>
+      <option value="pulsar">Pulsar</option>
+      <option value="random">Random</option>
+      <option value="clear">Clear</option>
+    </select>
+  </div>
+  <div id="generationCounter">Generation: 0</div>
+  <div>
+    <button id="exportBtn">Export Pattern</button>
+    <button id="importBtn">Import Pattern</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" />
+  </div>
+  <div style="font-size:12px; margin-top:6px;">
+    <small>Click on sphere to toggle cells</small>
+  </div>
+</div>
+<script>
+// Conway's Game of Life on a Sphere with multicolor cells and enhanced features
+
+(() => {
+  const canvas = document.getElementById('glcanvas');
+  const gl = canvas.getContext('webgl', {antialias: true});
+  if (!gl) {
+    alert('WebGL not supported');
+    return;
+  }
+
+  // Resize canvas to fill window
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Vertex shader source
+  const vertexSrc = `
+    attribute vec3 aPosition;
+    attribute vec3 aColor;
+    uniform mat4 uMVP;
+    varying vec3 vColor;
+    void main() {
+      gl_Position = uMVP * vec4(aPosition, 1.0);
+      vColor = aColor;
+      gl_PointSize = 4.0;
+    }
+  `;
+
+  // Fragment shader source
+  const fragmentSrc = `
+    precision mediump float;
+    varying vec3 vColor;
+    void main() {
+      // Draw small square points
+      gl_FragColor = vec4(vColor, 1.0);
+    }
+  `;
+
+  // Compile shader
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader compile failed:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  // Create program
+  function createProgram(vsSource, fsSource) {
+    const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+    const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Program link failed:', gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      return null;
+    }
+    return program;
+  }
+
+  const program = createProgram(vertexSrc, fragmentSrc);
+  gl.useProgram(program);
+
+  // Attributes and uniforms
+  const aPositionLoc = gl.getAttribLocation(program, 'aPosition');
+  const aColorLoc = gl.getAttribLocation(program, 'aColor');
+  const uMVPLoc = gl.getUniformLocation(program, 'uMVP');
+
+  // Sphere grid parameters
+  const LAT_DIV = 90;  // latitude divisions (from -90 to +90)
+  const LON_DIV = 180; // longitude divisions (from -180 to +180)
+  const CELL_COUNT = LAT_DIV * LON_DIV;
+
+  // Game state arrays
+  // 0 = dead, >0 = alive with color index
+  let currentState = new Uint8Array(CELL_COUNT);
+  let nextState = new Uint8Array(CELL_COUNT);
+
+  // Cell age array for color gradient visualization
+  let cellAge = new Uint16Array(CELL_COUNT);
+
+  // Color palette for alive cells (multicolor)
+  const palette = [
+    [1.0, 0.2, 0.2], // red
+    [0.2, 1.0, 0.2], // green
+    [0.2, 0.2, 1.0], // blue
+    [1.0, 1.0, 0.2], // yellow
+    [1.0, 0.2, 1.0], // magenta
+    [0.2, 1.0, 1.0], // cyan
+    [1.0, 0.6, 0.2], // orange
+    [0.6, 0.2, 1.0], // purple
+  ];
+  const PALETTE_SIZE = palette.length;
+
+  // Initialize with random alive cells
+  function randomInit() {
+    for(let i=0; i<CELL_COUNT; i++) {
+      if(Math.random() < 0.12) {
+        currentState[i] = 1 + Math.floor(Math.random() * PALETTE_SIZE);
+        cellAge[i] = 1;
+      } else {
+        currentState[i] = 0;
+        cellAge[i] = 0;
+      }
+    }
+  }
+  randomInit();
+
+  // Convert lat/lon indices to 3D position on unit sphere
+  function latLonToXYZ(latIndex, lonIndex) {
+    const lat = (latIndex / (LAT_DIV - 1)) * Math.PI - Math.PI/2; // -π/2 to +π/2
+    const lon = (lonIndex / (LON_DIV - 1)) * 2 * Math.PI - Math.PI; // -π to +π
+    const x = Math.cos(lat) * Math.cos(lon);
+    const y = Math.sin(lat);
+    const z = Math.cos(lat) * Math.sin(lon);
+    return [x, y, z];
+  }
+
+  // Buffers
+  const positionBuffer = gl.createBuffer();
+  const colorBuffer = gl.createBuffer();
+
+  // Rotation state for sphere
+  let rotationX = 0;
+  let rotationY = 0;
+  let isDragging = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+  });
+  window.addEventListener('mouseup', e => {
+    isDragging = false;
+  });
+  window.addEventListener('mousemove', e => {
+    if(isDragging) {
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      rotationY += dx * 0.005;
+      rotationX += dy * 0.005;
+      rotationX = Math.min(Math.max(rotationX, -Math.PI/2), Math.PI/2);
+    }
+  });
+
+  // Matrix utilities
+  function createIdentity() {
+    return new Float32Array([
+      1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1
+    ]);
+  }
+  function multiplyMat4(a,b) {
+    const out = new Float32Array(16);
+    for(let i=0; i<4; i++) {
+      for(let j=0; j<4; j++) {
+        out[i*4+j] = 0;
+        for(let k=0; k<4; k++) {
+          out[i*4+j] += a[i*4+k]*b[k*4+j];
+        }
+      }
+    }
+    return out;
+  }
+  function perspective(fovy, aspect, near, far) {
+    const f = 1/Math.tan(fovy/2);
+    const nf = 1/(near - far);
+    const out = new Float32Array(16);
+    out[0] = f / aspect;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+
+    out[4] = 0;
+    out[5] = f;
+    out[6] = 0;
+    out[7] = 0;
+
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = (far + near) * nf;
+    out[11] = -1;
+
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = (2 * far * near) * nf;
+    out[15] = 0;
+    return out;
+  }
+  function translate(m, v) {
+    const out = new Float32Array(m);
+    out[12] += v[0];
+    out[13] += v[1];
+    out[14] += v[2];
+    return out;
+  }
+  function rotateX(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]; out[1] = m[1]; out[2] = m[2]; out[3] = m[3];
+    out[4] = m[4]*c + m[8]*s;
+    out[5] = m[5]*c + m[9]*s;
+    out[6] = m[6]*c + m[10]*s;
+    out[7] = m[7]*c + m[11]*s;
+    out[8] = m[8]*c - m[4]*s;
+    out[9] = m[9]*c - m[5]*s;
+    out[10] = m[10]*c - m[6]*s;
+    out[11] = m[11]*c - m[7]*s;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+  function rotateY(m, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const out = new Float32Array(16);
+    out[0] = m[0]*c - m[8]*s;
+    out[1] = m[1]*c - m[9]*s;
+    out[2] = m[2]*c - m[10]*s;
+    out[3] = m[3]*c - m[11]*s;
+    out[4] = m[4]; out[5] = m[5]; out[6] = m[6]; out[7] = m[7];
+    out[8] = m[0]*s + m[8]*c;
+    out[9] = m[1]*s + m[9]*c;
+    out[10] = m[2]*s + m[10]*c;
+    out[11] = m[3]*s + m[11]*c;
+    out[12] = m[12]; out[13] = m[13]; out[14] = m[14]; out[15] = m[15];
+    return out;
+  }
+
+  // Game of Life rules on sphere grid
+  function getIndex(lat, lon) {
+    if(lat < 0 || lat >= LAT_DIV) return -1;
+    lon = (lon + LON_DIV) % LON_DIV;
+    return lat * LON_DIV + lon;
+  }
+
+  function countAliveNeighbors(lat, lon) {
+    let count = 0;
+    let colors = {};
+    for(let dLat = -1; dLat <= 1; dLat++) {
+      for(let dLon = -1; dLon <= 1; dLon++) {
+        if(dLat === 0 && dLon === 0) continue;
+        const nLat = lat + dLat;
+        const nLon = lon + dLon;
+        const idx = getIndex(nLat, nLon);
+        if(idx >= 0 && currentState[idx] > 0) {
+          count++;
+          const c = currentState[idx];
+          colors[c] = (colors[c] || 0) + 1;
+        }
+      }
+    }
+    return {count, colors};
+  }
+
+  function mostFrequentColor(colors) {
+    let maxCount = 0;
+    let maxColor = 1;
+    for(const c in colors) {
+      if(colors[c] > maxCount) {
+        maxCount = colors[c];
+        maxColor = parseInt(c);
+      }
+    }
+    return maxColor;
+  }
+
+  // Update Game of Life state and cell ages
+  function updateLife() {
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        const {count, colors} = countAliveNeighbors(lat, lon);
+        if(cell > 0) {
+          if(count === 2 || count === 3) {
+            nextState[idx] = cell;
+            cellAge[idx] = Math.min(cellAge[idx] + 1, 255);
+          } else {
+            nextState[idx] = 0;
+            cellAge[idx] = 0;
+          }
+        } else {
+          if(count === 3) {
+            nextState[idx] = mostFrequentColor(colors);
+            cellAge[idx] = 1;
+          } else {
+            nextState[idx] = 0;
+            cellAge[idx] = 0;
+          }
+        }
+      }
+    }
+    // Swap states
+    let temp = currentState;
+    currentState = nextState;
+    nextState = temp;
+  }
+
+  // Prepare data for rendering with cell age color gradient
+  function prepareRenderData() {
+    const positions = [];
+    const colors = [];
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        const cell = currentState[idx];
+        if(cell > 0) {
+          const pos = latLonToXYZ(lat, lon);
+          positions.push(...pos);
+          const cidx = (cell - 1) % PALETTE_SIZE;
+          const baseCol = palette[cidx];
+          // Age-based brightness: older cells dimmer
+          const age = cellAge[idx];
+          const brightness = 1 - Math.min(age / 60, 1) * 0.7; // fade to 30%
+          colors.push(baseCol[0] * brightness, baseCol[1] * brightness, baseCol[2] * brightness);
+        }
+      }
+    }
+    return {positions: new Float32Array(positions), colors: new Float32Array(colors)};
+  }
+
+  // Setup buffers and attributes
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aColorLoc);
+
+  // Enable blending for nicer colors on black background
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // Clear color black
+  gl.clearColor(0,0,0,1);
+
+  // Timing for updates
+  let lastUpdate = 0;
+  let updateInterval = 100; // ms, adjustable by speed control
+  let generation = 0;
+
+  // UI elements
+  const speedRange = document.getElementById('speedRange');
+  const speedValue = document.getElementById('speedValue');
+  const generationCounter = document.getElementById('generationCounter');
+  const patternSelect = document.getElementById('patternSelect');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+
+  // Update speed from UI
+  speedRange.addEventListener('input', () => {
+    const val = parseInt(speedRange.value);
+    speedValue.textContent = val;
+    updateInterval = 1000 / val;
+  });
+
+  // Preset patterns adapted for spherical topology
+  // Patterns defined as relative lat/lon offsets and color index
+  // We'll place pattern centered at equator and prime meridian (lat=LAT_DIV/2, lon=LON_DIV/2)
+  const patterns = {
+    glider: [
+      {lat:0, lon:1},
+      {lat:1, lon:2},
+      {lat:2, lon:0},
+      {lat:2, lon:1},
+      {lat:2, lon:2},
+    ],
+    blinker: [
+      {lat:0, lon:-1},
+      {lat:0, lon:0},
+      {lat:0, lon:1},
+    ],
+    toad: [
+      {lat:0, lon:0},
+      {lat:0, lon:1},
+      {lat:0, lon:2},
+      {lat:1, lon:-1},
+      {lat:1, lon:0},
+      {lat:1, lon:1},
+    ],
+    beacon: [
+      {lat:0, lon:0},
+      {lat:0, lon:1},
+      {lat:1, lon:0},
+      {lat:1, lon:1},
+      {lat:2, lon:2},
+      {lat:2, lon:3},
+      {lat:3, lon:2},
+      {lat:3, lon:3},
+    ],
+    pulsar: [
+      // Pulsar is large, approximate with 12 cells in a cross pattern
+      {lat:-2, lon:-4},{lat:-2, lon:-3},{lat:-2, lon:-2},
+      {lat:-4, lon:-2},{lat:-3, lon:-2},{lat:-2, lon:-2},
+      {lat:2, lon:-4},{lat:2, lon:-3},{lat:2, lon:-2},
+      {lat:4, lon:-2},{lat:3, lon:-2},{lat:2, lon:-2},
+      {lat:-2, lon:4},{lat:-2, lon:3},{lat:-2, lon:2},
+      {lat:-4, lon:2},{lat:-3, lon:2},{lat:-2, lon:2},
+      {lat:2, lon:4},{lat:2, lon:3},{lat:2, lon:2},
+      {lat:4, lon:2},{lat:3, lon:2},{lat:2, lon:2},
+    ]
+  };
+
+  function clearGrid() {
+    for(let i=0; i<CELL_COUNT; i++) {
+      currentState[i] = 0;
+      cellAge[i] = 0;
+    }
+    generation = 0;
+    updateGenerationCounter();
+  }
+
+  function placePattern(name) {
+    clearGrid();
+    if(name === 'random') {
+      randomInit();
+      generation = 0;
+      updateGenerationCounter();
+      return;
+    }
+    if(!patterns[name]) return;
+    const centerLat = Math.floor(LAT_DIV / 2);
+    const centerLon = Math.floor(LON_DIV / 2);
+    const colorIndex = 1 + Math.floor(Math.random() * PALETTE_SIZE);
+    for(const offset of patterns[name]) {
+      let lat = centerLat + offset.lat;
+      let lon = centerLon + offset.lon;
+      if(lat < 0 || lat >= LAT_DIV) continue;
+      lon = (lon + LON_DIV) % LON_DIV;
+      const idx = getIndex(lat, lon);
+      if(idx >= 0) {
+        currentState[idx] = colorIndex;
+        cellAge[idx] = 1;
+      }
+    }
+    generation = 0;
+    updateGenerationCounter();
+  }
+
+  patternSelect.addEventListener('change', () => {
+    const val = patternSelect.value;
+    if(val === 'clear') {
+      clearGrid();
+    } else {
+      placePattern(val);
+    }
+  });
+
+  // Export pattern as JSON of alive cells with lat, lon, color, age
+  exportBtn.addEventListener('click', () => {
+    const exportData = [];
+    for(let lat=0; lat<LAT_DIV; lat++) {
+      for(let lon=0; lon<LON_DIV; lon++) {
+        const idx = getIndex(lat, lon);
+        if(currentState[idx] > 0) {
+          exportData.push({
+            lat,
+            lon,
+            color: currentState[idx],
+            age: cellAge[idx]
+          });
+        }
+      }
+    }
+    const json = JSON.stringify(exportData);
+    const blob = new Blob([json], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'life_sphere_pattern.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Import pattern from JSON file
+  importBtn.addEventListener('click', () => {
+    importFile.value = '';
+    importFile.click();
+  });
+
+  importFile.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        clearGrid();
+        for(const cell of data) {
+          if(typeof cell.lat === 'number' && typeof cell.lon === 'number' && typeof cell.color === 'number') {
+            const lat = cell.lat;
+            let lon = cell.lon;
+            if(lat < 0 || lat >= LAT_DIV) continue;
+            lon = (lon + LON_DIV) % LON_DIV;
+            const idx = getIndex(lat, lon);
+            if(idx >= 0) {
+              currentState[idx] = cell.color;
+              cellAge[idx] = cell.age && cell.age > 0 ? cell.age : 1;
+            }
+          }
+        }
+        generation = 0;
+        updateGenerationCounter();
+      } catch(err) {
+        alert('Invalid pattern file');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Convert mouse click to lat/lon on sphere
+  // Raycast from camera through mouse position to sphere surface
+  function getMouseLatLon(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -(((clientY - rect.top) / rect.height) * 2 - 1);
+
+    // Inverse MVP matrix to get ray direction in world space
+    const aspect = canvas.width / canvas.height;
+    let proj = perspective(Math.PI/4, aspect, 0.1, 100);
+    let view = createIdentity();
+    view = translate(view, [0, 0, -3]);
+    view = rotateX(view, rotationX);
+    view = rotateY(view, rotationY);
+    const mvp = multiplyMat4(proj, view);
+
+    // Invert MVP matrix
+    const invMVP = invertMat4(mvp);
+    if(!invMVP) return null;
+
+    // Near and far points in clip space
+    const nearPoint = [x, y, -1, 1];
+    const farPoint = [x, y, 1, 1];
+
+    // Transform to world space
+    const nearWorld = multiplyMat4Vec4(invMVP, nearPoint);
+    const farWorld = multiplyMat4Vec4(invMVP, farPoint);
+
+    // Perspective divide
+    for(let i=0; i<3; i++) {
+      nearWorld[i] /= nearWorld[3];
+      farWorld[i] /= farWorld[3];
+    }
+
+    // Ray direction
+    const dir = [
+      farWorld[0] - nearWorld[0],
+      farWorld[1] - nearWorld[1],
+      farWorld[2] - nearWorld[2]
+    ];
+    const dirLen = Math.hypot(...dir);
+    if(dirLen === 0) return null;
+    const dirNorm = dir.map(v => v / dirLen);
+
+    // Ray origin
+    const origin = nearWorld.slice(0,3);
+
+    // Ray-sphere intersection (sphere radius 1 at origin)
+    const t = raySphereIntersect(origin, dirNorm, [0,0,0], 1);
+    if(t === null) return null;
+
+    // Intersection point
+    const ix = origin[0] + dirNorm[0]*t;
+    const iy = origin[1] + dirNorm[1]*t;
+    const iz = origin[2] + dirNorm[2]*t;
+
+    // Convert to lat/lon
+    const lat = Math.asin(iy); // -π/2 to π/2
+    const lon = Math.atan2(iz, ix); // -π to π
+
+    // Convert to indices
+    let latIndex = Math.round((lat + Math.PI/2) / Math.PI * (LAT_DIV - 1));
+    let lonIndex = Math.round((lon + Math.PI) / (2 * Math.PI) * (LON_DIV - 1));
+
+    latIndex = Math.min(Math.max(latIndex, 0), LAT_DIV - 1);
+    lonIndex = (lonIndex + LON_DIV) % LON_DIV;
+
+    return {latIndex, lonIndex};
+  }
+
+  // Ray-sphere intersection helper
+  function raySphereIntersect(origin, dir, center, radius) {
+    const oc = [origin[0]-center[0], origin[1]-center[1], origin[2]-center[2]];
+    const a = dot(dir, dir);
+    const b = 2 * dot(oc, dir);
+    const c = dot(oc, oc) - radius*radius;
+    const discriminant = b*b - 4*a*c;
+    if(discriminant < 0) return null;
+    const sqrtD = Math.sqrt(discriminant);
+    const t1 = (-b - sqrtD) / (2*a);
+    const t2 = (-b + sqrtD) / (2*a);
+    if(t1 >= 0) return t1;
+    if(t2 >= 0) return t2;
+    return null;
+  }
+  function dot(a,b) {
+    return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  }
+  function multiplyMat4Vec4(m, v) {
+    const out = [];
+    for(let i=0; i<4; i++) {
+      out[i] = m[i]*v[0] + m[4+i]*v[1] + m[8+i]*v[2] + m[12+i]*v[3];
+    }
+    return out;
+  }
+  // Matrix inversion for 4x4 matrix (needed for raycasting)
+  function invertMat4(m) {
+    const inv = new Float32Array(16);
+    const det =
+      m[0] * m[5] * m[10] * m[15] + m[0] * m[9] * m[14] * m[7] + m[0] * m[13] * m[6] * m[11] +
+      m[4] * m[1] * m[14] * m[11] + m[4] * m[9] * m[2] * m[15] + m[4] * m[13] * m[10] * m[3] +
+      m[8] * m[1] * m[6] * m[15] + m[8] * m[5] * m[14] * m[3] + m[8] * m[13] * m[2] * m[7] +
+      m[12] * m[1] * m[10] * m[7] + m[12] * m[5] * m[2] * m[11] + m[12] * m[9] * m[6] * m[3] -
+      m[0] * m[5] * m[14] * m[11] - m[0] * m[9] * m[6] * m[15] - m[0] * m[13] * m[10] * m[7] -
+      m[4] * m[1] * m[10] * m[15] - m[4] * m[9] * m[14] * m[3] - m[4] * m[13] * m[2] * m[11] -
+      m[8] * m[1] * m[14] * m[7] - m[8] * m[5] * m[2] * m[15] - m[8] * m[13] * m[6] * m[3] -
+      m[12] * m[1] * m[6] * m[11] - m[12] * m[5] * m[10] * m[3] - m[12] * m[9] * m[2] * m[7];
+    if(det === 0) return null;
+    const invDet = 1 / det;
+
+    inv[0] = (m[5]*m[10]*m[15] + m[9]*m[14]*m[7] + m[13]*m[6]*m[11] - m[5]*m[14]*m[11] - m[9]*m[6]*m[15] - m[13]*m[10]*m[7]) * invDet;
+    inv[1] = (m[1]*m[14]*m[11] + m[9]*m[2]*m[15] + m[13]*m[10]*m[3] - m[1]*m[10]*m[15] - m[9]*m[14]*m[3] - m[13]*m[2]*m[11]) * invDet;
+    inv[2] = (m[1]*m[6]*m[15] + m[5]*m[14]*m[3] + m[13]*m[2]*m[7] - m[1]*m[14]*m[7] - m[5]*m[2]*m[15] - m[13]*m[6]*m[3]) * invDet;
+    inv[3] = (m[1]*m[10]*m[7] + m[5]*m[2]*m[11] + m[9]*m[6]*m[3] - m[1]*m[6]*m[11] - m[5]*m[10]*m[3] - m[9]*m[2]*m[7]) * invDet;
+
+    inv[4] = (m[4]*m[14]*m[11] + m[8]*m[6]*m[15] + m[12]*m[10]*m[7] - m[4]*m[10]*m[15] - m[8]*m[14]*m[7] - m[12]*m[6]*m[11]) * invDet;
+    inv[5] = (m[0]*m[10]*m[15] + m[8]*m[14]*m[3] + m[12]*m[2]*m[11] - m[0]*m[14]*m[11] - m[8]*m[2]*m[15] - m[12]*m[10]*m[3]) * invDet;
+    inv[6] = (m[0]*m[14]*m[7] + m[4]*m[2]*m[15] + m[12]*m[6]*m[3] - m[0]*m[6]*m[15] - m[4]*m[14]*m[3] - m[12]*m[2]*m[7]) * invDet;
+    inv[7] = (m[0]*m[6]*m[11] + m[4]*m[10]*m[3] + m[8]*m[2]*m[7] - m[0]*m[10]*m[7] - m[4]*m[2]*m[11] - m[8]*m[6]*m[3]) * invDet;
+
+    inv[8] = (m[4]*m[9]*m[15] + m[8]*m[13]*m[7] + m[12]*m[5]*m[11] - m[4]*m[13]*m[11] - m[8]*m[5]*m[15] - m[12]*m[9]*m[7]) * invDet;
+    inv[9] = (m[0]*m[13]*m[11] + m[8]*m[5]*m[15] + m[12]*m[9]*m[3] - m[0]*m[9]*m[15] - m[8]*m[13]*m[3] - m[12]*m[5]*m[11]) * invDet;
+    inv[10] = (m[0]*m[5]*m[15] + m[4]*m[13]*m[3] + m[12]*m[1]*m[7] - m[0]*m[13]*m[7] - m[4]*m[1]*m[15] - m[12]*m[5]*m[3]) * invDet;
+    inv[11] = (m[0]*m[9]*m[7] + m[4]*m[1]*m[11] + m[8]*m[5]*m[3] - m[0]*m[5]*m[11] - m[4]*m[9]*m[3] - m[8]*m[1]*m[7]) * invDet;
+
+    inv[12] = (m[4]*m[13]*m[10] + m[8]*m[5]*m[14] + m[12]*m[9]*m[6] - m[4]*m[9]*m[14] - m[8]*m[13]*m[6] - m[12]*m[5]*m[10]) * invDet;
+    inv[13] = (m[0]*m[9]*m[14] + m[8]*m[13]*m[2] + m[12]*m[1]*m[10] - m[0]*m[13]*m[10] - m[8]*m[1]*m[14] - m[12]*m[9]*m[2]) * invDet;
+    inv[14] = (m[0]*m[13]*m[6] + m[4]*m[1]*m[14] + m[12]*m[5]*m[2] - m[0]*m[5]*m[14] - m[4]*m[13]*m[2] - m[12]*m[1]*m[6]) * invDet;
+    inv[15] = (m[0]*m[5]*m[10] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[0]*m[9]*m[6] - m[4]*m[1]*m[10] - m[8]*m[5]*m[2]) * invDet;
+
+    return inv;
+  }
+
+  // Toggle cell alive/dead on click
+  canvas.addEventListener('click', e => {
+    if(isDragging) return; // prevent toggle on drag
+    const pos = getMouseLatLon(e.clientX, e.clientY);
+    if(!pos) return;
+    const idx = getIndex(pos.latIndex, pos.lonIndex);
+    if(idx < 0) return;
+    if(currentState[idx] > 0) {
+      currentState[idx] = 0;
+      cellAge[idx] = 0;
+    } else {
+      currentState[idx] = 1 + Math.floor(Math.random() * PALETTE_SIZE);
+      cellAge[idx] = 1;
+    }
+    generation = 0;
+    updateGenerationCounter();
+  });
+
+  // Update generation counter UI
+  function updateGenerationCounter() {
+    generationCounter.textContent = `Generation: ${generation}`;
+  }
+
+  // Setup buffers and attributes
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aColorLoc);
+
+  // Enable blending for nicer colors on black background
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // Clear color black
+  gl.clearColor(0,0,0,1);
+
+  // Animation loop
+  function render(time=0) {
+    time = time|0;
+    if(time - lastUpdate > updateInterval) {
+      updateLife();
+      lastUpdate = time;
+      generation++;
+      updateGenerationCounter();
+    }
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Prepare data
+    const {positions, colors} = prepareRenderData();
+
+    // Bind and upload position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Bind and upload color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, false, 0, 0);
+
+    // Compute MVP matrix
+    const aspect = canvas.width / canvas.height;
+    let proj = perspective(Math.PI/4, aspect, 0.1, 100);
+    let view = createIdentity();
+    view = translate(view, [0, 0, -3]);
+    view = rotateX(view, rotationX);
+    view = rotateY(view, rotationY);
+    const mvp = multiplyMat4(proj, view);
+
+    gl.uniformMatrix4fv(uMVPLoc, false, mvp);
+
+    // Draw points
+    gl.drawArrays(gl.POINTS, 0, positions.length / 3);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+
+})();
+</script>
+</body>
+</html>
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - ✓ Final code saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10/final.html
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - MULTI-CANDIDATE ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - End Time: 2025-12-02 20:29:44
+2025-12-02 20:29:44 - INFO - Total Duration: 350.52 seconds (5.84 minutes)
+2025-12-02 20:29:44 - INFO - Total Iterations: 3
+2025-12-02 20:29:44 - INFO - Final Total Score: 89.0
+2025-12-02 20:29:44 - INFO - Log file saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10/run_log.txt
+2025-12-02 20:29:44 - INFO - All files saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10
+2025-12-02 20:29:44 - INFO - 
+================================================================================
+2025-12-02 20:29:44 - INFO - TOKEN USAGE SUMMARY
+2025-12-02 20:29:44 - INFO - ================================================================================
+2025-12-02 20:29:44 - INFO - Total Requests: 78
+2025-12-02 20:29:44 - INFO - Total Input Tokens: 679,394
+2025-12-02 20:29:44 - INFO - Total Output Tokens: 253,029
+2025-12-02 20:29:44 - INFO - Total Tokens: 932,423
+2025-12-02 20:29:44 - INFO - 
+Breakdown by Operation:
+2025-12-02 20:29:44 - INFO -   code_generation: 1 requests, 8,101 tokens
+2025-12-02 20:29:44 - INFO -   evaluation: 45 requests, 605,502 tokens
+2025-12-02 20:29:44 - INFO -   initial_code_generation: 10 requests, 56,546 tokens
+2025-12-02 20:29:44 - INFO -   code_improvement_iteration_1_candidate_0: 10 requests, 134,641 tokens
+2025-12-02 20:29:44 - INFO -   code_improvement_iteration_1_candidate_1: 7 requests, 74,667 tokens
+2025-12-02 20:29:44 - INFO -   code_improvement_iteration_1_candidate_2: 3 requests, 30,587 tokens
+2025-12-02 20:29:44 - INFO -   code_improvement_iteration_1_candidate_3: 1 requests, 11,455 tokens
+2025-12-02 20:29:44 - INFO -   code_improvement_iteration_1_candidate_4: 1 requests, 10,924 tokens
+2025-12-02 20:29:44 - INFO - 
+✓ Token usage saved to: artifacts_output/multi_candidate_generation/Simulation & Modeling-Mathematical Abstraction/task_10/token_usage.json
+2025-12-02 20:29:44 - INFO - ✓ Task token usage saved to token_usage_multi_candidate.json
+2025-12-02 20:29:44 - INFO - ================================================================================

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkiFree - Retro Skiing Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #87ceeb; /* Sky blue */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+  }
+  h1 {
+    margin: 12px 0 4px;
+    color: #003366;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  #game-container {
+    position: relative;
+    width: 480px;
+    height: 640px;
+    background: #e0f0ff; /* Light snow blue */
+    border: 4px solid #003366;
+    box-shadow: 0 0 20px #003366aa;
+  }
+  canvas {
+    display: block;
+    background: #e0f0ff;
+    image-rendering: pixelated;
+  }
+  #scoreboard {
+    margin-top: 8px;
+    color: #003366;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  #instructions {
+    max-width: 480px;
+    margin: 12px 0 24px;
+    color: #003366cc;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+  }
+  /* Retro pixel font from Google Fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+</style>
+</head>
+<body>
+<h1>SkiFree</h1>
+<div id="game-container">
+  <canvas id="game" width="480" height="640"></canvas>
+</div>
+<div id="scoreboard">Score: 0</div>
+<div id="instructions">
+  Use ◀️ and ▶️ arrow keys to move left and right.<br />
+  Avoid trees and rocks, collect flags to increase your score.<br />
+  Anticipate paths and keep skiing for a high score!
+</div>
+
+<script>
+(() => {
+  // Constants for game dimensions and gameplay
+  const CANVAS_WIDTH = 480;
+  const CANVAS_HEIGHT = 640;
+  const FPS = 60;
+  const SKIER_WIDTH = 16;
+  const SKIER_HEIGHT = 24;
+  const SKIER_SPEED_X = 4; // Horizontal speed per frame
+  const SCROLL_SPEED = 3; // Vertical scroll speed (pixels per frame)
+  const OBSTACLE_SIZE = 16;
+  const FLAG_SIZE = 16;
+  const OBSTACLE_SPAWN_INTERVAL = 30; // frames between obstacle spawns
+  const FLAG_SPAWN_INTERVAL = 90; // frames between flag spawns
+  const MAX_OBSTACLES = 10;
+  const MAX_FLAGS = 5;
+
+  // Canvas setup
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // Score display
+  const scoreDisplay = document.getElementById('scoreboard');
+
+  // Key state
+  const keys = {
+    left: false,
+    right: false,
+  };
+
+  // Game state variables
+  let score = 0;
+  let frameCount = 0;
+  let gameOver = false;
+
+  // Skier object
+  const skier = {
+    x: CANVAS_WIDTH / 2 - SKIER_WIDTH / 2,
+    y: CANVAS_HEIGHT - SKIER_HEIGHT - 40,
+    width: SKIER_WIDTH,
+    height: SKIER_HEIGHT,
+    speedX: 0,
+  };
+
+  // Arrays to hold obstacles and flags
+  const obstacles = [];
+  const flags = [];
+
+  // Retro pixel art colors
+  const COLORS = {
+    skierBody: '#ff0000',
+    skierHead: '#ffe0bd',
+    treeTrunk: '#5a3a1a',
+    treeLeaves: '#0a6b0a',
+    rock: '#666666',
+    flagPole: '#8b4513',
+    flagCloth: '#ff0000',
+    snow: '#ffffff',
+    shadow: '#00000033',
+  };
+
+  // Utility function: clamp value between min and max
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  // Draw pixelated skier facing forward
+  function drawSkier(x, y) {
+    // Draw shadow
+    ctx.fillStyle = COLORS.shadow;
+    ctx.fillRect(x + 2, y + SKIER_HEIGHT - 4, SKIER_WIDTH - 4, 4);
+
+    // Body
+    ctx.fillStyle = COLORS.skierBody;
+    ctx.fillRect(x + 4, y + 8, 8, 12);
+
+    // Head
+    ctx.fillStyle = COLORS.skierHead;
+    ctx.fillRect(x + 5, y + 2, 6, 6);
+
+    // Skis (two thin rectangles)
+    ctx.fillStyle = '#222222';
+    ctx.fillRect(x + 2, y + SKIER_HEIGHT - 2, 6, 2);
+    ctx.fillRect(x + 8, y + SKIER_HEIGHT - 2, 6, 2);
+  }
+
+  // Draw a tree obstacle (pixel art)
+  function drawTree(x, y) {
+    // Trunk
+    ctx.fillStyle = COLORS.treeTrunk;
+    ctx.fillRect(x + 6, y + 10, 4, 6);
+
+    // Leaves (3 layers of triangles)
+    ctx.fillStyle = COLORS.treeLeaves;
+    // Bottom layer
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y);
+    ctx.lineTo(x + 2, y + 10);
+    ctx.lineTo(x + 14, y + 10);
+    ctx.closePath();
+    ctx.fill();
+    // Middle layer
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y + 4);
+    ctx.lineTo(x + 4, y + 10);
+    ctx.lineTo(x + 12, y + 10);
+    ctx.closePath();
+    ctx.fill();
+    // Top layer
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y + 2);
+    ctx.lineTo(x + 5, y + 7);
+    ctx.lineTo(x + 11, y + 7);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw a rock obstacle (pixel art)
+  function drawRock(x, y) {
+    ctx.fillStyle = COLORS.rock;
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y + 2);
+    ctx.lineTo(x + 14, y + 10);
+    ctx.lineTo(x + 10, y + 14);
+    ctx.lineTo(x + 4, y + 14);
+    ctx.lineTo(x + 2, y + 8);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw a flag collectible (pixel art)
+  function drawFlag(x, y) {
+    // Pole
+    ctx.fillStyle = COLORS.flagPole;
+    ctx.fillRect(x + 7, y + 2, 2, 12);
+
+    // Flag cloth (waving)
+    ctx.fillStyle = COLORS.flagCloth;
+    ctx.beginPath();
+    ctx.moveTo(x + 9, y + 2);
+    ctx.lineTo(x + 15, y + 6);
+    ctx.lineTo(x + 9, y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw snow ground with subtle pixel pattern
+  function drawSnow() {
+    ctx.fillStyle = COLORS.snow;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // Draw subtle pixel noise for snow texture
+    ctx.fillStyle = '#f0f8ff33';
+    for (let i = 0; i < 200; i++) {
+      const px = Math.random() * CANVAS_WIDTH;
+      const py = Math.random() * CANVAS_HEIGHT;
+      ctx.fillRect(px, py, 1, 1);
+    }
+  }
+
+  // Obstacle class
+  class Obstacle {
+    constructor(type, x, y) {
+      this.type = type; // 'tree' or 'rock'
+      this.x = x;
+      this.y = y;
+      this.width = OBSTACLE_SIZE;
+      this.height = OBSTACLE_SIZE;
+    }
+    update() {
+      this.y += SCROLL_SPEED;
+    }
+    draw() {
+      if (this.type === 'tree') {
+        drawTree(this.x, this.y);
+      } else if (this.type === 'rock') {
+        drawRock(this.x, this.y);
+      }
+    }
+  }
+
+  // Flag class
+  class Flag {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.width = FLAG_SIZE;
+      this.height = FLAG_SIZE;
+    }
+    update() {
+      this.y += SCROLL_SPEED;
+    }
+    draw() {
+      drawFlag(this.x, this.y);
+    }
+  }
+
+  // Spawn obstacles randomly on the slope
+  function spawnObstacle() {
+    if (obstacles.length >= MAX_OBSTACLES) return;
+    // Randomly choose tree or rock
+    const type = Math.random() < 0.7 ? 'tree' : 'rock';
+    // Random x position within canvas bounds, leaving margin
+    const margin = 20;
+    const x = Math.floor(Math.random() * (CANVAS_WIDTH - OBSTACLE_SIZE - margin * 2)) + margin;
+    const y = -OBSTACLE_SIZE;
+    obstacles.push(new Obstacle(type, x, y));
+  }
+
+  // Spawn flags randomly on the slope
+  function spawnFlag() {
+    if (flags.length >= MAX_FLAGS) return;
+    const margin = 20;
+    const x = Math.floor(Math.random() * (CANVAS_WIDTH - FLAG_SIZE - margin * 2)) + margin;
+    const y = -FLAG_SIZE;
+    flags.push(new Flag(x, y));
+  }
+
+  // Check rectangle collision helper
+  function rectsCollide(r1, r2) {
+    return !(
+      r2.x > r1.x + r1.width ||
+      r2.x + r2.width < r1.x ||
+      r2.y > r1.y + r1.height ||
+      r2.y + r2.height < r1.y
+    );
+  }
+
+  // Handle keyboard input
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft') {
+      keys.left = true;
+      e.preventDefault();
+    } else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') {
+      keys.right = true;
+      e.preventDefault();
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft') {
+      keys.left = false;
+      e.preventDefault();
+    } else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') {
+      keys.right = false;
+      e.preventDefault();
+    }
+  });
+
+  // Reset game state
+  function resetGame() {
+    score = 0;
+    frameCount = 0;
+    gameOver = false;
+    obstacles.length = 0;
+    flags.length = 0;
+    skier.x = CANVAS_WIDTH / 2 - SKIER_WIDTH / 2;
+    skier.speedX = 0;
+    scoreDisplay.textContent = 'Score: 0';
+  }
+
+  // Draw game over screen
+  function drawGameOver() {
+    ctx.fillStyle = '#000000cc';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillStyle = '#ff4444';
+    ctx.font = 'bold 32px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px "Press Start 2P", monospace';
+    ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
+    ctx.fillText('Press Enter to Restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
+  }
+
+  // Main game loop
+  function gameLoop() {
+    if (gameOver) {
+      drawGameOver();
+      return;
+    }
+
+    frameCount++;
+
+    // Clear canvas and draw snow background
+    drawSnow();
+
+    // Update skier horizontal speed based on keys
+    if (keys.left && !keys.right) {
+      skier.speedX = -SKIER_SPEED_X;
+    } else if (keys.right && !keys.left) {
+      skier.speedX = SKIER_SPEED_X;
+    } else {
+      skier.speedX = 0;
+    }
+
+    // Update skier position and clamp within canvas
+    skier.x += skier.speedX;
+    skier.x = clamp(skier.x, 0, CANVAS_WIDTH - SKIER_WIDTH);
+
+    // Spawn obstacles and flags at intervals
+    if (frameCount % OBSTACLE_SPAWN_INTERVAL === 0) {
+      spawnObstacle();
+    }
+    if (frameCount % FLAG_SPAWN_INTERVAL === 0) {
+      spawnFlag();
+    }
+
+    // Update and draw obstacles
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const obs = obstacles[i];
+      obs.update();
+      obs.draw();
+
+      // Remove obstacles that moved off screen
+      if (obs.y > CANVAS_HEIGHT) {
+        obstacles.splice(i, 1);
+        continue;
+      }
+
+      // Check collision with skier
+      if (rectsCollide(skier, obs)) {
+        gameOver = true;
+      }
+    }
+
+    // Update and draw flags
+    for (let i = flags.length - 1; i >= 0; i--) {
+      const flag = flags[i];
+      flag.update();
+      flag.draw();
+
+      // Remove flags that moved off screen
+      if (flag.y > CANVAS_HEIGHT) {
+        flags.splice(i, 1);
+        continue;
+      }
+
+      // Check collision with skier - collect flag
+      if (rectsCollide(skier, flag)) {
+        score += 10;
+        flags.splice(i, 1);
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
+    }
+
+    // Draw skier on top
+    drawSkier(skier.x, skier.y);
+
+    // Draw score (redundant with scoreboard div, but nice on canvas)
+    ctx.fillStyle = '#003366cc';
+    ctx.font = '12px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${score}`, 8, 20);
+
+    // Loop
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Listen for Enter key to restart after game over
+  window.addEventListener('keydown', (e) => {
+    if (gameOver && (e.code === 'Enter' || e.key === 'Enter')) {
+      resetGame();
+      requestAnimationFrame(gameLoop);
+    }
+  });
+
+  // Start the game
+  resetGame();
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>

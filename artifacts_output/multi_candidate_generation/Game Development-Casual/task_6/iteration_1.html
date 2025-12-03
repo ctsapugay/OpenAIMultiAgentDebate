@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkiFree - Retro Skiing Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #87ceeb; /* Sky blue */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+  }
+  h1 {
+    margin: 12px 0 4px;
+    color: #003366;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  #game-container {
+    position: relative;
+    width: 480px;
+    height: 640px;
+    background: #e0f0ff; /* Light snow blue */
+    border: 4px solid #003366;
+    box-shadow: 0 0 12px #003366aa;
+  }
+  canvas {
+    display: block;
+    background: #e0f0ff;
+    image-rendering: pixelated;
+  }
+  #scoreboard {
+    margin-top: 8px;
+    color: #003366;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  #instructions {
+    margin: 12px 0 24px;
+    max-width: 480px;
+    color: #003366cc;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: center;
+  }
+  /* Pixel font import */
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+</style>
+</head>
+<body>
+<h1>SkiFree</h1>
+<div id="game-container">
+  <canvas id="game" width="480" height="640"></canvas>
+</div>
+<div id="scoreboard">Score: 0 | High Score: 0</div>
+<div id="instructions">
+  Use ◀️ and ▶️ arrow keys to move left and right.<br />
+  Avoid trees and rocks, collect flags to increase your score.<br />
+  Anticipate paths and keep skiing for a high score!<br />
+  Collect power-ups for temporary speed boost and invincibility.<br />
+  Enjoy snow trails and background music for immersive gameplay.
+</div>
+
+<script>
+(() => {
+  // Constants for game dimensions and gameplay
+  const CANVAS_WIDTH = 480;
+  const CANVAS_HEIGHT = 640;
+  const FPS = 60;
+  const SKIER_WIDTH = 16;
+  const SKIER_HEIGHT = 24;
+  const BASE_SKIER_SPEED = 4; // base horizontal speed per frame
+  const BASE_SCROLL_SPEED = 3; // base vertical scroll speed (pixels per frame)
+  const OBSTACLE_SIZE = 16;
+  const FLAG_SIZE = 16;
+  const POWERUP_SIZE = 16;
+  const OBSTACLE_SPAWN_INTERVAL_BASE = 40; // base frames between obstacle spawns
+  const FLAG_SPAWN_INTERVAL_BASE = 80; // base frames between flag spawns
+  const POWERUP_SPAWN_INTERVAL = 600; // frames between power-up spawns
+  const MAX_OBSTACLES = 12;
+  const MAX_FLAGS = 6;
+  const MAX_POWERUPS = 2;
+  const POWERUP_DURATION = FPS * 5; // 5 seconds duration
+
+  // Canvas setup
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // Score display
+  const scoreDisplay = document.getElementById('scoreboard');
+
+  // Key state tracking
+  const keys = {
+    left: false,
+    right: false,
+  };
+
+  // Game state variables
+  let score = 0;
+  let highScore = 0;
+  let frameCount = 0;
+  let gameOver = false;
+
+  // Difficulty scaling variables
+  let scrollSpeed = BASE_SCROLL_SPEED;
+  let obstacleSpawnInterval = OBSTACLE_SPAWN_INTERVAL_BASE;
+  let flagSpawnInterval = FLAG_SPAWN_INTERVAL_BASE;
+  let skierSpeed = BASE_SKIER_SPEED;
+
+  // Power-up state
+  let powerUps = [];
+  let activePowerUp = null;
+  let powerUpTimer = 0;
+
+  // Audio context and sounds
+  let audioCtx;
+  let bgmGainNode;
+  let bgmOscillator;
+  let soundEnabled = true;
+
+  // Skier object
+  const skier = {
+    x: CANVAS_WIDTH / 2 - SKIER_WIDTH / 2,
+    y: CANVAS_HEIGHT - SKIER_HEIGHT - 40,
+    width: SKIER_WIDTH,
+    height: SKIER_HEIGHT,
+    speedX: 0,
+  };
+
+  // Arrays to hold obstacles, flags, and power-ups
+  const obstacles = [];
+  const flags = [];
+  const powerupItems = [];
+
+  // Retro pixel colors palette
+  const COLORS = {
+    sky: '#87ceeb',
+    snow: '#e0f0ff',
+    treeDark: '#0b3d0b',
+    treeLight: '#2e7d32',
+    rockDark: '#555555',
+    rockLight: '#999999',
+    flagRed: '#d32f2f',
+    flagWhite: '#ffffff',
+    skierBody: '#ffcc00',
+    skierPants: '#003366',
+    skierSki: '#aa3300',
+    shadow: '#00000033',
+    powerupSpeed: '#00ccff',
+    powerupInvincible: '#ffcc00',
+    snowTrail: '#ffffff88',
+  };
+
+  // Utility function: clamp value between min and max
+  function clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  }
+
+  // Obstacle types
+  const OBSTACLE_TYPES = {
+    TREE: 'tree',
+    ROCK: 'rock',
+  };
+
+  // Item types
+  const ITEM_TYPE = {
+    FLAG: 'flag',
+    POWERUP_SPEED: 'powerup_speed',
+    POWERUP_INVINCIBLE: 'powerup_invincible',
+  };
+
+  // Generate a random integer between min and max inclusive
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Draw pixelated skier in retro style
+  function drawSkier(x, y) {
+    // Draw shadow
+    ctx.fillStyle = COLORS.shadow;
+    ctx.fillRect(x + 2, y + SKIER_HEIGHT - 4, SKIER_WIDTH - 4, 4);
+
+    // Body (yellow)
+    ctx.fillStyle = COLORS.skierBody;
+    ctx.fillRect(x + 5, y + 4, 6, 10);
+
+    // Pants (dark blue)
+    ctx.fillStyle = COLORS.skierPants;
+    ctx.fillRect(x + 5, y + 14, 6, 6);
+
+    // Head (yellow)
+    ctx.fillRect(x + 6, y + 0, 4, 4);
+
+    // Skis (brown)
+    ctx.fillStyle = COLORS.skierSki;
+    ctx.fillRect(x + 2, y + SKIER_HEIGHT - 4, SKIER_WIDTH - 4, 2);
+  }
+
+  // Draw a tree obstacle in pixel art style
+  function drawTree(x, y) {
+    // Shadow
+    ctx.fillStyle = COLORS.shadow;
+    ctx.fillRect(x + 3, y + OBSTACLE_SIZE - 3, OBSTACLE_SIZE - 6, 3);
+
+    // Trunk (dark brown)
+    ctx.fillStyle = '#4b2e0e';
+    ctx.fillRect(x + 6, y + OBSTACLE_SIZE - 8, 4, 8);
+
+    // Leaves (triangles)
+    ctx.fillStyle = COLORS.treeDark;
+    ctx.beginPath();
+    ctx.moveTo(x + OBSTACLE_SIZE / 2, y);
+    ctx.lineTo(x + 2, y + OBSTACLE_SIZE - 8);
+    ctx.lineTo(x + OBSTACLE_SIZE - 2, y + OBSTACLE_SIZE - 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = COLORS.treeLight;
+    ctx.beginPath();
+    ctx.moveTo(x + OBSTACLE_SIZE / 2, y + 4);
+    ctx.lineTo(x + 4, y + OBSTACLE_SIZE - 10);
+    ctx.lineTo(x + OBSTACLE_SIZE - 4, y + OBSTACLE_SIZE - 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw a rock obstacle in pixel art style
+  function drawRock(x, y) {
+    // Shadow
+    ctx.fillStyle = COLORS.shadow;
+    ctx.fillRect(x + 2, y + OBSTACLE_SIZE - 3, OBSTACLE_SIZE - 4, 3);
+
+    // Rock base (dark gray)
+    ctx.fillStyle = COLORS.rockDark;
+    ctx.beginPath();
+    ctx.ellipse(x + OBSTACLE_SIZE / 2, y + OBSTACLE_SIZE / 2 + 2, 7, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rock highlight (light gray)
+    ctx.fillStyle = COLORS.rockLight;
+    ctx.beginPath();
+    ctx.ellipse(x + OBSTACLE_SIZE / 2 + 2, y + OBSTACLE_SIZE / 2, 3, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Draw a flag item in pixel art style
+  function drawFlag(x, y) {
+    // Flag pole (brown)
+    ctx.fillStyle = '#6b3e0a';
+    ctx.fillRect(x + 6, y + 2, 2, FLAG_SIZE - 4);
+
+    // Flag (red and white stripes)
+    ctx.fillStyle = COLORS.flagRed;
+    ctx.fillRect(x + 8, y + 2, 6, 6);
+    ctx.fillStyle = COLORS.flagWhite;
+    ctx.fillRect(x + 8, y + 5, 6, 3);
+  }
+
+  // Draw power-up items in pixel art style
+  function drawPowerUp(x, y, type) {
+    // Draw shadow
+    ctx.fillStyle = COLORS.shadow;
+    ctx.fillRect(x + 3, y + POWERUP_SIZE - 3, POWERUP_SIZE - 6, 3);
+
+    if (type === ITEM_TYPE.POWERUP_SPEED) {
+      // Speed boost icon: blue lightning bolt
+      ctx.fillStyle = COLORS.powerupSpeed;
+      ctx.beginPath();
+      ctx.moveTo(x + 6, y + 2);
+      ctx.lineTo(x + 10, y + 8);
+      ctx.lineTo(x + 8, y + 8);
+      ctx.lineTo(x + 12, y + 14);
+      ctx.lineTo(x + 6, y + 8);
+      ctx.lineTo(x + 8, y + 8);
+      ctx.closePath();
+      ctx.fill();
+    } else if (type === ITEM_TYPE.POWERUP_INVINCIBLE) {
+      // Invincibility icon: yellow star
+      ctx.fillStyle = COLORS.powerupInvincible;
+      const cx = x + POWERUP_SIZE / 2;
+      const cy = y + POWERUP_SIZE / 2;
+      const spikes = 5;
+      const outerRadius = 7;
+      const innerRadius = 3;
+      let rot = Math.PI / 2 * 3;
+      let step = Math.PI / spikes;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        let x1 = cx + Math.cos(rot) * outerRadius;
+        let y1 = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x1, y1);
+        rot += step;
+
+        x1 = cx + Math.cos(rot) * innerRadius;
+        y1 = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x1, y1);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Draw the snowy slope background with subtle pixel pattern
+  function drawBackground(scrollY) {
+    // Fill background snow color
+    ctx.fillStyle = COLORS.snow;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // Draw subtle pixel snow pattern (small white dots)
+    const patternSpacing = 16;
+    ctx.fillStyle = '#ffffff33';
+    for (let y = -scrollY % patternSpacing; y < CANVAS_HEIGHT; y += patternSpacing) {
+      for (let x = 0; x < CANVAS_WIDTH; x += patternSpacing) {
+        ctx.fillRect(x + 4, y + 4, 1, 1);
+      }
+    }
+  }
+
+  // Draw snow trail particles behind skier
+  const snowTrails = [];
+  function addSnowTrail() {
+    snowTrails.push({
+      x: skier.x + SKIER_WIDTH / 2 + randInt(-4, 4),
+      y: skier.y + SKIER_HEIGHT,
+      alpha: 1,
+      size: randInt(1, 2),
+      life: 20,
+    });
+  }
+  function updateSnowTrails() {
+    for (let i = snowTrails.length - 1; i >= 0; i--) {
+      const p = snowTrails[i];
+      p.y += scrollSpeed / 2;
+      p.alpha -= 0.05;
+      p.life--;
+      if (p.alpha <= 0 || p.life <= 0) {
+        snowTrails.splice(i, 1);
+      }
+    }
+  }
+  function drawSnowTrails() {
+    ctx.fillStyle = COLORS.snowTrail;
+    for (const p of snowTrails) {
+      ctx.globalAlpha = p.alpha;
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Check rectangle collision helper
+  function rectsCollide(r1, r2) {
+    return !(
+      r2.x > r1.x + r1.width ||
+      r2.x + r2.width < r1.x ||
+      r2.y > r1.y + r1.height ||
+      r2.y + r2.height < r1.y
+    );
+  }
+
+  // Initialize obstacles, flags, power-ups arrays and variables
+  function resetGame() {
+    score = 0;
+    frameCount = 0;
+    gameOver = false;
+    skier.x = CANVAS_WIDTH / 2 - SKIER_WIDTH / 2;
+    obstacles.length = 0;
+    flags.length = 0;
+    powerupItems.length = 0;
+    powerUps.length = 0;
+    activePowerUp = null;
+    powerUpTimer = 0;
+    scrollSpeed = BASE_SCROLL_SPEED;
+    obstacleSpawnInterval = OBSTACLE_SPAWN_INTERVAL_BASE;
+    flagSpawnInterval = FLAG_SPAWN_INTERVAL_BASE;
+    skierSpeed = BASE_SKIER_SPEED;
+    updateScoreDisplay();
+  }
+
+  // Spawn a new obstacle at a random horizontal position above the screen
+  function spawnObstacle() {
+    if (obstacles.length >= MAX_OBSTACLES) return;
+    const type = Math.random() < 0.6 ? OBSTACLE_TYPES.TREE : OBSTACLE_TYPES.ROCK;
+    const x = randInt(OBSTACLE_SIZE, CANVAS_WIDTH - OBSTACLE_SIZE * 2);
+    const y = -OBSTACLE_SIZE;
+    obstacles.push({ x, y, width: OBSTACLE_SIZE, height: OBSTACLE_SIZE, type });
+  }
+
+  // Spawn a new flag at a random horizontal position above the screen
+  function spawnFlag() {
+    if (flags.length >= MAX_FLAGS) return;
+    const x = randInt(FLAG_SIZE, CANVAS_WIDTH - FLAG_SIZE * 2);
+    const y = -FLAG_SIZE - randInt(0, 100);
+    flags.push({ x, y, width: FLAG_SIZE, height: FLAG_SIZE, type: ITEM_TYPE.FLAG });
+  }
+
+  // Spawn a new power-up at a random horizontal position above the screen
+  function spawnPowerUp() {
+    if (powerupItems.length >= MAX_POWERUPS) return;
+    const types = [ITEM_TYPE.POWERUP_SPEED, ITEM_TYPE.POWERUP_INVINCIBLE];
+    const type = types[randInt(0, types.length - 1)];
+    const x = randInt(POWERUP_SIZE, CANVAS_WIDTH - POWERUP_SIZE * 2);
+    const y = -POWERUP_SIZE - randInt(0, 150);
+    powerupItems.push({ x, y, width: POWERUP_SIZE, height: POWERUP_SIZE, type });
+  }
+
+  // Update game objects positions and handle logic
+  function update() {
+    if (gameOver) return;
+
+    frameCount++;
+
+    // Progressive difficulty scaling: increase speed and spawn rate every 10 seconds
+    if (frameCount % (FPS * 10) === 0) {
+      scrollSpeed = Math.min(scrollSpeed + 0.5, 10);
+      skierSpeed = Math.min(skierSpeed + 0.5, 8);
+      obstacleSpawnInterval = Math.max(OBSTACLE_SPAWN_INTERVAL_BASE - frameCount / (FPS * 20), 15);
+      flagSpawnInterval = Math.max(FLAG_SPAWN_INTERVAL_BASE - frameCount / (FPS * 10), 40);
+    }
+
+    // Update skier horizontal movement based on keys pressed
+    if (keys.left && !keys.right) {
+      skier.speedX = -skierSpeed;
+    } else if (keys.right && !keys.left) {
+      skier.speedX = skierSpeed;
+    } else {
+      skier.speedX = 0;
+    }
+
+    // Update skier position and clamp within canvas bounds
+    skier.x += skier.speedX;
+    skier.x = clamp(skier.x, 0, CANVAS_WIDTH - skier.width);
+
+    // Add snow trail particles behind skier
+    addSnowTrail();
+    updateSnowTrails();
+
+    // Scroll obstacles, flags, and power-ups downward to simulate skiing downhill
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      obstacles[i].y += scrollSpeed;
+      // Remove obstacles that moved off screen
+      if (obstacles[i].y > CANVAS_HEIGHT) {
+        obstacles.splice(i, 1);
+      }
+    }
+    for (let i = flags.length - 1; i >= 0; i--) {
+      flags[i].y += scrollSpeed;
+      // Remove flags that moved off screen
+      if (flags[i].y > CANVAS_HEIGHT) {
+        flags.splice(i, 1);
+      }
+    }
+    for (let i = powerupItems.length - 1; i >= 0; i--) {
+      powerupItems[i].y += scrollSpeed;
+      if (powerupItems[i].y > CANVAS_HEIGHT) {
+        powerupItems.splice(i, 1);
+      }
+    }
+
+    // Spawn obstacles, flags, and power-ups at intervals
+    if (frameCount % Math.floor(obstacleSpawnInterval) === 0) {
+      spawnObstacle();
+    }
+    if (frameCount % Math.floor(flagSpawnInterval) === 0) {
+      spawnFlag();
+    }
+    if (frameCount % POWERUP_SPAWN_INTERVAL === 0) {
+      spawnPowerUp();
+    }
+
+    // Check collisions with obstacles
+    if (!activePowerUp || activePowerUp.type !== ITEM_TYPE.POWERUP_INVINCIBLE) {
+      for (const obs of obstacles) {
+        if (
+          rectsCollide(
+            { x: skier.x, y: skier.y, width: skier.width, height: skier.height },
+            obs
+          )
+        ) {
+          gameOver = true;
+          stopBGM();
+          break;
+        }
+      }
+    }
+
+    // Check collisions with flags
+    for (let i = flags.length - 1; i >= 0; i--) {
+      if (
+        rectsCollide(
+          { x: skier.x, y: skier.y, width: skier.width, height: skier.height },
+          flags[i]
+        )
+      ) {
+        score++;
+        flags.splice(i, 1);
+        updateScoreDisplay();
+        playSound('flag');
+      }
+    }
+
+    // Check collisions with power-ups
+    for (let i = powerupItems.length - 1; i >= 0; i--) {
+      if (
+        rectsCollide(
+          { x: skier.x, y: skier.y, width: skier.width, height: skier.height },
+          powerupItems[i]
+        )
+      ) {
+        activatePowerUp(powerupItems[i].type);
+        powerupItems.splice(i, 1);
+        playSound('powerup');
+      }
+    }
+
+    // Update active power-up timer
+    if (activePowerUp) {
+      powerUpTimer--;
+      if (powerUpTimer <= 0) {
+        deactivatePowerUp();
+      }
+    }
+  }
+
+  // Draw all game elements
+  function draw() {
+    // Draw background with scrolling effect
+    drawBackground(frameCount * scrollSpeed);
+
+    // Draw snow trails behind skier
+    drawSnowTrails();
+
+    // Draw obstacles
+    for (const obs of obstacles) {
+      if (obs.type === OBSTACLE_TYPES.TREE) {
+        drawTree(obs.x, obs.y);
+      } else if (obs.type === OBSTACLE_TYPES.ROCK) {
+        drawRock(obs.x, obs.y);
+      }
+    }
+
+    // Draw flags
+    for (const flag of flags) {
+      drawFlag(flag.x, flag.y);
+    }
+
+    // Draw power-ups
+    for (const pwr of powerupItems) {
+      drawPowerUp(pwr.x, pwr.y, pwr.type);
+    }
+
+    // Draw skier on top
+    drawSkier(skier.x, skier.y);
+
+    // Draw score and high score text
+    ctx.fillStyle = '#003366';
+    ctx.font = '16px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${score} | High Score: ${highScore}`, 12, 24);
+
+    // Draw active power-up indicator
+    if (activePowerUp) {
+      ctx.fillStyle = '#003366';
+      ctx.font = '12px "Press Start 2P", monospace';
+      ctx.textAlign = 'right';
+      let text = '';
+      if (activePowerUp.type === ITEM_TYPE.POWERUP_SPEED) {
+        text = `Speed Boost: ${(powerUpTimer / FPS).toFixed(1)}s`;
+      } else if (activePowerUp.type === ITEM_TYPE.POWERUP_INVINCIBLE) {
+        text = `Invincible: ${(powerUpTimer / FPS).toFixed(1)}s`;
+      }
+      ctx.fillText(text, CANVAS_WIDTH - 12, 24);
+    }
+
+    // If game over, draw overlay
+    if (gameOver) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.fillStyle = '#ff4444';
+      ctx.font = '32px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
+      ctx.font = '16px "Press Start 2P", monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Press ENTER to Restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
+    }
+  }
+
+  // Update score and high score display
+  function updateScoreDisplay() {
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('skifree_highscore', highScore);
+    }
+    scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
+  }
+
+  // Activate a power-up effect
+  function activatePowerUp(type) {
+    activePowerUp = { type };
+    powerUpTimer = POWERUP_DURATION;
+    if (type === ITEM_TYPE.POWERUP_SPEED) {
+      skierSpeed = BASE_SKIER_SPEED * 1.8;
+      scrollSpeed = BASE_SCROLL_SPEED * 1.5;
+    } else if (type === ITEM_TYPE.POWERUP_INVINCIBLE) {
+      // No speed change, just invincibility
+    }
+  }
+
+  // Deactivate power-up effect
+  function deactivatePowerUp() {
+    activePowerUp = null;
+    powerUpTimer = 0;
+    skierSpeed = BASE_SKIER_SPEED + (scrollSpeed - BASE_SCROLL_SPEED) * 0.3; // keep some speed increase from difficulty
+    scrollSpeed = Math.max(scrollSpeed, BASE_SCROLL_SPEED);
+  }
+
+  // Sound effects using Web Audio API
+  function initAudio() {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      createBGM();
+    } catch (e) {
+      soundEnabled = false;
+    }
+  }
+
+  // Create simple background music oscillator
+  function createBGM() {
+    if (!audioCtx) return;
+    bgmOscillator = audioCtx.createOscillator();
+    bgmGainNode = audioCtx.createGain();
+    bgmOscillator.type = 'square';
+    bgmOscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+    bgmGainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    bgmOscillator.connect(bgmGainNode);
+    bgmGainNode.connect(audioCtx.destination);
+    bgmOscillator.start();
+  }
+
+  // Stop background music
+  function stopBGM() {
+    if (bgmOscillator) {
+      bgmOscillator.stop();
+      bgmOscillator.disconnect();
+      bgmOscillator = null;
+    }
+  }
+
+  // Play simple sound effects
+  function playSound(type) {
+    if (!soundEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+    if (type === 'flag') {
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      osc.type = 'triangle';
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    } else if (type === 'powerup') {
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.type = 'square';
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    }
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+
+  // Main game loop
+  function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Keyboard event handlers
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return; // ignore held keys repeat events
+    if (e.code === 'ArrowLeft') {
+      keys.left = true;
+      e.preventDefault();
+    } else if (e.code === 'ArrowRight') {
+      keys.right = true;
+      e.preventDefault();
+    } else if (e.code === 'Enter' && gameOver) {
+      resetGame();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      createBGM();
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowLeft') {
+      keys.left = false;
+      e.preventDefault();
+    } else if (e.code === 'ArrowRight') {
+      keys.right = false;
+      e.preventDefault();
+    }
+  });
+
+  // Load high score from localStorage
+  function loadHighScore() {
+    const stored = localStorage.getItem('skifree_highscore');
+    if (stored !== null) {
+      highScore = parseInt(stored, 10) || 0;
+    }
+  }
+
+  // Initialize and start the game
+  loadHighScore();
+  updateScoreDisplay();
+  resetGame();
+  initAudio();
+  gameLoop();
+})();
+</script>
+</body>
+</html>

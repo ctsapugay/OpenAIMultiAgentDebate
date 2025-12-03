@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+  }
+  #ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    max-width: 320px;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 15px;
+    border-radius: 8px;
+    user-select: none;
+  }
+  #ui h1 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #7fffd4;
+  }
+  #ui p {
+    margin: 4px 0;
+  }
+  #ui .stats {
+    margin-top: 8px;
+  }
+  #ui button {
+    margin-top: 10px;
+    background: #007acc;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  #ui button:hover:not(:disabled) {
+    background: #005f99;
+  }
+  #ui button:disabled {
+    background: #444;
+    cursor: default;
+  }
+  #tip {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #a0d8d8;
+    font-style: italic;
+  }
+  #upgrade-panel {
+    margin-top: 12px;
+    border-top: 1px solid #2a4a4a;
+    padding-top: 8px;
+  }
+  #upgrade-panel h2 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    color: #7fffd4;
+  }
+  .upgrade {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .upgrade button {
+    background: #009933;
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+  .upgrade button:disabled {
+    background: #444;
+    cursor: default;
+  }
+  #game-over-screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #7fffd4;
+    font-size: 28px;
+    font-weight: 700;
+    z-index: 10;
+    user-select: none;
+  }
+  #game-over-screen button {
+    margin-top: 20px;
+    font-size: 18px;
+    padding: 10px 20px;
+    background: #007acc;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+  }
+  #game-over-screen button:hover {
+    background: #005f99;
+  }
+  /* Cursor style for target control */
+  #game-container.grabbing {
+    cursor: grabbing;
+  }
+  #game-container.grab {
+    cursor: grab;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" class="grab" tabindex="0" aria-label="JS Planet Defense Game">
+  <canvas id="game-canvas" width="800" height="600" aria-describedby="game-description"></canvas>
+  <div id="ui" role="region" aria-live="polite" aria-atomic="true">
+    <h1>JS Planet Defense</h1>
+    <p id="game-description">Control the single defense target to protect Earth from incoming enemies. Use mouse or touch to move the target. Click or press spacebar to shoot.</p>
+    <div class="stats">
+      <div>Score: <span id="score">0</span></div>
+      <div>Level: <span id="level">1</span></div>
+      <div>Health: <span id="health">100</span></div>
+      <div>Energy: <span id="energy">100</span></div>
+    </div>
+    <div id="upgrade-panel" aria-label="Upgrade Panel">
+      <h2>Upgrades</h2>
+      <div class="upgrade">
+        <span>Weapon Damage (Cost: <span id="cost-damage">50</span>)</span>
+        <button id="upgrade-damage" aria-label="Upgrade Weapon Damage">Upgrade</button>
+      </div>
+      <div class="upgrade">
+        <span>Fire Rate (Cost: <span id="cost-fireRate">70</span>)</span>
+        <button id="upgrade-fireRate" aria-label="Upgrade Fire Rate">Upgrade</button>
+      </div>
+      <div class="upgrade">
+        <span>Movement Speed (Cost: <span id="cost-speed">60</span>)</span>
+        <button id="upgrade-speed" aria-label="Upgrade Movement Speed">Upgrade</button>
+      </div>
+      <div class="upgrade">
+        <span>Shield Capacity (Cost: <span id="cost-shield">80</span>)</span>
+        <button id="upgrade-shield" aria-label="Upgrade Shield Capacity">Upgrade</button>
+      </div>
+    </div>
+    <div id="tip" aria-live="polite" aria-atomic="true">
+      Tip: Use precise control and tactical positioning to maximize defense effectiveness.
+    </div>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </div>
+  <div id="game-over-screen" role="alert" aria-hidden="true" hidden>
+    <div id="game-over-text">Game Over</div>
+    <div>Your final score: <span id="final-score">0</span></div>
+    <button id="restart-button" aria-label="Restart Game">Restart</button>
+  </div>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * Developed as a single-file HTML/JS/CSS game.
+ * 
+ * Controls:
+ * - Move the target with mouse or touch (dragging)
+ * - Shoot with left mouse click or spacebar
+ * 
+ * Objective:
+ * - Defend Earth by shooting down incoming enemies before they reach the bottom.
+ * - Upgrade your target's weapon, speed, and shield to survive longer.
+ * 
+ * Author: ChatGPT (2024)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const tipEl = document.getElementById('tip');
+  const startButton = document.getElementById('start-button');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const gameOverText = document.getElementById('game-over-text');
+  const finalScoreEl = document.getElementById('final-score');
+  const restartButton = document.getElementById('restart-button');
+
+  // Upgrade buttons and costs
+  const upgradeDamageBtn = document.getElementById('upgrade-damage');
+  const upgradeFireRateBtn = document.getElementById('upgrade-fireRate');
+  const upgradeSpeedBtn = document.getElementById('upgrade-speed');
+  const upgradeShieldBtn = document.getElementById('upgrade-shield');
+
+  const costDamageEl = document.getElementById('cost-damage');
+  const costFireRateEl = document.getElementById('cost-fireRate');
+  const costSpeedEl = document.getElementById('cost-speed');
+  const costShieldEl = document.getElementById('cost-shield');
+
+  // Game constants
+  const GAME_WIDTH = canvas.width;
+  const GAME_HEIGHT = canvas.height;
+
+  // Earth position (bottom center)
+  const EARTH_Y = GAME_HEIGHT - 20;
+
+  // Enemy spawn parameters
+  const ENEMY_SPAWN_INTERVAL_BASE = 2000; // ms, decreases with level
+  const ENEMY_SPEED_BASE = 0.6; // pixels per frame, increases with level
+  const ENEMY_HEALTH_BASE = 10; // base health, increases with level
+
+  // Target parameters
+  const TARGET_RADIUS = 20;
+  const TARGET_BASE_SPEED = 4; // pixels per frame
+  const TARGET_BASE_FIRE_RATE = 500; // ms between shots
+  const TARGET_BASE_DAMAGE = 10;
+  const TARGET_BASE_SHIELD = 100;
+  const TARGET_MAX_ENERGY = 100;
+  const ENERGY_REGEN_RATE = 10; // energy per second
+
+  // Projectile parameters
+  const PROJECTILE_SPEED = 10; // pixels per frame
+  const PROJECTILE_RADIUS = 4;
+
+  // Enemy types (for variety)
+  const ENEMY_TYPES = [
+    { color: '#ff5555', radius: 15, speedMultiplier: 1, healthMultiplier: 1, score: 10, pattern: 'linear' },
+    { color: '#ffaa00', radius: 20, speedMultiplier: 0.8, healthMultiplier: 2, score: 20, pattern: 'zigzag' },
+    { color: '#55aaff', radius: 12, speedMultiplier: 1.5, healthMultiplier: 0.7, score: 15, pattern: 'sine' },
+    { color: '#aa55ff', radius: 25, speedMultiplier: 0.6, healthMultiplier: 3, score: 30, pattern: 'homing' },
+  ];
+
+  // Game state variables
+  let gameRunning = false;
+  let lastTime = 0;
+  let deltaTime = 0;
+
+  // Player state
+  const player = {
+    x: GAME_WIDTH / 2,
+    y: EARTH_Y - TARGET_RADIUS - 10,
+    radius: TARGET_RADIUS,
+    speed: TARGET_BASE_SPEED,
+    fireRate: TARGET_BASE_FIRE_RATE,
+    damage: TARGET_BASE_DAMAGE,
+    shield: TARGET_BASE_SHIELD,
+    maxShield: TARGET_BASE_SHIELD,
+    energy: TARGET_MAX_ENERGY,
+    maxEnergy: TARGET_MAX_ENERGY,
+    lastShotTime: 0,
+    movingTo: null, // {x, y} target position for smooth movement
+  };
+
+  // Game progression
+  let score = 0;
+  let level = 1;
+  let enemies = [];
+  let projectiles = [];
+  let enemySpawnTimer = 0;
+  let enemySpawnInterval = ENEMY_SPAWN_INTERVAL_BASE;
+  let enemySpeed = ENEMY_SPEED_BASE;
+  let enemyHealth = ENEMY_HEALTH_BASE;
+
+  // Input state
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+
+  // Resources for upgrades
+  let resources = 0;
+
+  // Upgrade costs and levels
+  const upgrades = {
+    damage: { level: 0, cost: 50, increment: 5 },
+    fireRate: { level: 0, cost: 70, increment: 50 }, // fire rate decreases by 50ms per upgrade
+    speed: { level: 0, cost: 60, increment: 0.5 },
+    shield: { level: 0, cost: 80, increment: 20 },
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+
+  // Enemy class with enhanced AI patterns
+  class Enemy {
+    constructor(type, x, y, speed, health, scoreValue) {
+      this.type = type;
+      this.x = x;
+      this.y = y;
+      this.radius = type.radius;
+      this.color = type.color;
+      this.speed = speed;
+      this.health = health;
+      this.maxHealth = health;
+      this.scoreValue = scoreValue;
+      this.isDead = false;
+
+      // AI pattern state
+      this.pattern = type.pattern || 'linear';
+      this.spawnTime = performance.now();
+      this.initialX = x;
+      this.amplitude = 40 + Math.random() * 20; // for sine and zigzag
+      this.frequency = 0.002 + Math.random() * 0.002; // for sine and zigzag
+      this.zigzagDirection = 1; // for zigzag horizontal direction
+      this.zigzagStep = 0;
+      this.homingSpeedMultiplier = 1;
+    }
+
+    update(delta) {
+      const now = performance.now();
+      const elapsed = now - this.spawnTime;
+
+      switch (this.pattern) {
+        case 'linear':
+          // Straight downward movement
+          this.y += this.speed * delta;
+          break;
+
+        case 'zigzag':
+          // Zigzag horizontally while moving down
+          this.y += this.speed * delta;
+          this.zigzagStep += this.frequency * delta;
+          this.x = this.initialX + this.amplitude * Math.sin(this.zigzagStep * Math.PI * 2);
+          // Clamp x inside canvas
+          this.x = clamp(this.x, this.radius, GAME_WIDTH - this.radius);
+          break;
+
+        case 'sine':
+          // Smooth sine wave horizontal movement while moving down
+          this.y += this.speed * delta;
+          this.x = this.initialX + this.amplitude * Math.sin(elapsed * this.frequency * 2 * Math.PI);
+          this.x = clamp(this.x, this.radius, GAME_WIDTH - this.radius);
+          break;
+
+        case 'homing':
+          // Move downward but adjust horizontal position toward player
+          this.y += this.speed * delta;
+          const dx = player.x - this.x;
+          const dy = (EARTH_Y - this.radius - 10) - this.y; // vertical distance to Earth line
+          const dist = Math.hypot(dx, dy);
+          if (dist > 0) {
+            // Adjust horizontal position smoothly toward player
+            const homingSpeed = this.speed * 0.7;
+            this.x += (dx / dist) * homingSpeed * delta;
+            // Clamp x inside canvas
+            this.x = clamp(this.x, this.radius, GAME_WIDTH - this.radius);
+          }
+          break;
+
+        default:
+          // Default linear movement
+          this.y += this.speed * delta;
+          break;
+      }
+
+      // Check if reached Earth (bottom)
+      if (this.y + this.radius >= EARTH_Y) {
+        this.isDead = true;
+        // Damage player shield directly
+        player.shield -= this.health * 0.5; // enemy health as damage factor
+        if (player.shield < 0) player.shield = 0;
+      }
+    }
+
+    draw(ctx) {
+      // Draw enemy body
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 5;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#222';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 12, barWidth, barHeight);
+      ctx.fillStyle = '#ff4444';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 12, barWidth * healthRatio, barHeight);
+      ctx.restore();
+    }
+  }
+
+  // Projectile class
+  class Projectile {
+    constructor(x, y, targetX, targetY, damage) {
+      this.x = x;
+      this.y = y;
+      this.radius = PROJECTILE_RADIUS;
+      this.color = '#7fffd4';
+      this.speed = PROJECTILE_SPEED;
+      this.damage = damage;
+
+      // Calculate normalized direction vector
+      const dx = targetX - x;
+      const dy = targetY - y;
+      const dist = Math.hypot(dx, dy);
+      this.vx = (dx / dist) * this.speed;
+      this.vy = (dy / dist) * this.speed;
+
+      this.isDead = false;
+    }
+
+    update(delta) {
+      this.x += this.vx * delta;
+      this.y += this.vy * delta;
+
+      // Remove projectile if out of bounds
+      if (
+        this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+        this.y < -this.radius || this.y > GAME_HEIGHT + this.radius
+      ) {
+        this.isDead = true;
+      }
+    }
+
+    draw(ctx) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Draw the player target with weapon and shield
+  function drawPlayer(ctx) {
+    ctx.save();
+    ctx.translate(player.x, player.y);
+
+    // Draw shield ring
+    const shieldRatio = player.shield / player.maxShield;
+    const shieldColor = `rgba(127, 255, 212, ${0.3 + 0.7 * shieldRatio})`;
+    ctx.beginPath();
+    ctx.strokeStyle = shieldColor;
+    ctx.lineWidth = 6;
+    ctx.shadowColor = shieldColor;
+    ctx.shadowBlur = 15;
+    ctx.arc(0, 0, player.radius + 8, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw target body
+    ctx.beginPath();
+    ctx.fillStyle = '#00ffff';
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 20;
+    ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw weapon barrel (pointing upward)
+    ctx.beginPath();
+    ctx.fillStyle = '#00cccc';
+    ctx.shadowColor = '#00cccc';
+    ctx.shadowBlur = 10;
+    ctx.rect(-6, -player.radius - 14, 12, 14);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Draw Earth at bottom center
+  function drawEarth(ctx) {
+    const earthRadius = 60;
+    const earthX = GAME_WIDTH / 2;
+    const earthY = EARTH_Y + earthRadius - 10;
+
+    // Earth glow
+    const gradient = ctx.createRadialGradient(earthX, earthY, earthRadius * 0.5, earthX, earthY, earthRadius);
+    gradient.addColorStop(0, '#004400');
+    gradient.addColorStop(1, '#001100');
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = gradient;
+    ctx.shadowColor = '#00ff00';
+    ctx.shadowBlur = 20;
+    ctx.arc(earthX, earthY, earthRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth surface details (simple)
+    ctx.fillStyle = '#003300';
+    for (let i = 0; i < 10; i++) {
+      const angle = (i / 10) * Math.PI * 2;
+      const x = earthX + Math.cos(angle) * earthRadius * 0.7;
+      const y = earthY + Math.sin(angle) * earthRadius * 0.7;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Spawn a new enemy at random top position with pattern based on level and type
+  function spawnEnemy() {
+    // Select enemy type based on level with cycling for variety
+    const typeIndex = Math.min(level - 1, ENEMY_TYPES.length - 1);
+    // To add variety, cycle through types with some randomness
+    const cycleIndex = (Math.floor(Math.random() * 2) + typeIndex) % ENEMY_TYPES.length;
+    const type = ENEMY_TYPES[cycleIndex];
+
+    // Random x position within canvas width, with margin
+    const margin = 30;
+    const x = Math.random() * (GAME_WIDTH - margin * 2) + margin;
+    const y = -type.radius - 10;
+
+    // Speed and health scale with level and type
+    const speed = enemySpeed * type.speedMultiplier;
+    const health = enemyHealth * type.healthMultiplier;
+
+    const enemy = new Enemy(type, x, y, speed, health, type.score);
+    enemies.push(enemy);
+  }
+
+  // Handle player shooting
+  function playerShoot(targetX, targetY, time) {
+    if (time - player.lastShotTime < player.fireRate) return;
+    if (player.energy < 10) return; // Require energy to shoot
+
+    player.lastShotTime = time;
+    player.energy -= 10;
+
+    // Create projectile from player position toward target
+    const proj = new Projectile(player.x, player.y - player.radius - 10, targetX, targetY, player.damage);
+    projectiles.push(proj);
+  }
+
+  // Update all game objects
+  function update(delta, time) {
+    if (!gameRunning) return;
+
+    // Regenerate energy
+    player.energy += (ENERGY_REGEN_RATE * delta) / 1000;
+    if (player.energy > player.maxEnergy) player.energy = player.maxEnergy;
+
+    // Move player toward movingTo if set (smooth movement)
+    if (player.movingTo) {
+      const dx = player.movingTo.x - player.x;
+      const dy = player.movingTo.y - player.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < player.speed) {
+        player.x = player.movingTo.x;
+        player.y = player.movingTo.y;
+        player.movingTo = null;
+      } else {
+        player.x += (dx / dist) * player.speed;
+        player.y += (dy / dist) * player.speed;
+      }
+      // Clamp player position inside canvas and above Earth
+      player.x = clamp(player.x, player.radius, GAME_WIDTH - player.radius);
+      player.y = clamp(player.y, player.radius, EARTH_Y - player.radius - 10);
+    }
+
+    // Update enemies
+    enemies.forEach(enemy => enemy.update(delta));
+
+    // Update projectiles
+    projectiles.forEach(proj => proj.update(delta));
+
+    // Collision detection: projectiles vs enemies
+    projectiles.forEach(proj => {
+      if (proj.isDead) return;
+      enemies.forEach(enemy => {
+        if (enemy.isDead) return;
+        const dist = distance(proj.x, proj.y, enemy.x, enemy.y);
+        if (dist < proj.radius + enemy.radius) {
+          // Hit detected
+          enemy.health -= proj.damage;
+          proj.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += enemy.scoreValue;
+            resources += Math.floor(enemy.scoreValue / 2);
+          }
+        }
+      });
+    });
+
+    // Remove dead enemies and projectiles
+    enemies = enemies.filter(e => !e.isDead);
+    projectiles = projectiles.filter(p => !p.isDead);
+
+    // Check player shield health
+    if (player.shield <= 0) {
+      player.shield = 0;
+      endGame();
+    }
+
+    // Spawn enemies based on timer
+    enemySpawnTimer += delta;
+    if (enemySpawnTimer >= enemySpawnInterval) {
+      enemySpawnTimer = 0;
+      spawnEnemy();
+    }
+
+    // Level progression: increase difficulty every 30 seconds
+    if (time > level * 30000) {
+      level++;
+      levelEl.textContent = level;
+      enemySpawnInterval = Math.max(500, ENEMY_SPAWN_INTERVAL_BASE - (level - 1) * 150);
+      enemySpeed = ENEMY_SPEED_BASE + (level - 1) * 0.15;
+      enemyHealth = ENEMY_HEALTH_BASE + (level - 1) * 5;
+      tipEl.textContent = getRandomTip();
+    }
+
+    // Update UI
+    scoreEl.textContent = score;
+    healthEl.textContent = Math.floor(player.shield);
+    energyEl.textContent = Math.floor(player.energy);
+
+    // Update upgrade costs display
+    costDamageEl.textContent = upgrades.damage.cost;
+    costFireRateEl.textContent = upgrades.fireRate.cost;
+    costSpeedEl.textContent = upgrades.speed.cost;
+    costShieldEl.textContent = upgrades.shield.cost;
+
+    // Enable/disable upgrade buttons based on resources
+    upgradeDamageBtn.disabled = resources < upgrades.damage.cost;
+    upgradeFireRateBtn.disabled = resources < upgrades.fireRate.cost;
+    upgradeSpeedBtn.disabled = resources < upgrades.speed.cost;
+    upgradeShieldBtn.disabled = resources < upgrades.shield.cost;
+  }
+
+  // Draw all game objects
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(enemy => enemy.draw(ctx));
+
+    // Draw projectiles
+    projectiles.forEach(proj => proj.draw(ctx));
+
+    // Draw player
+    drawPlayer(ctx);
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastTime) lastTime = timestamp;
+    deltaTime = timestamp - lastTime;
+    lastTime = timestamp;
+
+    update(deltaTime, timestamp);
+    draw();
+
+    if (gameRunning) {
+      requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // Handle game start
+  function startGame() {
+    // Reset game state
+    gameRunning = true;
+    lastTime = 0;
+    deltaTime = 0;
+    score = 0;
+    level = 1;
+    enemies = [];
+    projectiles = [];
+    enemySpawnTimer = 0;
+    enemySpawnInterval = ENEMY_SPAWN_INTERVAL_BASE;
+    enemySpeed = ENEMY_SPEED_BASE;
+    enemyHealth = ENEMY_HEALTH_BASE;
+    resources = 0;
+
+    // Reset player stats
+    player.x = GAME_WIDTH / 2;
+    player.y = EARTH_Y - TARGET_RADIUS - 10;
+    player.speed = TARGET_BASE_SPEED + upgrades.speed.level * upgrades.speed.increment;
+    player.fireRate = Math.max(100, TARGET_BASE_FIRE_RATE - upgrades.fireRate.level * upgrades.fireRate.increment);
+    player.damage = TARGET_BASE_DAMAGE + upgrades.damage.level * upgrades.damage.increment;
+    player.maxShield = TARGET_BASE_SHIELD + upgrades.shield.level * upgrades.shield.increment;
+    player.shield = player.maxShield;
+    player.energy = player.maxEnergy;
+    player.lastShotTime = 0;
+    player.movingTo = null;
+
+    // Update UI
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = player.shield;
+    energyEl.textContent = player.energy;
+
+    tipEl.textContent = getRandomTip();
+
+    // Hide game over screen
+    gameOverScreen.hidden = true;
+    gameOverScreen.setAttribute('aria-hidden', 'true');
+
+    // Disable start button
+    startButton.disabled = true;
+
+    // Start game loop
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Handle game over
+  function endGame() {
+    gameRunning = false;
+    finalScoreEl.textContent = score;
+    gameOverScreen.hidden = false;
+    gameOverScreen.setAttribute('aria-hidden', 'false');
+    startButton.disabled = false;
+  }
+
+  // Get random gameplay tip
+  function getRandomTip() {
+    const tips = [
+      'Use precise control and tactical positioning to maximize defense effectiveness.',
+      'Upgrade your weapon damage to take down enemies faster.',
+      'Increase fire rate to shoot more projectiles per second.',
+      'Boost movement speed to dodge enemy paths and reposition quickly.',
+      'Enhance shield capacity to survive longer against enemy attacks.',
+      'Manage your energy carefully; shooting consumes energy.',
+      'Focus fire on larger enemies to prevent heavy damage.',
+      'Keep moving to avoid being overwhelmed by enemy waves.',
+      'Use upgrades strategically to adapt to increasing enemy difficulty.',
+      'Watch enemy patterns and position yourself for optimal defense.',
+    ];
+    return tips[Math.floor(Math.random() * tips.length)];
+  }
+
+  // Input handling for player movement and shooting
+  function setupInput() {
+    const container = document.getElementById('game-container');
+
+    // Mouse and touch dragging for movement
+    function pointerDown(e) {
+      e.preventDefault();
+      isDragging = true;
+      container.classList.remove('grab');
+      container.classList.add('grabbing');
+
+      const rect = canvas.getBoundingClientRect();
+      const pointerX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+      const pointerY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+
+      dragOffset.x = player.x - (pointerX - rect.left);
+      dragOffset.y = player.y - (pointerY - rect.top);
+    }
+    function pointerMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const rect = canvas.getBoundingClientRect();
+      const pointerX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+      const pointerY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+
+      let newX = pointerX - rect.left + dragOffset.x;
+      let newY = pointerY - rect.top + dragOffset.y;
+
+      // Clamp inside canvas and above Earth
+      newX = clamp(newX, player.radius, GAME_WIDTH - player.radius);
+      newY = clamp(newY, player.radius, EARTH_Y - player.radius - 10);
+
+      player.x = newX;
+      player.y = newY;
+      player.movingTo = null; // cancel smooth movement if dragging
+    }
+    function pointerUp(e) {
+      e.preventDefault();
+      isDragging = false;
+      container.classList.remove('grabbing');
+      container.classList.add('grab');
+    }
+
+    canvas.addEventListener('mousedown', pointerDown);
+    canvas.addEventListener('touchstart', pointerDown, { passive: false });
+
+    window.addEventListener('mousemove', pointerMove);
+    window.addEventListener('touchmove', pointerMove, { passive: false });
+
+    window.addEventListener('mouseup', pointerUp);
+    window.addEventListener('touchend', pointerUp);
+    window.addEventListener('touchcancel', pointerUp);
+
+    // Shooting on click or tap (if not dragging)
+    canvas.addEventListener('click', e => {
+      if (isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      playerShoot(clickX, clickY, performance.now());
+    });
+
+    // Keyboard controls: spacebar to shoot, arrow keys or WASD to move
+    window.addEventListener('keydown', e => {
+      if (!gameRunning) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        // Shoot straight upward from player center
+        playerShoot(player.x, player.y - 100, performance.now());
+      }
+      // Movement keys move player smoothly
+      const moveAmount = player.speed;
+      switch (e.code) {
+        case 'ArrowLeft':
+        case 'KeyA':
+          player.movingTo = { x: clamp(player.x - moveAmount * 5, player.radius, GAME_WIDTH - player.radius), y: player.y };
+          break;
+        case 'ArrowRight':
+        case 'KeyD':
+          player.movingTo = { x: clamp(player.x + moveAmount * 5, player.radius, GAME_WIDTH - player.radius), y: player.y };
+          break;
+        case 'ArrowUp':
+        case 'KeyW':
+          player.movingTo = { x: player.x, y: clamp(player.y - moveAmount * 5, player.radius, EARTH_Y - player.radius - 10) };
+          break;
+        case 'ArrowDown':
+        case 'KeyS':
+          player.movingTo = { x: player.x, y: clamp(player.y + moveAmount * 5, player.radius, EARTH_Y - player.radius - 10) };
+          break;
+      }
+    });
+  }
+
+  // Upgrade system handlers
+  function setupUpgrades() {
+    upgradeDamageBtn.addEventListener('click', () => {
+      if (resources >= upgrades.damage.cost) {
+        resources -= upgrades.damage.cost;
+        upgrades.damage.level++;
+        upgrades.damage.cost = Math.floor(upgrades.damage.cost * 1.5);
+        player.damage = TARGET_BASE_DAMAGE + upgrades.damage.level * upgrades.damage.increment;
+        updateResourcesUI();
+      }
+    });
+    upgradeFireRateBtn.addEventListener('click', () => {
+      if (resources >= upgrades.fireRate.cost) {
+        resources -= upgrades.fireRate.cost;
+        upgrades.fireRate.level++;
+        upgrades.fireRate.cost = Math.floor(upgrades.fireRate.cost * 1.5);
+        player.fireRate = Math.max(100, TARGET_BASE_FIRE_RATE - upgrades.fireRate.level * upgrades.fireRate.increment);
+        updateResourcesUI();
+      }
+    });
+    upgradeSpeedBtn.addEventListener('click', () => {
+      if (resources >= upgrades.speed.cost) {
+        resources -= upgrades.speed.cost;
+        upgrades.speed.level++;
+        upgrades.speed.cost = Math.floor(upgrades.speed.cost * 1.5);
+        player.speed = TARGET_BASE_SPEED + upgrades.speed.level * upgrades.speed.increment;
+        updateResourcesUI();
+      }
+    });
+    upgradeShieldBtn.addEventListener('click', () => {
+      if (resources >= upgrades.shield.cost) {
+        resources -= upgrades.shield.cost;
+        upgrades.shield.level++;
+        upgrades.shield.cost = Math.floor(upgrades.shield.cost * 1.5);
+        player.maxShield = TARGET_BASE_SHIELD + upgrades.shield.level * upgrades.shield.increment;
+        player.shield = player.maxShield;
+        updateResourcesUI();
+      }
+    });
+  }
+
+  // Update resource display and upgrade buttons state
+  function updateResourcesUI() {
+    // Resources shown as score for simplicity
+    scoreEl.textContent = score + resources;
+    upgradeDamageBtn.disabled = resources < upgrades.damage.cost;
+    upgradeFireRateBtn.disabled = resources < upgrades.fireRate.cost;
+    upgradeSpeedBtn.disabled = resources < upgrades.speed.cost;
+    upgradeShieldBtn.disabled = resources < upgrades.shield.cost;
+  }
+
+  // Setup start and restart buttons
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  restartButton.addEventListener('click', () => {
+    startGame();
+  });
+
+  // Initialize input and upgrades
+  setupInput();
+  setupUpgrades();
+
+  // Initial draw to show UI before start
+  drawEarth(ctx);
+  drawPlayer(ctx);
+})();
+</script>
+</body>
+</html>

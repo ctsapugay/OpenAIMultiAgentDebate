@@ -1,0 +1,195 @@
+{
+  "experiments": [
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 16327,
+      "output_tokens": 10725,
+      "total_tokens": 27052,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-11-30 16:37:10"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 16306,
+      "output_tokens": 11011,
+      "total_tokens": 27317,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-11-30 16:48:24"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 72150,
+      "output_tokens": 30061,
+      "total_tokens": 102211,
+      "experiment_name": "iterative_improvement_task_1_game_development-puzzle_hard",
+      "timestamp": "2025-11-30 16:53:58"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 16164,
+      "output_tokens": 9721,
+      "total_tokens": 25885,
+      "cost_usd": 0.0083,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-11-30 17:59:28"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 71979,
+      "output_tokens": 31112,
+      "total_tokens": 103091,
+      "cost_usd": 0.0295,
+      "experiment_name": "task_1_game_development-puzzle_hard_iterative",
+      "timestamp": "2025-11-30 18:06:02"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 15474,
+      "output_tokens": 10208,
+      "total_tokens": 25682,
+      "cost_usd": 0.0084,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-11-30 19:18:25"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14345,
+      "output_tokens": 8774,
+      "total_tokens": 23119,
+      "cost_usd": 0.0074,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-01 22:46:10"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14767,
+      "output_tokens": 7947,
+      "total_tokens": 22714,
+      "cost_usd": 0.007,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-02 19:09:08"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14405,
+      "output_tokens": 8658,
+      "total_tokens": 23063,
+      "cost_usd": 0.0074,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-02 19:26:58"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 15114,
+      "output_tokens": 8475,
+      "total_tokens": 23589,
+      "cost_usd": 0.0074,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 09:39:54"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 31045,
+      "output_tokens": 17343,
+      "total_tokens": 48388,
+      "cost_usd": 0.0151,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 09:42:00"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 13717,
+      "output_tokens": 8108,
+      "total_tokens": 21825,
+      "cost_usd": 0.0069,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 09:53:21"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 28400,
+      "output_tokens": 16411,
+      "total_tokens": 44811,
+      "cost_usd": 0.0141,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 09:55:48"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 123370,
+      "output_tokens": 29595,
+      "total_tokens": 152965,
+      "cost_usd": 0.0363,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 09:59:35"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 201467,
+      "output_tokens": 44264,
+      "total_tokens": 245731,
+      "cost_usd": 0.0568,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 10:03:46"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 291533,
+      "output_tokens": 58650,
+      "total_tokens": 350183,
+      "cost_usd": 0.0789,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 10:07:38"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 375121,
+      "output_tokens": 73986,
+      "total_tokens": 449107,
+      "cost_usd": 0.1007,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 10:12:40"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14666,
+      "output_tokens": 8994,
+      "total_tokens": 23660,
+      "cost_usd": 0.0076,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 11:15:36"
+    },
+    {
+      "model": "gpt-4.1-mini",
+      "input_tokens": 29625,
+      "output_tokens": 18737,
+      "total_tokens": 48362,
+      "cost_usd": 0.0157,
+      "experiment_name": "experiment_task_1_game_development-puzzle",
+      "timestamp": "2025-12-03 11:18:50"
+    }
+  ],
+  "cumulative_by_model": {
+    "gpt-4o-mini": {
+      "input_tokens": 28063,
+      "output_tokens": 9825,
+      "total_tokens": 37888,
+      "total_runs": 4,
+      "last_updated": "2025-11-19 11:40:44"
+    },
+    "gpt-4.1": {
+      "input_tokens": 15672,
+      "output_tokens": 6800,
+      "total_tokens": 22472,
+      "total_runs": 3,
+      "last_updated": "2025-11-19 09:28:51"
+    },
+    "gpt-4.1-mini": {
+      "input_tokens": 1375975,
+      "output_tokens": 412780,
+      "total_tokens": 1788755,
+      "total_runs": 19,
+      "last_updated": "2025-12-03 11:18:50"
+    }
+  }
+}

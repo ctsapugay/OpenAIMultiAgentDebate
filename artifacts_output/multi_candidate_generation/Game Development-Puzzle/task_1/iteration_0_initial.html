@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    max-width: 600px;
+    margin: 1rem auto 3rem;
+    background: #2a2a44;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #000a;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    grid-template-rows: repeat(7, 60px);
+    gap: 6px;
+    background: #1a1a2e;
+    padding: 10px;
+    border-radius: 10px;
+    user-select: none;
+    touch-action: none;
+  }
+  .cell {
+    width: 60px;
+    height: 60px;
+    background: #222244;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 0 6px #0008;
+  }
+  .cell.highlight {
+    background: #3a3a6a;
+    box-shadow: 0 0 10px #88aaffcc;
+  }
+  .block {
+    width: 56px;
+    height: 56px;
+    margin: 2px;
+    background: #4a90e2;
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 8px #a0c4ff,
+      0 3px 6px #0008;
+    cursor: grab;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: box-shadow 0.2s ease;
+    user-select: none;
+    touch-action: none;
+  }
+  .block:active {
+    cursor: grabbing;
+    box-shadow:
+      inset 0 0 12px #c0e0ff,
+      0 6px 12px #000c;
+  }
+  .block.rotatable {
+    cursor: pointer;
+  }
+  .block svg {
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    background: #2a2a44;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 0 20px #000a;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  #level-info {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  #controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  button {
+    background: #4a90e2;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+    margin: 0 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px #0008;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #6aa0ff;
+  }
+  button:disabled {
+    background: #3a3a6a;
+    cursor: default;
+    box-shadow: none;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #a0ffa0;
+    text-align: center;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotate hint */
+  .rotate-hint {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 12px;
+    color: #a0aaffcc;
+    user-select: none;
+    pointer-events: none;
+  }
+  /* Cub and Star icons */
+  .icon-cub, .icon-star {
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+  }
+  .icon-cub path {
+    fill: #f0c040;
+    stroke: #b08010;
+    stroke-width: 1.2;
+  }
+  .icon-star path {
+    fill: #ffd93b;
+    stroke: #bfae1a;
+    stroke-width: 1.2;
+  }
+  /* Block connection lines */
+  .conn-line {
+    stroke: #a0c4ff;
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .conn-line.active {
+    stroke: #ffd93b;
+    stroke-width: 8;
+    filter: drop-shadow(0 0 3px #ffd93baa);
+  }
+  /* Drag ghost */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 1000;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup puzzle game">
+  <div id="grid" role="grid" aria-readonly="true" aria-label="Puzzle grid"></div>
+  <div id="message" aria-live="polite" aria-atomic="true"></div>
+  <div id="controls" role="region" aria-label="Game controls">
+    <button id="btn-prev" aria-label="Previous level">← Prev</button>
+    <button id="btn-reset" aria-label="Reset level">Reset</button>
+    <button id="btn-next" aria-label="Next level">Next →</button>
+  </div>
+  <div id="info-panel" role="region" aria-label="Game information">
+    <div id="level-info"></div>
+    <div>
+      <strong>Gameplay:</strong> Drag and rotate blocks to form paths that guide Cub to the Star.<br />
+      <strong>Tips:</strong> Plan your moves and rotations in advance. Observe obstacles and adapt your strategy.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // Constants for directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+  const DIR_VECTORS = [
+    {x: 0, y: -1}, // UP
+    {x: 1, y: 0},  // RIGHT
+    {x: 0, y: 1},  // DOWN
+    {x: -1, y: 0}, // LEFT
+  ];
+
+  // Block types and their connection patterns (directions they connect)
+  // Connections are relative to block orientation (rotation)
+  // Each block type has a base connection set, rotation rotates these connections clockwise
+  // Connections are represented as array of directions (0=up,1=right,2=down,3=left)
+  const BLOCK_TYPES = {
+    EMPTY: 'empty',
+    STRAIGHT: 'straight', // connects two opposite sides (0-2 or 1-3)
+    CURVE: 'curve',       // connects two adjacent sides (e.g. 0-1)
+    TEE: 'tee',           // connects three sides
+    CROSS: 'cross',       // connects all four sides
+    START: 'start',       // Cub start block (fixed)
+    END: 'end',           // Star end block (fixed)
+    OBSTACLE: 'obstacle', // impassable block
+  };
+
+  // Base connections for each block type (before rotation)
+  // For straight, base is vertical (up-down)
+  // For curve, base is up-right
+  // For tee, base is up-right-left
+  // For cross, all four
+  // Start and end have one connection (start: out, end: in)
+  const BLOCK_CONNECTIONS = {
+    [BLOCK_TYPES.EMPTY]: [],
+    [BLOCK_TYPES.STRAIGHT]: [DIRS.UP, DIRS.DOWN],
+    [BLOCK_TYPES.CURVE]: [DIRS.UP, DIRS.RIGHT],
+    [BLOCK_TYPES.TEE]: [DIRS.UP, DIRS.RIGHT, DIRS.LEFT],
+    [BLOCK_TYPES.CROSS]: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+    [BLOCK_TYPES.START]: [DIRS.RIGHT], // Cub faces right initially
+    [BLOCK_TYPES.END]: [DIRS.LEFT],    // Star expects connection from left
+    [BLOCK_TYPES.OBSTACLE]: [],
+  };
+
+  // Game grid size
+  const GRID_SIZE = 7;
+
+  // Levels definition
+  // Each level is a 7x7 array of block definitions:
+  // {type: BLOCK_TYPES.*, rotation: 0-3, fixed: boolean}
+  // fixed: true means block cannot be moved or rotated (start, end, obstacles)
+  // rotation: 0 = base orientation, clockwise increments
+  // For empty cells, type=EMPTY
+  // For start and end, fixed=true
+  // For obstacles, fixed=true
+  // For other blocks, fixed=false (can drag and rotate)
+  // The player must connect start to end by rotating and moving blocks.
+
+  // Levels are designed with unique solutions and increasing difficulty.
+  // We provide 3 demo levels.
+
+  const LEVELS = [
+    // Level 1 - simple straight path with some curves
+    [
+      // row 0
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      // row 1
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      // row 2
+      [{type: 'empty'}, {type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      // row 3
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}],
+      // row 4
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      // row 5
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      // row 6
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+    // Level 2 - more complex with T and cross blocks and obstacles
+    [
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'obstacle', fixed: true}, {type: 'curve', rotation: 2}, {type: 'straight', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'tee', rotation: 3}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+    // Level 3 - challenging with multiple obstacles and cross blocks
+    [
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'obstacle', fixed: true}, {type: 'curve', rotation: 3}, {type: 'tee', rotation: 0}, {type: 'obstacle', fixed: true}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'cross', rotation: 0}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+  ];
+
+  // Utility: rotate direction by rotation steps clockwise
+  function rotateDir(dir, rotation) {
+    return (dir + rotation) % 4;
+  }
+
+  // Utility: rotate array of directions by rotation steps
+  function rotateConnections(conns, rotation) {
+    return conns.map(d => rotateDir(d, rotation));
+  }
+
+  // Create SVG elements for blocks
+  // Each block visually shows its connections as lines inside a rounded square
+  // We also show icons for start (Cub) and end (Star)
+  // Blocks can be rotated by multiples of 90deg
+
+  // SVG namespace
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  // Create SVG element helper
+  function createSVGElement(tag, attrs = {}) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const [k,v] of Object.entries(attrs)) {
+      el.setAttribute(k, v);
+    }
+    return el;
+  }
+
+  // Create block SVG content based on type and rotation
+  function createBlockSVG(type, rotation) {
+    const size = 56;
+    const center = size/2;
+    const lineLength = 20;
+    const lineWidth = 6;
+    const connColor = '#a0c4ff';
+
+    const svg = createSVGElement('svg', {
+      width: size,
+      height: size,
+      viewBox: `0 0 ${size} ${size}`,
+      'aria-hidden': 'true',
+      focusable: 'false',
+    });
+
+    // Background rect
+    const bg = createSVGElement('rect', {
+      x: 0,
+      y: 0,
+      width: size,
+      height: size,
+      rx: 10,
+      ry: 10,
+      fill: 'none',
+    });
+    svg.appendChild(bg);
+
+    // Draw connection lines
+    const baseConns = BLOCK_CONNECTIONS[type] || [];
+    const conns = rotateConnections(baseConns, rotation);
+
+    // For each connection, draw a line from center to edge in that direction
+    for (const dir of conns) {
+      let x1 = center;
+      let y1 = center;
+      let x2 = center;
+      let y2 = center;
+      switch(dir) {
+        case DIRS.UP: y2 = center - lineLength; break;
+        case DIRS.RIGHT: x2 = center + lineLength; break;
+        case DIRS.DOWN: y2 = center + lineLength; break;
+        case DIRS.LEFT: x2 = center - lineLength; break;
+      }
+      const line = createSVGElement('line', {
+        x1, y1, x2, y2,
+        stroke: connColor,
+        'stroke-width': lineWidth,
+        'stroke-linecap': 'round',
+      });
+      svg.appendChild(line);
+    }
+
+    // Draw center circle to connect lines
+    const centerCircle = createSVGElement('circle', {
+      cx: center,
+      cy: center,
+      r: lineWidth/2 + 1,
+      fill: connColor,
+    });
+    svg.appendChild(centerCircle);
+
+    // Draw special icons for start and end
+    if (type === BLOCK_TYPES.START) {
+      // Cub icon (a simple stylized puppy face)
+      const cubGroup = createCubIcon(center, center);
+      svg.appendChild(cubGroup);
+    } else if (type === BLOCK_TYPES.END) {
+      // Star icon
+      const starGroup = createStarIcon(center, center);
+      svg.appendChild(starGroup);
+    } else if (type === BLOCK_TYPES.OBSTACLE) {
+      // Obstacle: draw a dark block with X
+      const rect = createSVGElement('rect', {
+        x: 8,
+        y: 8,
+        width: size - 16,
+        height: size - 16,
+        fill: '#552222',
+        rx: 8,
+        ry: 8,
+      });
+      svg.appendChild(rect);
+      const line1 = createSVGElement('line', {
+        x1: 12,
+        y1: 12,
+        x2: size - 12,
+        y2: size - 12,
+        stroke: '#aa4444',
+        'stroke-width': 6,
+        'stroke-linecap': 'round',
+      });
+      const line2 = createSVGElement('line', {
+        x1: size - 12,
+        y1: 12,
+        x2: 12,
+        y2: size - 12,
+        stroke: '#aa4444',
+        'stroke-width': 6,
+        'stroke-linecap': 'round',
+      });
+      svg.appendChild(line1);
+      svg.appendChild(line2);
+    }
+
+    return svg;
+  }
+
+  // Create Cub icon group (puppy face)
+  function createCubIcon(cx, cy) {
+    const g = createSVGElement('g', {class: 'icon-cub'});
+    // Face circle
+    const face = createSVGElement('circle', {
+      cx, cy,
+      r: 14,
+      fill: '#f0c040',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(face);
+    // Ears
+    const earL = createSVGElement('path', {
+      d: `M${cx-12},${cy-8} Q${cx-16},${cy-20} ${cx-6},${cy-12}`,
+      fill: '#d9a520',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    const earR = createSVGElement('path', {
+      d: `M${cx+12},${cy-8} Q${cx+16},${cy-20} ${cx+6},${cy-12}`,
+      fill: '#d9a520',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(earL);
+    g.appendChild(earR);
+    // Eyes
+    const eyeL = createSVGElement('circle', {
+      cx: cx - 6,
+      cy: cy - 2,
+      r: 3,
+      fill: '#603000',
+    });
+    const eyeR = createSVGElement('circle', {
+      cx: cx + 6,
+      cy: cy - 2,
+      r: 3,
+      fill: '#603000',
+    });
+    g.appendChild(eyeL);
+    g.appendChild(eyeR);
+    // Nose
+    const nose = createSVGElement('path', {
+      d: `M${cx},${cy+4} l-3,4 l6,0 l-3,-4 z`,
+      fill: '#603000',
+    });
+    g.appendChild(nose);
+    return g;
+  }
+
+  // Create Star icon group
+  function createStarIcon(cx, cy) {
+    const g = createSVGElement('g', {class: 'icon-star'});
+    const starPath = createSVGElement('path', {
+      d: 'M12 2 L15 9 L22 9 L16 14 L18 21 L12 17 L6 21 L8 14 L2 9 L9 9 Z',
+      transform: `translate(${cx-12},${cy-12}) scale(1)`,
+      fill: '#ffd93b',
+      stroke: '#bfae1a',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(starPath);
+    return g;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let gridData = []; // 2D array of blocks with properties: type, rotation, fixed
+  let blocksMap = new Map(); // Map from block element to its data {x,y,type,rotation,fixed}
+  let dragState = null; // {blockEl, offsetX, offsetY, originX, originY, originCellX, originCellY}
+  let gridEl, messageEl, levelInfoEl, btnPrev, btnNext, btnReset;
+
+  // Initialize game elements
+  function init() {
+    gridEl = document.getElementById('grid');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    btnPrev = document.getElementById('btn-prev');
+    btnNext = document.getElementById('btn-next');
+    btnReset = document.getElementById('btn-reset');
+
+    btnPrev.addEventListener('click', () => {
+      if (currentLevelIndex > 0) {
+        currentLevelIndex--;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnNext.addEventListener('click', () => {
+      if (currentLevelIndex < LEVELS.length - 1) {
+        currentLevelIndex++;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnReset.addEventListener('click', () => {
+      loadLevel(currentLevelIndex);
+    });
+
+    loadLevel(currentLevelIndex);
+  }
+
+  // Load a level by index
+  function loadLevel(index) {
+    clearMessage();
+    gridEl.innerHTML = '';
+    blocksMap.clear();
+    gridData = [];
+
+    const level = LEVELS[index];
+    for (let y = 0; y < GRID_SIZE; y++) {
+      gridData[y] = [];
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const cellData = level[y][x] || {type: BLOCK_TYPES.EMPTY};
+        // Normalize properties
+        const type = cellData.type || BLOCK_TYPES.EMPTY;
+        const rotation = cellData.rotation || 0;
+        const fixed = !!cellData.fixed;
+        gridData[y][x] = {type, rotation, fixed};
+      }
+    }
+
+    renderGrid();
+    updateLevelInfo();
+    updateControls();
+    checkWinCondition();
+  }
+
+  // Render the grid and blocks
+  function renderGrid() {
+    gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 60px)`;
+    gridEl.style.gridTemplateRows = `repeat(${GRID_SIZE}, 60px)`;
+    gridEl.innerHTML = '';
+
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `Cell ${x + 1},${y + 1}`);
+
+        const blockData = gridData[y][x];
+        if (blockData.type !== BLOCK_TYPES.EMPTY) {
+          const blockEl = createBlockElement(blockData, x, y);
+          cell.appendChild(blockEl);
+          blocksMap.set(blockEl, {x, y, ...blockData});
+        }
+
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  // Create a block DOM element with SVG inside
+  function createBlockElement(blockData, x, y) {
+    const blockEl = document.createElement('div');
+    blockEl.className = 'block';
+    if (!blockData.fixed) {
+      blockEl.classList.add('rotatable');
+      blockEl.setAttribute('tabindex', '0');
+      blockEl.setAttribute('role', 'button');
+      blockEl.setAttribute('aria-label', `Block type ${blockData.type}, rotation ${blockData.rotation * 90} degrees. Click to rotate. Drag to move.`);
+    } else {
+      blockEl.setAttribute('aria-label', `Fixed block type ${blockData.type}`);
+    }
+    blockEl.style.transform = `rotate(${blockData.rotation * 90}deg)`;
+    blockEl.style.position = 'absolute';
+    blockEl.style.top = '2px';
+    blockEl.style.left = '2px';
+
+    // Create SVG content
+    const svg = createBlockSVG(blockData.type, 0);
+    blockEl.appendChild(svg);
+
+    // Add rotate hint for rotatable blocks
+    if (!blockData.fixed) {
+      const hint = document.createElement('div');
+      hint.className = 'rotate-hint';
+      hint.textContent = '⟳';
+      blockEl.appendChild(hint);
+    }
+
+    // Event listeners for rotation and drag
+    if (!blockData.fixed) {
+      blockEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateBlock(blockEl);
+      });
+      blockEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          rotateBlock(blockEl);
+        }
+      });
+      blockEl.addEventListener('pointerdown', onPointerDown);
+      blockEl.style.touchAction = 'none';
+    }
+
+    return blockEl;
+  }
+
+  // Rotate a block 90 degrees clockwise
+  function rotateBlock(blockEl) {
+    const data = blocksMap.get(blockEl);
+    if (!data || data.fixed) return;
+    data.rotation = (data.rotation + 1) % 4;
+    gridData[data.y][data.x].rotation = data.rotation;
+    blockEl.style.transform = `rotate(${data.rotation * 90}deg)`;
+    checkWinCondition();
+  }
+
+  // Pointer event handlers for drag and drop
+  function onPointerDown(e) {
+    if (e.button !== 0) return; // left button only
+    e.preventDefault();
+    const blockEl = e.currentTarget;
+    const data = blocksMap.get(blockEl);
+    if (!data || data.fixed) return;
+
+    // Prepare drag state
+    const rect = blockEl.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    dragState = {
+      blockEl,
+      offsetX,
+      offsetY,
+      originX: rect.left,
+      originY: rect.top,
+      originCellX: data.x,
+      originCellY: data.y,
+    };
+
+    // Create drag ghost
+    dragState.ghost = blockEl.cloneNode(true);
+    dragState.ghost.classList.add('drag-ghost');
+    dragState.ghost.style.width = rect.width + 'px';
+    dragState.ghost.style.height = rect.height + 'px';
+    dragState.ghost.style.transform = blockEl.style.transform;
+    document.body.appendChild(dragState.ghost);
+
+    moveDragGhost(e.clientX, e.clientY);
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    e.preventDefault();
+    if (!dragState) return;
+    moveDragGhost(e.clientX, e.clientY);
+
+    // Highlight potential drop cell
+    const cell = getCellFromPoint(e.clientX, e.clientY);
+    highlightCell(cell);
+  }
+
+  function onPointerUp(e) {
+    e.preventDefault();
+    if (!dragState) return;
+
+    // Remove drag ghost
+    if (dragState.ghost && dragState.ghost.parentNode) {
+      dragState.ghost.parentNode.removeChild(dragState.ghost);
+    }
+
+    // Determine drop cell
+    const dropCell = getCellFromPoint(e.clientX, e.clientY);
+    if (dropCell) {
+      const {x: dropX, y: dropY} = dropCell;
+      const {blockEl, originCellX, originCellY} = dragState;
+      const data = blocksMap.get(blockEl);
+
+      // Check if drop cell is empty and not fixed
+      if (dropX !== originCellX || dropY !== originCellY) {
+        if (gridData[dropY][dropX].type === BLOCK_TYPES.EMPTY) {
+          // Move block to new cell
+          gridData[originCellY][originCellX] = {type: BLOCK_TYPES.EMPTY};
+          gridData[dropY][dropX] = {type: data.type, rotation: data.rotation, fixed: false};
+          blocksMap.delete(blockEl);
+          blocksMap.set(blockEl, {x: dropX, y: dropY, type: data.type, rotation: data.rotation, fixed: false});
+          // Update DOM
+          const originCellEl = getCellElement(originCellX, originCellY);
+          const dropCellEl = getCellElement(dropX, dropY);
+          if (originCellEl && dropCellEl) {
+            originCellEl.innerHTML = '';
+            dropCellEl.innerHTML = '';
+            dropCellEl.appendChild(blockEl);
+          }
+          // Update data
+          data.x = dropX;
+          data.y = dropY;
+          checkWinCondition();
+        }
+      }
+    }
+
+    clearHighlight();
+    dragState = null;
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+  }
+
+  // Move drag ghost element to pointer position
+  function moveDragGhost(clientX, clientY) {
+    if (!dragState || !dragState.ghost) return;
+    dragState.ghost.style.left = (clientX - dragState.offsetX) + 'px';
+    dragState.ghost.style.top = (clientY - dragState.offsetY) + 'px';
+  }
+
+  // Get cell coordinates from client point
+  function getCellFromPoint(clientX, clientY) {
+    const rect = gridEl.getBoundingClientRect();
+    const x = Math.floor((clientX - rect.left) / (rect.width / GRID_SIZE));
+    const y = Math.floor((clientY - rect.top) / (rect.height / GRID_SIZE));
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+      return {x, y};
+    }
+    return null;
+  }
+
+  // Highlight a cell for drop target
+  function highlightCell(cell) {
+    clearHighlight();
+    if (!cell) return;
+    const cellEl = getCellElement(cell.x, cell.y);
+    if (!cellEl) return;
+    // Only highlight if cell is empty
+    if (gridData[cell.y][cell.x].type === BLOCK_TYPES.EMPTY) {
+      cellEl.classList.add('highlight');
+    }
+  }
+
+  // Clear all highlights
+  function clearHighlight() {
+    const highlighted = gridEl.querySelectorAll('.highlight');
+    highlighted.forEach(el => el.classList.remove('highlight'));
+  }
+
+  // Get cell element by coordinates
+  function getCellElement(x, y) {
+    return gridEl.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+  }
+
+  // Update level info text
+  function updateLevelInfo() {
+    levelInfoEl.textContent = `Level ${currentLevelIndex + 1} of ${LEVELS.length}`;
+  }
+
+  // Update controls buttons state
+  function updateControls() {
+    btnPrev.disabled = currentLevelIndex === 0;
+    btnNext.disabled = currentLevelIndex === LEVELS.length - 1;
+  }
+
+  // Clear message text
+  function clearMessage() {
+    messageEl.textContent = '';
+  }
+
+  // Show message text
+  function showMessage(text) {
+    messageEl.textContent = text;
+  }
+
+  // Check if the path from start to end is connected properly
+  // We simulate Cub moving through connected blocks following connections
+  // If Cub can reach the end block, player wins
+  function checkWinCondition() {
+    // Find start block position
+    let startPos = null;
+    let endPos = null;
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const b = gridData[y][x];
+        if (b.type === BLOCK_TYPES.START) startPos = {x, y, rotation: b.rotation};
+        if (b.type === BLOCK_TYPES.END) endPos = {x, y, rotation: b.rotation};
+      }
+    }
+    if (!startPos || !endPos) return false;
+
+    // BFS or DFS from start to find if end is reachable through connections
+    // Each step: from current block, find connected neighbors that connect back
+    // We track visited cells to avoid loops
+
+    const visited = new Set();
+    const stack = [];
+
+    // Start from start block, entering from the side opposite to its connection (simulate Cub facing out)
+    // Actually, start block has one connection side (e.g. right), Cub moves out that side
+    // We start from startPos, entering from the side opposite to start connection (simulate Cub inside start block)
+    // But since start block is fixed, we start moving out from its connection side
+
+    // We'll track current position and the direction Cub came from (to check connections)
+    // For start, direction from which Cub came is opposite of start connection side
+
+    // Get start block connections rotated
+    const startConns = rotateConnections(BLOCK_CONNECTIONS[BLOCK_TYPES.START], startPos.rotation);
+    if (startConns.length !== 1) return false;
+    const startOutDir = startConns[0];
+    const startInDir = (startOutDir + 2) % 4;
+
+    // Push initial state: position and direction Cub came from (startInDir)
+    stack.push({x: startPos.x, y: startPos.y, cameFrom: startInDir});
+
+    while (stack.length > 0) {
+      const {x, y, cameFrom} = stack.pop();
+      const key = `${x},${y},${cameFrom}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      const block = gridData[y][x];
+      if (!block) continue;
+      const conns = rotateConnections(BLOCK_CONNECTIONS[block.type], block.rotation);
+
+      // Check if block has connection on cameFrom side (Cub entered from that side)
+      if (!conns.includes(cameFrom)) continue;
+
+      // If this is the end block, check if connection matches
+      if (block.type === BLOCK_TYPES.END) {
+        // End block has one connection side, Cub must enter from that side
+        const endConns = rotateConnections(BLOCK_CONNECTIONS[BLOCK_TYPES.END], block.rotation);
+        if (endConns.length === 1 && endConns[0] === cameFrom) {
+          // Win condition met
+          showMessage('🎉 Cub reached the Star! You solved the puzzle!');
+          return true;
+        }
+        continue;
+      }
+
+      // Explore neighbors connected to this block (except cameFrom side)
+      for (const dir of conns) {
+        if (dir === cameFrom) continue;
+        const vec = DIR_VECTORS[dir];
+        const nx = x + vec.x;
+        const ny = y + vec.y;
+        if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+        const neighbor = gridData[ny][nx];
+        if (!neighbor) continue;
+        if (neighbor.type === BLOCK_TYPES.EMPTY || neighbor.type === BLOCK_TYPES.OBSTACLE) continue;
+        const neighborConns = rotateConnections(BLOCK_CONNECTIONS[neighbor.type], neighbor.rotation);
+        // Cub must enter neighbor from opposite direction
+        const neighborInDir = (dir + 2) % 4;
+        if (!neighborConns.includes(neighborInDir)) continue;
+        stack.push({x: nx, y: ny, cameFrom: neighborInDir});
+      }
+    }
+
+    // If we reach here, no path found
+    clearMessage();
+    return false;
+  }
+
+  // Initialize game on DOM ready
+  window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>

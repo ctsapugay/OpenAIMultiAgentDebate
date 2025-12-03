@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conway's Game of Life on a Sphere</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+    color: white;
+    font-family: monospace, monospace;
+  }
+  canvas {
+    display: block;
+    background: black;
+    cursor: grab;
+  }
+  canvas:active {
+    cursor: grabbing;
+  }
+  #ui {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    user-select: none;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  #ui button, #ui select {
+    margin: 4px 6px 4px 0;
+    background: #222;
+    border: 1px solid #555;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  #ui button:hover, #ui select:hover {
+    background: #444;
+  }
+  #generationCounter {
+    display: inline-block;
+    min-width: 60px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div id="ui" aria-label="Game controls">
+  <button id="btnRandom">Random Seed</button>
+  <select id="presetPatterns" aria-label="Select preset pattern">
+    <option value="">-- Preset Patterns --</option>
+    <option value="glider">Glider</option>
+    <option value="blinker">Blinker</option>
+    <option value="toad">Toad</option>
+    <option value="beacon">Beacon</option>
+    <option value="pulsar">Pulsar</option>
+  </select>
+  <label for="speedRange">Speed:</label>
+  <input type="range" id="speedRange" min="1" max="30" value="15" step="1" aria-valuemin="1" aria-valuemax="30" aria-valuenow="15" aria-label="Simulation speed" />
+  <span id="generationCounter" aria-live="polite" aria-atomic="true">Gen: 0</span>
+  <button id="btnExport" title="Export current pattern">Export</button>
+  <button id="btnImport" title="Import pattern">Import</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none" aria-hidden="true" />
+</div>
+<canvas id="canvas" role="img" aria-label="Conway's Game of Life on a rotating sphere"></canvas>
+<script>
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Configuration
+  const SPHERE_RADIUS = 300; // radius in pixels
+  const CELL_SIZE = 6; // size of each cell square on sphere surface
+  const GRID_COLS = 60; // longitude divisions
+  const GRID_ROWS = 30; // latitude divisions
+  let FPS = 15;
+
+  // Game state arrays
+  let currentGrid = [];
+  let nextGrid = [];
+  let ageGrid = []; // track cell age for color gradient
+
+  // Generation counter
+  let generation = 0;
+
+  // Color palette for alive cells (multicolor with age gradient)
+  function cellColor(row, col, age) {
+    const hue = (col / GRID_COLS) * 360;
+    const baseLightness = 50 + 20 * Math.sin((row / GRID_ROWS) * Math.PI);
+    // Age affects saturation and lightness for gradient effect
+    const saturation = Math.min(100, 80 + age * 5);
+    const lightness = Math.min(90, baseLightness + age * 3);
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
+  // Initialize grids and age grid
+  function initGrids() {
+    currentGrid = new Array(GRID_ROWS);
+    nextGrid = new Array(GRID_ROWS);
+    ageGrid = new Array(GRID_ROWS);
+    for (let r = 0; r < GRID_ROWS; r++) {
+      currentGrid[r] = new Array(GRID_COLS).fill(0);
+      nextGrid[r] = new Array(GRID_COLS).fill(0);
+      ageGrid[r] = new Array(GRID_COLS).fill(0);
+    }
+  }
+
+  // Randomize initial state with some density
+  function randomizeGrid(density = 0.15) {
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        currentGrid[r][c] = Math.random() < density ? 1 : 0;
+        ageGrid[r][c] = currentGrid[r][c] ? 1 : 0;
+      }
+    }
+    generation = 0;
+    updateGenerationCounter();
+  }
+
+  // Preset patterns adapted for spherical topology
+  // Patterns defined as relative coordinates (rowOffset, colOffset)
+  // Centered on given position, wrapping around edges
+  const presetPatterns = {
+    glider: [
+      [0,1],[1,2],[2,0],[2,1],[2,2]
+    ],
+    blinker: [
+      [0,-1],[0,0],[0,1]
+    ],
+    toad: [
+      [0,1],[0,2],[0,3],[1,0],[1,1],[1,2]
+    ],
+    beacon: [
+      [0,0],[0,1],[1,0],[1,1],[2,2],[2,3],[3,2],[3,3]
+    ],
+    pulsar: [
+      [-6,-4],[-6,-3],[-6,-2],[-6,2],[-6,3],[-6,4],
+      [-1,-6],[-1,-1],[-1,1],[-1,6],
+      [1,-6],[1,-1],[1,1],[1,6],
+      [6,-4],[6,-3],[6,-2],[6,2],[6,3],[6,4],
+      [-4,-6],[-3,-6],[-2,-6],[2,-6],[3,-6],[4,-6],
+      [-4,6],[-3,6],[-2,6],[2,6],[3,6],[4,6]
+    ]
+  };
+
+  // Place a pattern on the grid centered at (centerRow, centerCol)
+  function placePattern(patternName, centerRow, centerCol) {
+    if (!presetPatterns[patternName]) return;
+    const pattern = presetPatterns[patternName];
+    for (const [rOff, cOff] of pattern) {
+      const r = (centerRow + rOff + GRID_ROWS) % GRID_ROWS;
+      const c = (centerCol + cOff + GRID_COLS) % GRID_COLS;
+      currentGrid[r][c] = 1;
+      ageGrid[r][c] = 1;
+    }
+    generation = 0;
+    updateGenerationCounter();
+  }
+
+  // Conway's Game of Life rules on spherical topology with neighbor calculation adjusted
+  // We approximate spherical neighbors by considering neighbors in latitude and longitude,
+  // but adjust neighbor count near poles to avoid artifacts.
+  // For poles, neighbors are fewer, so we weight neighbor counts accordingly.
+  // This is a heuristic to better approximate spherical neighbor counts.
+
+  // Neighbor offsets for hex-like neighborhood on sphere grid:
+  // We use 8 neighbors as usual, but adjust for poles by ignoring invalid neighbors.
+  // We'll count neighbors with wrap-around in longitude, but clamp latitude at poles.
+
+  function countNeighborsSpherical(r, c) {
+    let count = 0;
+    // Neighbor relative positions (8 neighbors)
+    const neighbors = [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],           [0, 1],
+      [1, -1],  [1, 0],  [1, 1]
+    ];
+    for (const [dr, dc] of neighbors) {
+      const nr = r + dr;
+      if (nr < 0 || nr >= GRID_ROWS) {
+        // At poles, no wrap in latitude, so skip neighbors outside range
+        continue;
+      }
+      const nc = (c + dc + GRID_COLS) % GRID_COLS;
+      count += currentGrid[nr][nc];
+    }
+    return count;
+  }
+
+  function stepGame() {
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        const alive = currentGrid[r][c];
+        const neighbors = countNeighborsSpherical(r, c);
+        if (alive) {
+          // Any live cell with two or three live neighbours survives.
+          nextGrid[r][c] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+          ageGrid[r][c] = nextGrid[r][c] ? ageGrid[r][c] + 1 : 0;
+        } else {
+          // Any dead cell with three live neighbours becomes a live cell.
+          nextGrid[r][c] = (neighbors === 3) ? 1 : 0;
+          ageGrid[r][c] = nextGrid[r][c] ? 1 : 0;
+        }
+      }
+    }
+    // Swap grids
+    [currentGrid, nextGrid] = [nextGrid, currentGrid];
+    generation++;
+    updateGenerationCounter();
+  }
+
+  // 3D sphere and projection math
+  let rotationX = 0;
+  let rotationY = 0;
+
+  let isDragging = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+  let velocityX = 0;
+  let velocityY = 0;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  function sphericalToCartesian(lat, lon, radius) {
+    const x = radius * Math.cos(lat) * Math.cos(lon);
+    const y = radius * Math.sin(lat);
+    const z = radius * Math.cos(lat) * Math.sin(lon);
+    return { x, y, z };
+  }
+
+  function rotateX(point, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return {
+      x: point.x,
+      y: point.y * cos - point.z * sin,
+      z: point.y * sin + point.z * cos,
+    };
+  }
+  function rotateY(point, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return {
+      x: point.x * cos + point.z * sin,
+      y: point.y,
+      z: -point.x * sin + point.z * cos,
+    };
+  }
+
+  const CAMERA_DISTANCE = 800;
+  function project(point) {
+    const scale = CAMERA_DISTANCE / (CAMERA_DISTANCE + point.z);
+    return {
+      x: point.x * scale,
+      y: point.y * scale,
+      scale,
+    };
+  }
+
+  let cells = [];
+
+  function prepareCells() {
+    cells.length = 0;
+    for (let r = 0; r < GRID_ROWS; r++) {
+      const lat = ((r + 0.5) / GRID_ROWS) * Math.PI - Math.PI / 2;
+      for (let c = 0; c < GRID_COLS; c++) {
+        const lon = ((c + 0.5) / GRID_COLS) * 2 * Math.PI;
+        let pos = sphericalToCartesian(lat, lon, SPHERE_RADIUS);
+        pos = rotateX(pos, rotationX);
+        pos = rotateY(pos, rotationY);
+
+        const proj = project(pos);
+
+        const length = Math.sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+        const normal = { x: pos.x / length, y: pos.y / length, z: pos.z / length };
+
+        cells.push({
+          row: r,
+          col: c,
+          alive: currentGrid[r][c],
+          age: ageGrid[r][c],
+          x3d: pos.x,
+          y3d: pos.y,
+          z3d: pos.z,
+          x2d: proj.x,
+          y2d: proj.y,
+          scale: proj.scale,
+          normal,
+          lat,
+        });
+      }
+    }
+    cells.sort((a, b) => a.z3d - b.z3d);
+  }
+
+  function drawCells() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+
+    for (const cell of cells) {
+      if (!cell.alive) continue;
+
+      const brightness = Math.max(0.2, cell.normal.z);
+
+      const baseColor = cellColor(cell.row, cell.col, cell.age);
+      const hslMatch = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+      let h = 0, s = 0, l = 0;
+      if (hslMatch) {
+        h = +hslMatch[1];
+        s = +hslMatch[2];
+        l = +hslMatch[3];
+      }
+      const lightness = Math.min(100, Math.max(0, l * brightness));
+      const color = `hsl(${h},${s}%,${lightness}%)`;
+
+      // Adjust cell size for latitude distortion with smoother scaling near poles
+      const latScale = Math.cos(cell.lat) ** 1.5; // stronger effect to reduce pole distortion
+      const sizeX = CELL_SIZE * cell.scale;
+      const sizeY = CELL_SIZE * cell.scale * latScale;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(
+        cell.x2d - sizeX / 2,
+        cell.y2d - sizeY / 2,
+        sizeX,
+        sizeY
+      );
+    }
+    ctx.restore();
+  }
+
+  let lastStepTime = 0;
+  function animate(time = 0) {
+    rotationY += velocityX;
+    rotationX += velocityY;
+
+    const maxRotX = Math.PI / 2 - 0.01;
+    if (rotationX > maxRotX) rotationX = maxRotX;
+    if (rotationX < -maxRotX) rotationX = -maxRotX;
+
+    velocityX *= 0.95;
+    velocityY *= 0.95;
+
+    if (time - lastStepTime > 1000 / FPS) {
+      stepGame();
+      lastStepTime = time;
+    }
+
+    prepareCells();
+    drawCells();
+
+    requestAnimationFrame(animate);
+  }
+
+  function onPointerDown(e) {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    velocityX = 0;
+    velocityY = 0;
+    canvas.style.cursor = 'grabbing';
+  }
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const dx = e.clientX - lastMouseX;
+    const dy = e.clientY - lastMouseY;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+
+    const sensitivity = 0.005;
+    rotationY += dx * sensitivity;
+    rotationX += dy * sensitivity;
+
+    const maxRotX = Math.PI / 2 - 0.01;
+    if (rotationX > maxRotX) rotationX = maxRotX;
+    if (rotationX < -maxRotX) rotationX = -maxRotX;
+
+    velocityX = dx * sensitivity;
+    velocityY = dy * sensitivity;
+  }
+  function onPointerUp(e) {
+    isDragging = false;
+    canvas.style.cursor = 'grab';
+  }
+
+  function onResize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  // Interactive seeding by clicking on sphere
+  // Convert mouse position to ray, find closest cell under cursor, toggle cell state
+  function onCanvasClick(e) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left - canvas.width / 2;
+    const mouseY = e.clientY - rect.top - canvas.height / 2;
+
+    // Find closest cell to mouse position within a threshold
+    let closestCell = null;
+    let minDist = 20; // max distance in pixels to select cell
+    for (const cell of cells) {
+      const dx = cell.x2d - mouseX;
+      const dy = cell.y2d - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) {
+        minDist = dist;
+        closestCell = cell;
+      }
+    }
+    if (closestCell) {
+      const r = closestCell.row;
+      const c = closestCell.col;
+      currentGrid[r][c] = currentGrid[r][c] ? 0 : 1;
+      ageGrid[r][c] = currentGrid[r][c] ? 1 : 0;
+      generation = 0;
+      updateGenerationCounter();
+    }
+  }
+
+  // Export current pattern as JSON
+  function exportPattern() {
+    const pattern = [];
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        if (currentGrid[r][c]) {
+          pattern.push([r, c, ageGrid[r][c]]);
+        }
+      }
+    }
+    const dataStr = JSON.stringify({rows: GRID_ROWS, cols: GRID_COLS, pattern});
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'life_sphere_pattern.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Import pattern from JSON file
+  function importPattern(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.rows || !data.cols || !Array.isArray(data.pattern)) {
+          alert('Invalid pattern file format.');
+          return;
+        }
+        if (data.rows !== GRID_ROWS || data.cols !== GRID_COLS) {
+          alert(`Pattern grid size mismatch. Expected ${GRID_ROWS}x${GRID_COLS}.`);
+          return;
+        }
+        initGrids();
+        for (const [r, c, age] of data.pattern) {
+          if (r >= 0 && r < GRID_ROWS && c >= 0 && c < GRID_COLS) {
+            currentGrid[r][c] = 1;
+            ageGrid[r][c] = age > 0 ? age : 1;
+          }
+        }
+        generation = 0;
+        updateGenerationCounter();
+      } catch {
+        alert('Failed to parse pattern file.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Update generation counter UI
+  function updateGenerationCounter() {
+    const genCounter = document.getElementById('generationCounter');
+    genCounter.textContent = `Gen: ${generation}`;
+  }
+
+  // UI elements
+  const btnRandom = document.getElementById('btnRandom');
+  const presetSelect = document.getElementById('presetPatterns');
+  const speedRange = document.getElementById('speedRange');
+  const btnExport = document.getElementById('btnExport');
+  const btnImport = document.getElementById('btnImport');
+  const fileInput = document.getElementById('fileInput');
+
+  btnRandom.addEventListener('click', () => {
+    randomizeGrid(0.15);
+  });
+
+  presetSelect.addEventListener('change', () => {
+    const patternName = presetSelect.value;
+    if (!patternName) return;
+    // Place pattern at center of grid
+    const centerRow = Math.floor(GRID_ROWS / 2);
+    const centerCol = Math.floor(GRID_COLS / 2);
+    placePattern(patternName, centerRow, centerCol);
+    presetSelect.value = '';
+  });
+
+  speedRange.addEventListener('input', () => {
+    FPS = parseInt(speedRange.value, 10);
+    speedRange.setAttribute('aria-valuenow', FPS);
+  });
+
+  btnExport.addEventListener('click', () => {
+    exportPattern();
+  });
+
+  btnImport.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (fileInput.files.length > 0) {
+      importPattern(fileInput.files[0]);
+      fileInput.value = '';
+    }
+  });
+
+  // Robustness: handle context loss and restore (for 2D canvas, rare but possible)
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    alert('Canvas context lost. Please reload the page.');
+  });
+
+  // Initialize
+  function init() {
+    try {
+      initGrids();
+      randomizeGrid(0.15);
+      canvas.style.cursor = 'grab';
+
+      window.addEventListener('resize', onResize);
+      onResize();
+
+      canvas.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
+      window.addEventListener('pointerleave', onPointerUp);
+
+      canvas.addEventListener('click', onCanvasClick);
+
+      requestAnimationFrame(animate);
+    } catch (err) {
+      alert('An error occurred initializing the simulation: ' + err.message);
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

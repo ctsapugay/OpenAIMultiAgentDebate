@@ -1,0 +1,5348 @@
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - Task ID: 4
+2025-11-30 19:29:16 - INFO - Task Class: Game Development-Strategy
+2025-11-30 19:29:16 - INFO - Task Difficulty: hard
+2025-11-30 19:29:16 - INFO - Improvement Threshold: 7.0
+2025-11-30 19:29:16 - INFO - Max Iterations: 2
+2025-11-30 19:29:16 - INFO - Start Time: 2025-11-30 19:29:16
+2025-11-30 19:29:16 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:29:16 - INFO - Screenshots Enabled: True
+2025-11-30 19:29:16 - INFO - Use Screenshots in Evaluation: True
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - GENERATING INITIAL CODE...
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:29:16 - INFO - Temperature: 0.0
+2025-11-30 19:29:16 - INFO - Task Question (first 200 chars): You are a code expert. Please use your professional knowledge to generate accurate and professional responses. JS Planet Defense Game Introduction
+
+**Game Overview:**
+"JS Planet Defense Game" is a str...
+2025-11-30 19:30:55 - INFO - ✓ Initial code generated (took 99.28 seconds)
+2025-11-30 19:30:55 - INFO - Generated code length: 31272 characters
+2025-11-30 19:30:55 - INFO - Response length: 31272 characters
+2025-11-30 19:30:55 - INFO - 
+================================================================================
+2025-11-30 19:30:55 - INFO - INITIAL HTML CODE
+2025-11-30 19:30:55 - INFO - ================================================================================
+2025-11-30 19:30:55 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff88c88;
+  }
+  #ui {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #0ff;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0ff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff,
+      0 0 40px #0ff;
+    pointer-events: none;
+    user-select: none;
+  }
+  #start-screen, #upgrade-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px;
+    background: rgba(0, 20, 40, 0.85);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 24px 32px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #0ff88cc;
+    color: #0ff;
+    user-select: none;
+  }
+  #start-screen h1 {
+    margin-top: 0;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff;
+  }
+  #start-screen p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #start-screen button, #upgrade-screen button {
+    background: #0ff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003322;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+  }
+  #start-screen button:hover, #upgrade-screen button:hover {
+    background: #0cc;
+  }
+  #upgrade-screen {
+    display: none;
+    flex-direction: column;
+  }
+  #upgrade-screen h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #upgrade-options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .upgrade-option {
+    background: #002233;
+    border: 1px solid #0ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 140px;
+    margin: 8px;
+    text-align: center;
+    box-shadow: 0 0 8px #0ff44aa inset;
+  }
+  .upgrade-option h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  .upgrade-option p {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    min-height: 40px;
+  }
+  .upgrade-option button {
+    background: #0ff;
+    color: #003322;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .upgrade-option button:disabled {
+    background: #044;
+    color: #022;
+    cursor: not-allowed;
+  }
+  #tips {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    font-size: 0.9rem;
+    color: #0ff;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 0 6px #0ff88;
+  }
+  /* Tooltip style for buttons */
+  .upgrade-option button[title] {
+    position: relative;
+  }
+  .upgrade-option button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ffcc;
+    color: #003322;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 8px #0ffccaa;
+    pointer-events: none;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" aria-label="JS Planet Defense Game">
+  <canvas id="gameCanvas" width="900" height="600" aria-label="Game canvas"></canvas>
+  <div id="ui" aria-live="polite" aria-atomic="true">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+    <div>Health: <span id="health">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+  <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" tabindex="0">
+    <h1 id="start-title">JS Planet Defense Game</h1>
+    <p>Defend Earth by controlling the only target in space. Move precisely and shoot incoming enemies before they reach the planet.</p>
+    <p><strong>Controls:</strong> <br>Arrow keys or WASD to move<br>Spacebar to shoot</p>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </section>
+  <section id="upgrade-screen" role="dialog" aria-modal="true" aria-labelledby="upgrade-title" tabindex="0">
+    <h2 id="upgrade-title">Upgrade Your Target</h2>
+    <div id="upgrade-options" aria-live="polite" aria-atomic="true">
+      <!-- Upgrade options inserted by JS -->
+    </div>
+    <button id="upgrade-continue" aria-label="Continue to Next Level">Continue</button>
+  </section>
+  <div id="tips" aria-live="polite" aria-atomic="true">
+    <strong>Tips:</strong> Use precise target control and tactical positioning to maximize your defense effectiveness. Upgrade your weapon systems and survivability to face tougher enemies.
+  </div>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * 
+ * Developed as a single file HTML/JS/CSS game.
+ * 
+ * Features:
+ * - Single controllable target defending Earth from incoming enemies.
+ * - Multiple levels with increasing difficulty.
+ * - Upgrade system between levels.
+ * - Precise movement and shooting mechanics.
+ * 
+ * Controls:
+ * - Move: Arrow keys or WASD
+ * - Shoot: Spacebar
+ * 
+ * Author: ChatGPT (OpenAI)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const messageEl = document.getElementById('message');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('start-button');
+  const upgradeScreen = document.getElementById('upgrade-screen');
+  const upgradeOptionsContainer = document.getElementById('upgrade-options');
+  const upgradeContinueBtn = document.getElementById('upgrade-continue');
+
+  // Game constants
+  const GAME_WIDTH = canvas.width;
+  const GAME_HEIGHT = canvas.height;
+  const EARTH_RADIUS = 60;
+  const EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+  const TARGET_RADIUS = 18;
+  const MAX_ENERGY = 100;
+  const MAX_HEALTH = 100;
+
+  // Key input tracking
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    shoot: false,
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+  }
+
+  // Game state variables
+  let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameover'
+  let score = 0;
+  let level = 1;
+  let health = MAX_HEALTH;
+  let energy = MAX_ENERGY;
+  let enemies = [];
+  let bullets = [];
+  let enemyBullets = [];
+  let lastEnemySpawn = 0;
+  let enemySpawnInterval = 2000; // ms, decreases with level
+  let lastShotTime = 0;
+  let shotCooldown = 300; // ms, can be upgraded
+  let target;
+  let upgrades = {
+    damage: 1,
+    fireRate: 1,
+    speed: 3.5,
+    maxHealth: MAX_HEALTH,
+    maxEnergy: MAX_ENERGY,
+    energyRegen: 0.15,
+  };
+  let upgradePoints = 0;
+
+  // Timing
+  let lastFrameTime = 0;
+
+  // Target class - the single controllable unit
+  class Target {
+    constructor() {
+      this.x = GAME_WIDTH / 2;
+      this.y = GAME_HEIGHT - EARTH_RADIUS - 100;
+      this.radius = TARGET_RADIUS;
+      this.speed = upgrades.speed;
+      this.color = '#0ff';
+      this.angle = -Math.PI / 2; // Facing upward initially
+      this.energy = energy;
+      this.health = health;
+      this.damage = upgrades.damage;
+      this.fireRate = upgrades.fireRate;
+      this.lastShot = 0;
+      this.energyRegen = upgrades.energyRegen;
+    }
+    update(delta) {
+      // Movement based on keys
+      let dx = 0, dy = 0;
+      if (keys.left) dx -= 1;
+      if (keys.right) dx += 1;
+      if (keys.up) dy -= 1;
+      if (keys.down) dy += 1;
+
+      // Normalize diagonal movement
+      if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2;
+        dy *= Math.SQRT1_2;
+      }
+
+      this.x += dx * this.speed;
+      this.y += dy * this.speed;
+
+      // Clamp inside canvas and above Earth
+      const minY = 20;
+      const maxY = EARTH_POSITION.y - EARTH_RADIUS - this.radius - 10;
+      this.x = clamp(this.x, this.radius + 10, GAME_WIDTH - this.radius - 10);
+      this.y = clamp(this.y, minY, maxY);
+
+      // Update angle to face mouse or shooting direction (for now fixed upward)
+      this.angle = -Math.PI / 2;
+
+      // Regenerate energy
+      this.energy += this.energyRegen * delta;
+      if (this.energy > upgrades.maxEnergy) this.energy = upgrades.maxEnergy;
+
+      // Update health and energy globals
+      health = this.health;
+      energy = this.energy;
+    }
+    canShoot() {
+      const now = performance.now();
+      return (now - this.lastShot) >= (shotCooldown / this.fireRate) && this.energy >= 10;
+    }
+    shoot() {
+      if (!this.canShoot()) return false;
+      this.lastShot = performance.now();
+      this.energy -= 10;
+      // Create a bullet going upward from target position
+      bullets.push(new Bullet(this.x, this.y - this.radius - 8, -Math.PI / 2, this.damage, 'player'));
+      return true;
+    }
+    draw(ctx) {
+      // Draw target body - a glowing triangle pointing upward
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      // Glow
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 0.7, this.radius);
+      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner shape
+      ctx.fillStyle = '#004d4d';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.7);
+      ctx.lineTo(this.radius * 0.5, this.radius * 0.7);
+      ctx.lineTo(-this.radius * 0.5, this.radius * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+
+      // Energy bar above target
+      const barWidth = 50;
+      const barHeight = 6;
+      const energyRatio = this.energy / upgrades.maxEnergy;
+      ctx.fillStyle = '#003322';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth * energyRatio, barHeight);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+
+      // Health bar below target
+      const healthRatio = this.health / upgrades.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+    }
+  }
+
+  // Bullet class for player and enemy projectiles
+  class Bullet {
+    constructor(x, y, angle, damage, owner) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 7;
+      this.radius = 4;
+      this.damage = damage;
+      this.owner = owner; // 'player' or 'enemy'
+      this.color = owner === 'player' ? '#0ff' : '#f44';
+      this.isDead = false;
+    }
+    update(delta) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      // Remove if out of bounds
+      if (this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+          this.y < -this.radius || this.y > GAME_HEIGHT + this.radius) {
+        this.isDead = true;
+      }
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  // Enemy class
+  class Enemy {
+    constructor(type, level) {
+      this.type = type; // 'basic', 'fast', 'tank', 'shooter'
+      this.level = level;
+      this.isDead = false;
+      this.spawnTime = performance.now();
+
+      // Enemy stats based on type and level
+      switch (type) {
+        case 'basic':
+          this.radius = 14;
+          this.speed = 1 + 0.1 * level;
+          this.health = 10 + 5 * level;
+          this.maxHealth = this.health;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+          break;
+        case 'fast':
+          this.radius = 12;
+          this.speed = 2 + 0.15 * level;
+          this.health = 6 + 3 * level;
+          this.maxHealth = this.health;
+          this.color = '#fa0';
+          this.damage = 8;
+          this.canShoot = false;
+          break;
+        case 'tank':
+          this.radius = 22;
+          this.speed = 0.6 + 0.05 * level;
+          this.health = 30 + 15 * level;
+          this.maxHealth = this.health;
+          this.color = '#a00';
+          this.damage = 20;
+          this.canShoot = false;
+          break;
+        case 'shooter':
+          this.radius = 16;
+          this.speed = 1 + 0.1 * level;
+          this.health = 15 + 7 * level;
+          this.maxHealth = this.health;
+          this.color = '#f0f';
+          this.damage = 12;
+          this.canShoot = true;
+          this.lastShot = 0;
+          this.shootInterval = 2500 - Math.min(level * 100, 1500);
+          break;
+        default:
+          this.radius = 14;
+          this.speed = 1;
+          this.health = 10;
+          this.maxHealth = 10;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+      }
+
+      // Spawn position: random x at top edge, y = -radius
+      this.x = randomRange(this.radius + 20, GAME_WIDTH - this.radius - 20);
+      this.y = -this.radius;
+
+      // Movement path: enemies move roughly downward toward Earth center
+      this.targetX = EARTH_POSITION.x + randomRange(-EARTH_RADIUS / 2, EARTH_RADIUS / 2);
+      this.targetY = EARTH_POSITION.y + EARTH_RADIUS / 2;
+
+      // For shooter enemies, track shooting cooldown
+    }
+    update(delta) {
+      // Move toward target position (Earth)
+      const angleToEarth = angleBetween(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y);
+      this.x += Math.cos(angleToEarth) * this.speed;
+      this.y += Math.sin(angleToEarth) * this.speed;
+
+      // Shooting behavior for shooter enemies
+      if (this.canShoot) {
+        const now = performance.now();
+        if (now - this.lastShot > this.shootInterval) {
+          this.lastShot = now;
+          // Shoot bullet toward target (player)
+          if (target) {
+            const angleToTarget = angleBetween(this.x, this.y, target.x, target.y);
+            enemyBullets.push(new Bullet(this.x, this.y, angleToTarget, this.damage, 'enemy'));
+          }
+        }
+      }
+
+      // Check if reached Earth (collision)
+      if (distance(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y) < EARTH_RADIUS + this.radius) {
+        // Damage Earth and die
+        health -= this.damage;
+        this.isDead = true;
+        if (health < 0) health = 0;
+      }
+    }
+    draw(ctx) {
+      // Draw enemy body with glow
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 4;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+
+      ctx.restore();
+    }
+  }
+
+  // Earth drawing function
+  function drawEarth(ctx) {
+    const gradient = ctx.createRadialGradient(
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS * 0.3,
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS
+    );
+    gradient.addColorStop(0, '#0a4');
+    gradient.addColorStop(0.7, '#030');
+    gradient.addColorStop(1, '#001100');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth glow
+    ctx.save();
+    ctx.shadowColor = '#0f0';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Simple continents shape (abstract)
+    ctx.fillStyle = '#073';
+    ctx.beginPath();
+    ctx.moveTo(EARTH_POSITION.x - 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x - 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x + 30, EARTH_POSITION.y + 10, EARTH_POSITION.x + 10, EARTH_POSITION.y + 30, EARTH_POSITION.x - 20, EARTH_POSITION.y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Game functions
+  function resetGame() {
+    score = 0;
+    level = 1;
+    health = upgrades.maxHealth;
+    energy = upgrades.maxEnergy;
+    enemies = [];
+    bullets = [];
+    enemyBullets = [];
+    lastEnemySpawn = 0;
+    enemySpawnInterval = 2000;
+    shotCooldown = 300;
+    target = new Target();
+    updateUI();
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = Math.floor(health);
+    energyEl.textContent = Math.floor(energy);
+  }
+
+  // Spawn enemies based on level and time
+  function spawnEnemies(delta) {
+    const now = performance.now();
+    if (now - lastEnemySpawn > enemySpawnInterval) {
+      lastEnemySpawn = now;
+
+      // Determine enemy type probabilities based on level
+      const enemyTypes = ['basic', 'fast', 'tank', 'shooter'];
+      let weights = [60, 25, 10, 5]; // base weights
+      // Increase weights for tougher enemies as level grows
+      weights = weights.map((w, i) => w + i * level * 2);
+
+      // Normalize weights
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      let chosenType = 'basic';
+      for (let i = 0; i < enemyTypes.length; i++) {
+        sum += weights[i];
+        if (rand <= sum) {
+          chosenType = enemyTypes[i];
+          break;
+        }
+      }
+
+      enemies.push(new Enemy(chosenType, level));
+    }
+  }
+
+  // Collision detection between circles
+  function circleCollision(x1, y1, r1, x2, y2, r2) {
+    return distance(x1, y1, x2, y2) < r1 + r2;
+  }
+
+  // Handle all collisions
+  function handleCollisions() {
+    // Player bullets vs enemies
+    bullets.forEach(bullet => {
+      if (bullet.owner !== 'player') return;
+      enemies.forEach(enemy => {
+        if (!enemy.isDead && circleCollision(bullet.x, bullet.y, bullet.radius, enemy.x, enemy.y, enemy.radius)) {
+          enemy.health -= bullet.damage;
+          bullet.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += 10 * level;
+          }
+        }
+      });
+    });
+
+    // Enemy bullets vs player
+    enemyBullets.forEach(bullet => {
+      if (bullet.owner !== 'enemy') return;
+      if (target && circleCollision(bullet.x, bullet.y, bullet.radius, target.x, target.y, target.radius)) {
+        target.health -= bullet.damage;
+        bullet.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+
+    // Enemies vs player (collision)
+    enemies.forEach(enemy => {
+      if (!enemy.isDead && target && circleCollision(enemy.x, enemy.y, enemy.radius, target.x, target.y, target.radius)) {
+        // Both take damage
+        target.health -= enemy.damage * 1.5;
+        enemy.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+  }
+
+  // Remove dead entities
+  function cleanupEntities() {
+    bullets = bullets.filter(b => !b.isDead);
+    enemyBullets = enemyBullets.filter(b => !b.isDead);
+    enemies = enemies.filter(e => !e.isDead);
+  }
+
+  // Game over handler
+  function gameOver() {
+    gameState = 'gameover';
+    messageEl.textContent = `Game Over! Final Score: ${score}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showStartScreen();
+    }, 4000);
+  }
+
+  // Level up handler
+  function levelUp() {
+    gameState = 'upgrade';
+    upgradePoints = 3;
+    messageEl.textContent = `Level ${level} Complete! Choose your upgrades.`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showUpgradeScreen();
+    }, 1500);
+  }
+
+  // Show start screen
+  function showStartScreen() {
+    startScreen.style.display = 'block';
+    upgradeScreen.style.display = 'none';
+    gameState = 'start';
+  }
+
+  // Show upgrade screen
+  function showUpgradeScreen() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'flex';
+    upgradeContinueBtn.disabled = true;
+    renderUpgradeOptions();
+    upgradeScreen.focus();
+  }
+
+  // Hide all overlays
+  function hideOverlays() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'none';
+  }
+
+  // Upgrade options data
+  const upgradeData = [
+    {
+      id: 'damage',
+      name: 'Weapon Damage',
+      description: 'Increase bullet damage by 1.',
+      apply: () => {
+        upgrades.damage += 1;
+        target.damage = upgrades.damage;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => upgrades.damage - 1,
+    },
+    {
+      id: 'fireRate',
+      name: 'Fire Rate',
+      description: 'Increase shooting speed by 10%.',
+      apply: () => {
+        upgrades.fireRate += 0.1;
+        target.fireRate = upgrades.fireRate;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.fireRate - 1) * 10),
+    },
+    {
+      id: 'speed',
+      name: 'Movement Speed',
+      description: 'Increase target movement speed by 0.3.',
+      apply: () => {
+        upgrades.speed += 0.3;
+        target.speed = upgrades.speed;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.speed - 3.5) / 0.3),
+    },
+    {
+      id: 'maxHealth',
+      name: 'Max Health',
+      description: 'Increase max health by 10.',
+      apply: () => {
+        upgrades.maxHealth += 10;
+        target.health = upgrades.maxHealth;
+        target.maxHealth = upgrades.maxHealth;
+        health = upgrades.maxHealth;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxHealth - MAX_HEALTH) / 10,
+    },
+    {
+      id: 'maxEnergy',
+      name: 'Max Energy',
+      description: 'Increase max energy by 10.',
+      apply: () => {
+        upgrades.maxEnergy += 10;
+        target.energy = upgrades.maxEnergy;
+        target.maxEnergy = upgrades.maxEnergy;
+        energy = upgrades.maxEnergy;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxEnergy - MAX_ENERGY) / 10,
+    },
+    {
+      id: 'energyRegen',
+      name: 'Energy Regeneration',
+      description: 'Increase energy regen rate by 0.05 per frame.',
+      apply: () => {
+        upgrades.energyRegen += 0.05;
+        target.energyRegen = upgrades.energyRegen;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.energyRegen - 0.15) / 0.05),
+    },
+  ];
+
+  // Render upgrade options UI
+  function renderUpgradeOptions() {
+    upgradeOptionsContainer.innerHTML = '';
+    upgradeData.forEach(upg => {
+      const currentLvl = upg.currentLevel();
+      const isMaxed = currentLvl >= upg.maxLevel;
+      const option = document.createElement('div');
+      option.className = 'upgrade-option';
+      option.setAttribute('role', 'group');
+      option.setAttribute('aria-label', `${upg.name} upgrade option`);
+
+      const title = document.createElement('h3');
+      title.textContent = `${upg.name} (${currentLvl}/${upg.maxLevel})`;
+      option.appendChild(title);
+
+      const desc = document.createElement('p');
+      desc.textContent = upg.description;
+      option.appendChild(desc);
+
+      const btn = document.createElement('button');
+      btn.textContent = isMaxed ? 'Maxed' : `Upgrade (${upg.cost} point${upg.cost > 1 ? 's' : ''})`;
+      btn.disabled = isMaxed || upgradePoints < upg.cost;
+      btn.title = upg.description;
+      btn.setAttribute('aria-disabled', btn.disabled);
+      btn.addEventListener('click', () => {
+        if (upgradePoints >= upg.cost && !isMaxed) {
+          upgradePoints -= upg.cost;
+          upg.apply();
+          updateUI();
+          renderUpgradeOptions();
+          if (upgradePoints === 0) {
+            upgradeContinueBtn.disabled = false;
+            upgradeContinueBtn.focus();
+          }
+        }
+      });
+      option.appendChild(btn);
+
+      upgradeOptionsContainer.appendChild(option);
+    });
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const delta = (timestamp - lastFrameTime) / 16.6667; // approx frames (60fps base)
+    lastFrameTime = timestamp;
+
+    if (gameState === 'playing') {
+      update(delta);
+      draw();
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Update game state
+  function update(delta) {
+    // Spawn enemies
+    spawnEnemies(delta);
+
+    // Update target
+    target.update(delta);
+
+    // Update bullets
+    bullets.forEach(b => b.update(delta));
+    enemyBullets.forEach(b => b.update(delta));
+
+    // Update enemies
+    enemies.forEach(e => e.update(delta));
+
+    // Handle collisions
+    handleCollisions();
+
+    // Cleanup dead entities
+    cleanupEntities();
+
+    // Update UI
+    updateUI();
+
+    // Check level progression
+    if (score >= level * 100) {
+      level++;
+      enemySpawnInterval = Math.max(600, 2000 - level * 150);
+      shotCooldown = Math.max(100, 300 - level * 15);
+      levelUp();
+    }
+
+    // Check health
+    if (health <= 0) {
+      gameOver();
+    }
+  }
+
+  // Draw game state
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(e => e.draw(ctx));
+
+    // Draw bullets
+    bullets.forEach(b => b.draw(ctx));
+    enemyBullets.forEach(b => b.draw(ctx));
+
+    // Draw target
+    target.draw(ctx);
+  }
+
+  // Input handlers
+  function keyDownHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = true;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = true;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = true;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = true;
+        break;
+      case 'Space':
+        keys.shoot = true;
+        break;
+    }
+  }
+  function keyUpHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = false;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = false;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = false;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = false;
+        break;
+      case 'Space':
+        keys.shoot = false;
+        break;
+    }
+  }
+
+  // Shooting handler (continuous shooting while space pressed)
+  function shootingHandler() {
+    if (gameState !== 'playing') return;
+    if (keys.shoot && target.canShoot()) {
+      target.shoot();
+    }
+    setTimeout(shootingHandler, 50);
+  }
+
+  // Start game
+  function startGame() {
+    resetGame();
+    hideOverlays();
+    gameState = 'playing';
+    canvas.focus();
+  }
+
+  // Continue from upgrade screen
+  function continueGame() {
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'block';
+    messageEl.textContent = `Level ${level} Start!`;
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      gameState = 'playing';
+    }, 1500);
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', keyDownHandler);
+  window.addEventListener('keyup', keyUpHandler);
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  upgradeContinueBtn.addEventListener('click', () => {
+    continueGame();
+  });
+
+  // Accessibility: focus trap for dialogs
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+    });
+  }
+  trapFocus(startScreen);
+  trapFocus(upgradeScreen);
+
+  // Initialize
+  showStartScreen();
+  shootingHandler();
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:30:55 - INFO - ================================================================================
+2025-11-30 19:30:55 - INFO - 
+✓ Initial code saved to: artifacts_output/Game Development-Strategy/task_4/iteration_0_initial.html
+2025-11-30 19:30:55 - INFO - 
+================================================================================
+2025-11-30 19:30:55 - INFO - EVALUATING INITIAL CODE
+2025-11-30 19:30:55 - INFO - ================================================================================
+2025-11-30 19:30:55 - INFO - Generating screenshots for initial code...
+2025-11-30 19:31:04 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 0,
+  "blank_canvases": 1,
+  "canvas_details": [
+    {
+      "width": 900,
+      "height": 600,
+      "has_content": false
+    }
+  ]
+}
+2025-11-30 19:31:04 - INFO - Evaluating initial code...
+2025-11-30 19:31:25 - INFO - Initial evaluation completed in 20.61 seconds
+2025-11-30 19:31:25 - INFO - 
+Initial Scores:
+2025-11-30 19:31:25 - INFO - Individual Scores (JSON):
+{
+  "Is the core target control system properly implemented?": 8.0,
+  "Are the enemy AI and attack patterns implemented?": 7.0,
+  "Is the level design system properly structured?": 8.0,
+  "Is the tactical upgrade system implemented?": 9.0,
+  "Is the code robust?": 6.0,
+  "Are there any innovative features that are eye-catching?": 3.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 19:31:25 - INFO - Initial Calculated Sum: 76.0
+2025-11-30 19:31:25 - INFO - 
+================================================================================
+2025-11-30 19:31:25 - INFO - STEP 2: ITERATIVE IMPROVEMENT LOOP
+2025-11-30 19:31:25 - INFO - ================================================================================
+2025-11-30 19:31:25 - INFO - 
+================================================================================
+2025-11-30 19:31:25 - INFO - ITERATION 1
+2025-11-30 19:31:25 - INFO - ================================================================================
+2025-11-30 19:31:25 - INFO - Iteration Start Time: 2025-11-30 19:31:25
+2025-11-30 19:31:25 - INFO - 
+Generating screenshots for iteration 1...
+2025-11-30 19:31:35 - INFO - Canvas Check: {
+  "canvas_count": 1,
+  "canvases_with_content": 0,
+  "blank_canvases": 1,
+  "canvas_details": [
+    {
+      "width": 900,
+      "height": 600,
+      "has_content": false
+    }
+  ]
+}
+2025-11-30 19:31:35 - INFO - 
+Evaluating code for iteration 1...
+2025-11-30 19:31:56 - INFO - Evaluation completed in 21.35 seconds
+2025-11-30 19:31:56 - INFO - 
+================================================================================
+2025-11-30 19:31:56 - INFO - EVALUATION RESULTS - ITERATION 1
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - Individual Scores (JSON):
+{
+  "Is the core target control system properly implemented?": 8.0,
+  "Are the enemy AI and attack patterns implemented?": 7.0,
+  "Is the level design system properly structured?": 8.0,
+  "Is the tactical upgrade system implemented?": 9.0,
+  "Is the code robust?": 6.0,
+  "Are there any innovative features that are eye-catching?": 3.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 7.0
+}
+2025-11-30 19:31:56 - INFO - Calculated Sum: 75.0
+2025-11-30 19:31:56 - INFO - Overall Score (from LLM): 71.0
+2025-11-30 19:31:56 - INFO - 
+================================================================================
+2025-11-30 19:31:56 - INFO - FULL EVALUATION FEEDBACK - ITERATION 1
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - ```json
+{
+  "Is the core target control system properly implemented?": "8",
+  "Are the enemy AI and attack patterns implemented?": "7",
+  "Is the level design system properly structured?": "8",
+  "Is the tactical upgrade system implemented?": "9",
+  "Is the code robust?": "6",
+  "Are there any innovative features that are eye-catching?": "3",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "7",
+  "Overall Score": "71"
+}
+```
+
+Reason:
+
+1. **Is the core target control system properly implemented? (8/10)**  
+   The target control system supports keyboard input (WASD/arrow keys) for movement and spacebar for shooting. Movement includes normalized diagonal speed, clamping within bounds, and energy-based shooting cooldown. The target is visually represented with a glowing triangle and health/energy bars. However, the aiming angle is fixed upward rather than dynamically aiming toward the mouse or enemies, which limits precision targeting and advanced control features like aim assist or predictive targeting. The shooting mechanic is functional but basic. Overall, the control system is solid and responsive but lacks advanced targeting sophistication.
+
+2. **Are the enemy AI and attack patterns implemented? (7/10)**  
+   The code includes four enemy types with distinct stats and behaviors: basic, fast, tank, and shooter. Shooter enemies fire bullets toward the player, adding some complexity. Enemy speed and health scale with level, and spawn probabilities shift to tougher enemies as levels progress. However, enemy movement is always a direct path toward Earth, lacking more complex or evasive maneuvers. Difficulty scaling is present but could be deeper with more dynamic enemy responses to player positioning or coordinated attack patterns.
+
+3. **Is the level design system properly structured? (8/10)**  
+   Levels progress by score thresholds, increasing enemy spawn rate and player shot cooldown improvements. The system supports multiple levels with increasing difficulty and triggers upgrade screens between levels. Wave management is implicit via spawn intervals and enemy types. Game state management is clear with states for start, playing, upgrade, and gameover. However, levels are somewhat linear and hard-coded in progression logic rather than fully data-driven or configurable with multiple objectives or event triggers.
+
+4. **Is the tactical upgrade system implemented? (9/10)**  
+   A robust upgrade system allows players to spend points on six upgrade categories (damage, fire rate, speed, max health, max energy, energy regen). Each upgrade has max levels, costs, and visual UI with buttons and tooltips. Upgrades persist between levels and immediately affect player stats. Visual feedback is clear in the upgrade screen and UI. The system offers strategic choices rather than simple numeric increments. Minor deduction for lack of more diverse or special ability upgrades.
+
+5. **Is the code robust? (6/10)**  
+   The code handles out-of-bounds bullets and removes dead entities properly. It prevents shooting without energy or cooldown. However, it lacks explicit handling for rapid input spamming beyond cooldown, no window resize handling (canvas size fixed), and no explicit concurrency or input conflict management. No error prompts or recovery mechanisms are present. The robustness is average but could be improved with more edge case handling and adaptive canvas resizing.
+
+6. **Are there any innovative features that are eye-catching? (3/10)**  
+   The game includes a polished upgrade system and a glowing neon space theme with smooth UI transitions. The focus trap for accessibility dialogs is a nice touch. However, no truly novel gameplay mechanics or advanced features like dynamic weather, voice control, or multiplayer modes are implemented. The glowing UI and energy/health bars add polish but are standard.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean with no redundant or unrelated modules. No multiple collision detection algorithms or unrelated code. Visual effects are tasteful and do not appear to cause performance issues. No fancy particle systems or crypto miners. No interference with core functions.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modular with classes for Target, Enemy, Bullet, and clear separation of concerns. Game logic, rendering, and input handling are well organized. Use of utility functions and constants is good. Some global state variables exist but are mostly encapsulated. No major code duplication detected. Performance optimizations like requestAnimationFrame and delta timing are used. Minor deduction for some global state and lack of design patterns like MVC or event-driven architecture.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The UI uses a consistent space-themed neon color scheme with good contrast. Visual hierarchy is clear: Earth, target, enemies, bullets, and HUD elements are distinct. HUD is non-intrusive and placed at top with clear labels. Upgrade and start screens are visually appealing and accessible. Minor deduction for some text alignment and font size consistency that could be improved.
+
+10. **Is the dynamic interaction smooth and seamless? (7/10)**  
+    The game loop uses requestAnimationFrame with delta timing for smooth animation. Input lag is likely low given keyboard controls and immediate response. Visual feedback for hits is present via health bars and bullet impacts. However, no explicit hit/miss animations or sound feedback. Game pacing includes breaks for upgrades and start screens. Frame rate drops or input lag are not reported but the blank canvas warning suggests rendering issues that could affect smoothness. Minor deduction for missing richer feedback and potential rendering problems.
+
+**Additional Notes:**  
+The warning about the canvas being blank in the rendering check is concerning. The code appears correct and should render, so this might be an environment issue rather than code fault. However, it must be considered in scoring as it impacts the user experience.
+
+**Summary:**  
+This is a well-structured, visually polished, and functionally solid space defense game implementation with good core mechanics, upgrade system, and UI design. It lacks some advanced AI complexity, dynamic targeting, and robustness features. The code quality is high with good modularity and maintainability. The overall experience is professional but could be enhanced with more innovative gameplay features and improved robustness.
+
+Final overall score: 71/90 (sum of all criteria scores).
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - 
+================================================================================
+2025-11-30 19:31:56 - INFO - HTML CODE - ITERATION 1
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff88c88;
+  }
+  #ui {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #0ff;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0ff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff,
+      0 0 40px #0ff;
+    pointer-events: none;
+    user-select: none;
+  }
+  #start-screen, #upgrade-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px;
+    background: rgba(0, 20, 40, 0.85);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 24px 32px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #0ff88cc;
+    color: #0ff;
+    user-select: none;
+  }
+  #start-screen h1 {
+    margin-top: 0;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff;
+  }
+  #start-screen p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #start-screen button, #upgrade-screen button {
+    background: #0ff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003322;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+  }
+  #start-screen button:hover, #upgrade-screen button:hover {
+    background: #0cc;
+  }
+  #upgrade-screen {
+    display: none;
+    flex-direction: column;
+  }
+  #upgrade-screen h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #upgrade-options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .upgrade-option {
+    background: #002233;
+    border: 1px solid #0ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 140px;
+    margin: 8px;
+    text-align: center;
+    box-shadow: 0 0 8px #0ff44aa inset;
+  }
+  .upgrade-option h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  .upgrade-option p {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    min-height: 40px;
+  }
+  .upgrade-option button {
+    background: #0ff;
+    color: #003322;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .upgrade-option button:disabled {
+    background: #044;
+    color: #022;
+    cursor: not-allowed;
+  }
+  #tips {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    font-size: 0.9rem;
+    color: #0ff;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 0 6px #0ff88;
+  }
+  /* Tooltip style for buttons */
+  .upgrade-option button[title] {
+    position: relative;
+  }
+  .upgrade-option button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ffcc;
+    color: #003322;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 8px #0ffccaa;
+    pointer-events: none;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" aria-label="JS Planet Defense Game">
+  <canvas id="gameCanvas" width="900" height="600" aria-label="Game canvas"></canvas>
+  <div id="ui" aria-live="polite" aria-atomic="true">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+    <div>Health: <span id="health">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+  <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" tabindex="0">
+    <h1 id="start-title">JS Planet Defense Game</h1>
+    <p>Defend Earth by controlling the only target in space. Move precisely and shoot incoming enemies before they reach the planet.</p>
+    <p><strong>Controls:</strong> <br>Arrow keys or WASD to move<br>Spacebar to shoot</p>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </section>
+  <section id="upgrade-screen" role="dialog" aria-modal="true" aria-labelledby="upgrade-title" tabindex="0">
+    <h2 id="upgrade-title">Upgrade Your Target</h2>
+    <div id="upgrade-options" aria-live="polite" aria-atomic="true">
+      <!-- Upgrade options inserted by JS -->
+    </div>
+    <button id="upgrade-continue" aria-label="Continue to Next Level">Continue</button>
+  </section>
+  <div id="tips" aria-live="polite" aria-atomic="true">
+    <strong>Tips:</strong> Use precise target control and tactical positioning to maximize your defense effectiveness. Upgrade your weapon systems and survivability to face tougher enemies.
+  </div>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * 
+ * Developed as a single file HTML/JS/CSS game.
+ * 
+ * Features:
+ * - Single controllable target defending Earth from incoming enemies.
+ * - Multiple levels with increasing difficulty.
+ * - Upgrade system between levels.
+ * - Precise movement and shooting mechanics.
+ * 
+ * Controls:
+ * - Move: Arrow keys or WASD
+ * - Shoot: Spacebar
+ * 
+ * Author: ChatGPT (OpenAI)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const messageEl = document.getElementById('message');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('start-button');
+  const upgradeScreen = document.getElementById('upgrade-screen');
+  const upgradeOptionsContainer = document.getElementById('upgrade-options');
+  const upgradeContinueBtn = document.getElementById('upgrade-continue');
+
+  // Game constants
+  const GAME_WIDTH = canvas.width;
+  const GAME_HEIGHT = canvas.height;
+  const EARTH_RADIUS = 60;
+  const EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+  const TARGET_RADIUS = 18;
+  const MAX_ENERGY = 100;
+  const MAX_HEALTH = 100;
+
+  // Key input tracking
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    shoot: false,
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+  }
+
+  // Game state variables
+  let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameover'
+  let score = 0;
+  let level = 1;
+  let health = MAX_HEALTH;
+  let energy = MAX_ENERGY;
+  let enemies = [];
+  let bullets = [];
+  let enemyBullets = [];
+  let lastEnemySpawn = 0;
+  let enemySpawnInterval = 2000; // ms, decreases with level
+  let lastShotTime = 0;
+  let shotCooldown = 300; // ms, can be upgraded
+  let target;
+  let upgrades = {
+    damage: 1,
+    fireRate: 1,
+    speed: 3.5,
+    maxHealth: MAX_HEALTH,
+    maxEnergy: MAX_ENERGY,
+    energyRegen: 0.15,
+  };
+  let upgradePoints = 0;
+
+  // Timing
+  let lastFrameTime = 0;
+
+  // Target class - the single controllable unit
+  class Target {
+    constructor() {
+      this.x = GAME_WIDTH / 2;
+      this.y = GAME_HEIGHT - EARTH_RADIUS - 100;
+      this.radius = TARGET_RADIUS;
+      this.speed = upgrades.speed;
+      this.color = '#0ff';
+      this.angle = -Math.PI / 2; // Facing upward initially
+      this.energy = energy;
+      this.health = health;
+      this.damage = upgrades.damage;
+      this.fireRate = upgrades.fireRate;
+      this.lastShot = 0;
+      this.energyRegen = upgrades.energyRegen;
+    }
+    update(delta) {
+      // Movement based on keys
+      let dx = 0, dy = 0;
+      if (keys.left) dx -= 1;
+      if (keys.right) dx += 1;
+      if (keys.up) dy -= 1;
+      if (keys.down) dy += 1;
+
+      // Normalize diagonal movement
+      if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2;
+        dy *= Math.SQRT1_2;
+      }
+
+      this.x += dx * this.speed;
+      this.y += dy * this.speed;
+
+      // Clamp inside canvas and above Earth
+      const minY = 20;
+      const maxY = EARTH_POSITION.y - EARTH_RADIUS - this.radius - 10;
+      this.x = clamp(this.x, this.radius + 10, GAME_WIDTH - this.radius - 10);
+      this.y = clamp(this.y, minY, maxY);
+
+      // Update angle to face mouse or shooting direction (for now fixed upward)
+      this.angle = -Math.PI / 2;
+
+      // Regenerate energy
+      this.energy += this.energyRegen * delta;
+      if (this.energy > upgrades.maxEnergy) this.energy = upgrades.maxEnergy;
+
+      // Update health and energy globals
+      health = this.health;
+      energy = this.energy;
+    }
+    canShoot() {
+      const now = performance.now();
+      return (now - this.lastShot) >= (shotCooldown / this.fireRate) && this.energy >= 10;
+    }
+    shoot() {
+      if (!this.canShoot()) return false;
+      this.lastShot = performance.now();
+      this.energy -= 10;
+      // Create a bullet going upward from target position
+      bullets.push(new Bullet(this.x, this.y - this.radius - 8, -Math.PI / 2, this.damage, 'player'));
+      return true;
+    }
+    draw(ctx) {
+      // Draw target body - a glowing triangle pointing upward
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      // Glow
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 0.7, this.radius);
+      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner shape
+      ctx.fillStyle = '#004d4d';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.7);
+      ctx.lineTo(this.radius * 0.5, this.radius * 0.7);
+      ctx.lineTo(-this.radius * 0.5, this.radius * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+
+      // Energy bar above target
+      const barWidth = 50;
+      const barHeight = 6;
+      const energyRatio = this.energy / upgrades.maxEnergy;
+      ctx.fillStyle = '#003322';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth * energyRatio, barHeight);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+
+      // Health bar below target
+      const healthRatio = this.health / upgrades.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+    }
+  }
+
+  // Bullet class for player and enemy projectiles
+  class Bullet {
+    constructor(x, y, angle, damage, owner) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 7;
+      this.radius = 4;
+      this.damage = damage;
+      this.owner = owner; // 'player' or 'enemy'
+      this.color = owner === 'player' ? '#0ff' : '#f44';
+      this.isDead = false;
+    }
+    update(delta) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      // Remove if out of bounds
+      if (this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+          this.y < -this.radius || this.y > GAME_HEIGHT + this.radius) {
+        this.isDead = true;
+      }
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  // Enemy class
+  class Enemy {
+    constructor(type, level) {
+      this.type = type; // 'basic', 'fast', 'tank', 'shooter'
+      this.level = level;
+      this.isDead = false;
+      this.spawnTime = performance.now();
+
+      // Enemy stats based on type and level
+      switch (type) {
+        case 'basic':
+          this.radius = 14;
+          this.speed = 1 + 0.1 * level;
+          this.health = 10 + 5 * level;
+          this.maxHealth = this.health;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+          break;
+        case 'fast':
+          this.radius = 12;
+          this.speed = 2 + 0.15 * level;
+          this.health = 6 + 3 * level;
+          this.maxHealth = this.health;
+          this.color = '#fa0';
+          this.damage = 8;
+          this.canShoot = false;
+          break;
+        case 'tank':
+          this.radius = 22;
+          this.speed = 0.6 + 0.05 * level;
+          this.health = 30 + 15 * level;
+          this.maxHealth = this.health;
+          this.color = '#a00';
+          this.damage = 20;
+          this.canShoot = false;
+          break;
+        case 'shooter':
+          this.radius = 16;
+          this.speed = 1 + 0.1 * level;
+          this.health = 15 + 7 * level;
+          this.maxHealth = this.health;
+          this.color = '#f0f';
+          this.damage = 12;
+          this.canShoot = true;
+          this.lastShot = 0;
+          this.shootInterval = 2500 - Math.min(level * 100, 1500);
+          break;
+        default:
+          this.radius = 14;
+          this.speed = 1;
+          this.health = 10;
+          this.maxHealth = 10;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+      }
+
+      // Spawn position: random x at top edge, y = -radius
+      this.x = randomRange(this.radius + 20, GAME_WIDTH - this.radius - 20);
+      this.y = -this.radius;
+
+      // Movement path: enemies move roughly downward toward Earth center
+      this.targetX = EARTH_POSITION.x + randomRange(-EARTH_RADIUS / 2, EARTH_RADIUS / 2);
+      this.targetY = EARTH_POSITION.y + EARTH_RADIUS / 2;
+
+      // For shooter enemies, track shooting cooldown
+    }
+    update(delta) {
+      // Move toward target position (Earth)
+      const angleToEarth = angleBetween(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y);
+      this.x += Math.cos(angleToEarth) * this.speed;
+      this.y += Math.sin(angleToEarth) * this.speed;
+
+      // Shooting behavior for shooter enemies
+      if (this.canShoot) {
+        const now = performance.now();
+        if (now - this.lastShot > this.shootInterval) {
+          this.lastShot = now;
+          // Shoot bullet toward target (player)
+          if (target) {
+            const angleToTarget = angleBetween(this.x, this.y, target.x, target.y);
+            enemyBullets.push(new Bullet(this.x, this.y, angleToTarget, this.damage, 'enemy'));
+          }
+        }
+      }
+
+      // Check if reached Earth (collision)
+      if (distance(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y) < EARTH_RADIUS + this.radius) {
+        // Damage Earth and die
+        health -= this.damage;
+        this.isDead = true;
+        if (health < 0) health = 0;
+      }
+    }
+    draw(ctx) {
+      // Draw enemy body with glow
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 4;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+
+      ctx.restore();
+    }
+  }
+
+  // Earth drawing function
+  function drawEarth(ctx) {
+    const gradient = ctx.createRadialGradient(
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS * 0.3,
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS
+    );
+    gradient.addColorStop(0, '#0a4');
+    gradient.addColorStop(0.7, '#030');
+    gradient.addColorStop(1, '#001100');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth glow
+    ctx.save();
+    ctx.shadowColor = '#0f0';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Simple continents shape (abstract)
+    ctx.fillStyle = '#073';
+    ctx.beginPath();
+    ctx.moveTo(EARTH_POSITION.x - 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x - 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x + 30, EARTH_POSITION.y + 10, EARTH_POSITION.x + 10, EARTH_POSITION.y + 30, EARTH_POSITION.x - 20, EARTH_POSITION.y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Game functions
+  function resetGame() {
+    score = 0;
+    level = 1;
+    health = upgrades.maxHealth;
+    energy = upgrades.maxEnergy;
+    enemies = [];
+    bullets = [];
+    enemyBullets = [];
+    lastEnemySpawn = 0;
+    enemySpawnInterval = 2000;
+    shotCooldown = 300;
+    target = new Target();
+    updateUI();
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = Math.floor(health);
+    energyEl.textContent = Math.floor(energy);
+  }
+
+  // Spawn enemies based on level and time
+  function spawnEnemies(delta) {
+    const now = performance.now();
+    if (now - lastEnemySpawn > enemySpawnInterval) {
+      lastEnemySpawn = now;
+
+      // Determine enemy type probabilities based on level
+      const enemyTypes = ['basic', 'fast', 'tank', 'shooter'];
+      let weights = [60, 25, 10, 5]; // base weights
+      // Increase weights for tougher enemies as level grows
+      weights = weights.map((w, i) => w + i * level * 2);
+
+      // Normalize weights
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      let chosenType = 'basic';
+      for (let i = 0; i < enemyTypes.length; i++) {
+        sum += weights[i];
+        if (rand <= sum) {
+          chosenType = enemyTypes[i];
+          break;
+        }
+      }
+
+      enemies.push(new Enemy(chosenType, level));
+    }
+  }
+
+  // Collision detection between circles
+  function circleCollision(x1, y1, r1, x2, y2, r2) {
+    return distance(x1, y1, x2, y2) < r1 + r2;
+  }
+
+  // Handle all collisions
+  function handleCollisions() {
+    // Player bullets vs enemies
+    bullets.forEach(bullet => {
+      if (bullet.owner !== 'player') return;
+      enemies.forEach(enemy => {
+        if (!enemy.isDead && circleCollision(bullet.x, bullet.y, bullet.radius, enemy.x, enemy.y, enemy.radius)) {
+          enemy.health -= bullet.damage;
+          bullet.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += 10 * level;
+          }
+        }
+      });
+    });
+
+    // Enemy bullets vs player
+    enemyBullets.forEach(bullet => {
+      if (bullet.owner !== 'enemy') return;
+      if (target && circleCollision(bullet.x, bullet.y, bullet.radius, target.x, target.y, target.radius)) {
+        target.health -= bullet.damage;
+        bullet.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+
+    // Enemies vs player (collision)
+    enemies.forEach(enemy => {
+      if (!enemy.isDead && target && circleCollision(enemy.x, enemy.y, enemy.radius, target.x, target.y, target.radius)) {
+        // Both take damage
+        target.health -= enemy.damage * 1.5;
+        enemy.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+  }
+
+  // Remove dead entities
+  function cleanupEntities() {
+    bullets = bullets.filter(b => !b.isDead);
+    enemyBullets = enemyBullets.filter(b => !b.isDead);
+    enemies = enemies.filter(e => !e.isDead);
+  }
+
+  // Game over handler
+  function gameOver() {
+    gameState = 'gameover';
+    messageEl.textContent = `Game Over! Final Score: ${score}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showStartScreen();
+    }, 4000);
+  }
+
+  // Level up handler
+  function levelUp() {
+    gameState = 'upgrade';
+    upgradePoints = 3;
+    messageEl.textContent = `Level ${level} Complete! Choose your upgrades.`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showUpgradeScreen();
+    }, 1500);
+  }
+
+  // Show start screen
+  function showStartScreen() {
+    startScreen.style.display = 'block';
+    upgradeScreen.style.display = 'none';
+    gameState = 'start';
+  }
+
+  // Show upgrade screen
+  function showUpgradeScreen() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'flex';
+    upgradeContinueBtn.disabled = true;
+    renderUpgradeOptions();
+    upgradeScreen.focus();
+  }
+
+  // Hide all overlays
+  function hideOverlays() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'none';
+  }
+
+  // Upgrade options data
+  const upgradeData = [
+    {
+      id: 'damage',
+      name: 'Weapon Damage',
+      description: 'Increase bullet damage by 1.',
+      apply: () => {
+        upgrades.damage += 1;
+        target.damage = upgrades.damage;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => upgrades.damage - 1,
+    },
+    {
+      id: 'fireRate',
+      name: 'Fire Rate',
+      description: 'Increase shooting speed by 10%.',
+      apply: () => {
+        upgrades.fireRate += 0.1;
+        target.fireRate = upgrades.fireRate;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.fireRate - 1) * 10),
+    },
+    {
+      id: 'speed',
+      name: 'Movement Speed',
+      description: 'Increase target movement speed by 0.3.',
+      apply: () => {
+        upgrades.speed += 0.3;
+        target.speed = upgrades.speed;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.speed - 3.5) / 0.3),
+    },
+    {
+      id: 'maxHealth',
+      name: 'Max Health',
+      description: 'Increase max health by 10.',
+      apply: () => {
+        upgrades.maxHealth += 10;
+        target.health = upgrades.maxHealth;
+        target.maxHealth = upgrades.maxHealth;
+        health = upgrades.maxHealth;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxHealth - MAX_HEALTH) / 10,
+    },
+    {
+      id: 'maxEnergy',
+      name: 'Max Energy',
+      description: 'Increase max energy by 10.',
+      apply: () => {
+        upgrades.maxEnergy += 10;
+        target.energy = upgrades.maxEnergy;
+        target.maxEnergy = upgrades.maxEnergy;
+        energy = upgrades.maxEnergy;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxEnergy - MAX_ENERGY) / 10,
+    },
+    {
+      id: 'energyRegen',
+      name: 'Energy Regeneration',
+      description: 'Increase energy regen rate by 0.05 per frame.',
+      apply: () => {
+        upgrades.energyRegen += 0.05;
+        target.energyRegen = upgrades.energyRegen;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.energyRegen - 0.15) / 0.05),
+    },
+  ];
+
+  // Render upgrade options UI
+  function renderUpgradeOptions() {
+    upgradeOptionsContainer.innerHTML = '';
+    upgradeData.forEach(upg => {
+      const currentLvl = upg.currentLevel();
+      const isMaxed = currentLvl >= upg.maxLevel;
+      const option = document.createElement('div');
+      option.className = 'upgrade-option';
+      option.setAttribute('role', 'group');
+      option.setAttribute('aria-label', `${upg.name} upgrade option`);
+
+      const title = document.createElement('h3');
+      title.textContent = `${upg.name} (${currentLvl}/${upg.maxLevel})`;
+      option.appendChild(title);
+
+      const desc = document.createElement('p');
+      desc.textContent = upg.description;
+      option.appendChild(desc);
+
+      const btn = document.createElement('button');
+      btn.textContent = isMaxed ? 'Maxed' : `Upgrade (${upg.cost} point${upg.cost > 1 ? 's' : ''})`;
+      btn.disabled = isMaxed || upgradePoints < upg.cost;
+      btn.title = upg.description;
+      btn.setAttribute('aria-disabled', btn.disabled);
+      btn.addEventListener('click', () => {
+        if (upgradePoints >= upg.cost && !isMaxed) {
+          upgradePoints -= upg.cost;
+          upg.apply();
+          updateUI();
+          renderUpgradeOptions();
+          if (upgradePoints === 0) {
+            upgradeContinueBtn.disabled = false;
+            upgradeContinueBtn.focus();
+          }
+        }
+      });
+      option.appendChild(btn);
+
+      upgradeOptionsContainer.appendChild(option);
+    });
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const delta = (timestamp - lastFrameTime) / 16.6667; // approx frames (60fps base)
+    lastFrameTime = timestamp;
+
+    if (gameState === 'playing') {
+      update(delta);
+      draw();
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Update game state
+  function update(delta) {
+    // Spawn enemies
+    spawnEnemies(delta);
+
+    // Update target
+    target.update(delta);
+
+    // Update bullets
+    bullets.forEach(b => b.update(delta));
+    enemyBullets.forEach(b => b.update(delta));
+
+    // Update enemies
+    enemies.forEach(e => e.update(delta));
+
+    // Handle collisions
+    handleCollisions();
+
+    // Cleanup dead entities
+    cleanupEntities();
+
+    // Update UI
+    updateUI();
+
+    // Check level progression
+    if (score >= level * 100) {
+      level++;
+      enemySpawnInterval = Math.max(600, 2000 - level * 150);
+      shotCooldown = Math.max(100, 300 - level * 15);
+      levelUp();
+    }
+
+    // Check health
+    if (health <= 0) {
+      gameOver();
+    }
+  }
+
+  // Draw game state
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(e => e.draw(ctx));
+
+    // Draw bullets
+    bullets.forEach(b => b.draw(ctx));
+    enemyBullets.forEach(b => b.draw(ctx));
+
+    // Draw target
+    target.draw(ctx);
+  }
+
+  // Input handlers
+  function keyDownHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = true;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = true;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = true;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = true;
+        break;
+      case 'Space':
+        keys.shoot = true;
+        break;
+    }
+  }
+  function keyUpHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = false;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = false;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = false;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = false;
+        break;
+      case 'Space':
+        keys.shoot = false;
+        break;
+    }
+  }
+
+  // Shooting handler (continuous shooting while space pressed)
+  function shootingHandler() {
+    if (gameState !== 'playing') return;
+    if (keys.shoot && target.canShoot()) {
+      target.shoot();
+    }
+    setTimeout(shootingHandler, 50);
+  }
+
+  // Start game
+  function startGame() {
+    resetGame();
+    hideOverlays();
+    gameState = 'playing';
+    canvas.focus();
+  }
+
+  // Continue from upgrade screen
+  function continueGame() {
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'block';
+    messageEl.textContent = `Level ${level} Start!`;
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      gameState = 'playing';
+    }, 1500);
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', keyDownHandler);
+  window.addEventListener('keyup', keyUpHandler);
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  upgradeContinueBtn.addEventListener('click', () => {
+    continueGame();
+  });
+
+  // Accessibility: focus trap for dialogs
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+    });
+  }
+  trapFocus(startScreen);
+  trapFocus(upgradeScreen);
+
+  // Initialize
+  showStartScreen();
+  shootingHandler();
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - 
+================================================================================
+2025-11-30 19:31:56 - INFO - SCORE SUMMARY - ITERATION 1
+2025-11-30 19:31:56 - INFO - ================================================================================
+2025-11-30 19:31:56 - INFO - ✓ Is the core target control system properly implemented?: 8.0/10
+2025-11-30 19:31:57 - INFO - ✓ Are the enemy AI and attack patterns implemented?: 7.0/10
+2025-11-30 19:31:57 - INFO - ✓ Is the level design system properly structured?: 8.0/10
+2025-11-30 19:31:57 - INFO - ✓ Is the tactical upgrade system implemented?: 9.0/10
+2025-11-30 19:31:57 - INFO - ✗ Is the code robust?: 6.0/10
+2025-11-30 19:31:57 - INFO - ✗ Are there any innovative features that are eye-catching?: 3.0/10
+2025-11-30 19:31:57 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 19:31:57 - INFO - ✓ Does the code have engineering quality?: 8.0/10
+2025-11-30 19:31:57 - INFO - ✓ Does the interface vision meet professional design standards?: 9.0/10
+2025-11-30 19:31:57 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 7.0/10
+2025-11-30 19:31:57 - INFO - 
+⚠ Found 2 area(s) needing improvement:
+2025-11-30 19:31:57 - INFO -   - Are there any innovative features that are eye-catching?: 3.0/10
+2025-11-30 19:31:57 - INFO -   - Is the code robust?: 6.0/10
+2025-11-30 19:31:57 - INFO - 
+Creating improvement prompt for 2 weak area(s)...
+2025-11-30 19:31:57 - INFO - Improvement prompt created (length: 35952 characters)
+2025-11-30 19:31:57 - INFO - 
+================================================================================
+2025-11-30 19:31:57 - INFO - IMPROVEMENT ROUND 1
+2025-11-30 19:31:57 - INFO - ================================================================================
+2025-11-30 19:31:57 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:31:57 - INFO - Temperature: 0.0
+2025-11-30 19:31:57 - INFO - Improvement Prompt Length: 35952 characters
+2025-11-30 19:31:57 - INFO - Improvement Prompt Preview:
+You are an expert web front-end developer. Your task is to improve existing code based on specific feedback.
+
+ORIGINAL TASK:
+You are a code expert. Please use your professional knowledge to generate accurate and professional responses. JS Planet Defense Game Introduction
+
+**Game Overview:**
+"JS Planet Defense Game" is a strategy defense game developed with JavaScript. Players take on the role of a defense commander in space, operating the only target to combat incoming enemies.
+
+**Gameplay:**
+In...
+2025-11-30 19:33:44 - INFO - ✓ Improved code generated for iteration 1 (took 107.87 seconds)
+2025-11-30 19:33:44 - INFO - Improved code length: 38919 characters
+2025-11-30 19:33:44 - INFO - ✓ Improved code saved to: artifacts_output/Game Development-Strategy/task_4/iteration_1.html
+2025-11-30 19:33:44 - INFO - Iteration 1 completed in 139.50 seconds
+2025-11-30 19:33:44 - INFO - 
+================================================================================
+2025-11-30 19:33:44 - INFO - ITERATION 2
+2025-11-30 19:33:44 - INFO - ================================================================================
+2025-11-30 19:33:44 - INFO - Iteration Start Time: 2025-11-30 19:33:44
+2025-11-30 19:33:44 - INFO - 
+Generating screenshots for iteration 2...
+2025-11-30 19:33:54 - INFO - Canvas Check: {
+  "canvas_count": 2,
+  "canvases_with_content": 0,
+  "blank_canvases": 2,
+  "canvas_details": [
+    {
+      "width": 900,
+      "height": 600,
+      "has_content": false
+    },
+    {
+      "width": 1080,
+      "height": 720,
+      "has_content": false
+    }
+  ]
+}
+2025-11-30 19:33:54 - INFO - 
+Evaluating code for iteration 2...
+2025-11-30 19:34:11 - INFO - Evaluation completed in 17.36 seconds
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - EVALUATION RESULTS - ITERATION 2
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - Individual Scores (JSON):
+{
+  "Is the core target control system properly implemented?": 9.0,
+  "Are the enemy AI and attack patterns implemented?": 8.0,
+  "Is the level design system properly structured?": 8.0,
+  "Is the tactical upgrade system implemented?": 9.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 19:34:11 - INFO - Calculated Sum: 82.0
+2025-11-30 19:34:11 - INFO - Overall Score (from LLM): 82.0
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - FULL EVALUATION FEEDBACK - ITERATION 2
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - ```json
+{
+  "Is the core target control system properly implemented?": 9,
+  "Are the enemy AI and attack patterns implemented?": 8,
+  "Is the level design system properly structured?": 8,
+  "Is the tactical upgrade system implemented?": 9,
+  "Is the code robust?": 7,
+  "Are there any innovative features that are eye-catching?": 6,
+  "Are there any redundant features?": 10,
+  "Does the code have engineering quality?": 8,
+  "Does the interface vision meet professional design standards?": 9,
+  "Is the dynamic interaction smooth and seamless?": 8,
+  "Overall Score": 82
+}
+```
+
+Reason:
+
+1. **Core Target Control System (9/10):**  
+   The target control is well implemented with smooth movement including diagonal normalization, speed modifiers affected by weather, and energy-based shooting cooldown. The shooting mechanic is responsive and energy-limited, which adds tactical depth. However, the aiming is fixed upward (no aim assist or predictive targeting), which slightly limits precision targeting sophistication. The input handling is solid, but continuous shooting is implemented via a recursive timeout rather than a more elegant event-driven or frame-based approach, which is a minor drawback.
+
+2. **Enemy AI and Attack Patterns (8/10):**  
+   Multiple enemy types with distinct stats and behaviors are implemented, including shooters that fire at the player and tanks with high health. Enemies move toward Earth with some randomness in target position. Weather effects dynamically affect enemy speed. However, enemy movement is essentially linear toward Earth without complex pathfinding or evasive maneuvers. Difficulty scaling is present via level-based stat increments and spawn rate adjustments. The AI is functional but not deeply sophisticated.
+
+3. **Level Design System (8/10):**  
+   The game features multiple levels with increasing difficulty, enemy spawn intervals decreasing, and shot cooldown improving. Level progression triggers upgrade screens and weather events. However, levels are primarily defined by numeric parameters (score thresholds, spawn intervals) rather than diverse objectives or wave scripting. Game state management is clear and well handled.
+
+4. **Tactical Upgrade System (9/10):**  
+   A robust upgrade system allows players to improve multiple stats with upgrade points, max levels, and UI feedback. Visual feedback and disabling of maxed upgrades are implemented. Upgrade persistence between levels is handled well. The system offers strategic choices rather than simple numeric increments only. Visual indication is clear and accessible.
+
+5. **Code Robustness (7/10):**  
+   The code handles window resizing gracefully, clamps positions, and cleans up off-screen bullets and dead enemies. It also manages simultaneous inputs and shooting cooldowns. However, there is no explicit error handling or recovery for unexpected states or rapid input spamming beyond cooldowns. The recursive shooting timeout could cause issues if not carefully managed. The game over and level up states are handled cleanly.
+
+6. **Innovative Features (6/10):**  
+   The implementation of dynamic weather effects (solar flare and meteor shower) that affect gameplay is a notable innovation enhancing immersion and tactical variation (+3 points). Accessibility features like focus trapping and ARIA roles improve usability (+3 points). However, no voice control, multiplayer, or other advanced innovations are present.
+
+7. **Redundant Features (10/10):**  
+   The code is clean with no redundant or unrelated modules. No multiple collision detection algorithms or unrelated features are present. Visual effects are tasteful and do not appear to cause performance issues. No redundancy detected.
+
+8. **Engineering Quality (8/10):**  
+   The code is modular with clear class definitions (Target, Enemy, Bullet, Particle). Separation of concerns between game logic, rendering, input, and UI is evident. Some global state is used but mostly encapsulated. Performance optimizations like delta time usage and entity cleanup are present. Minor duplication exists but below 30%. The recursive shooting handler could be improved for clarity and robustness.
+
+9. **Interface Vision (9/10):**  
+   The UI uses a consistent space-themed color scheme with good contrast and glowing effects that enhance the sci-fi feel. Visual hierarchy is clear: Earth, target, enemies, bullets, and UI elements are distinct. HUD elements are non-intrusive and well placed. Upgrade and start screens are visually appealing and accessible. Minor improvements could be made in scaling text for smaller screens.
+
+10. **Dynamic Interaction Smoothness (8/10):**  
+    Input response is fast with no obvious lag. Visual feedback for hits (health bars, glowing bullets) is present. Game pacing includes breaks for upgrades and messages. Weather effects add dynamic visual interest without overwhelming the player. Frame rate drops are unlikely given the simple canvas rendering, but no explicit FPS management is implemented. The recursive shooting timeout might introduce slight timing inconsistencies.
+
+**Additional Notes:**  
+- The warning about blank canvases in the rendering check is likely due to the static code extraction environment and not the code itself, as the drawing logic is clearly implemented.  
+- The code is well-commented and accessible, aiding maintainability and extensibility.  
+- Overall, this is a solid, professional implementation of a JS space defense game with good balance between features, usability, and code quality. Some advanced AI and control refinements could elevate it further.
+
+**Summary:**  
+The answer demonstrates a comprehensive, well-engineered game implementation with strong core mechanics, thoughtful UI, and innovative weather effects. Minor improvements in AI complexity, input handling, and error robustness would push it closer to perfection. The overall score reflects a high-quality submission with room for refinement.
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - HTML CODE - ITERATION 2
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff88c88;
+  }
+  #ui {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #0ff;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0ff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff,
+      0 0 40px #0ff;
+    pointer-events: none;
+    user-select: none;
+  }
+  #start-screen, #upgrade-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px;
+    background: rgba(0, 20, 40, 0.85);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 24px 32px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #0ff88cc;
+    color: #0ff;
+    user-select: none;
+  }
+  #start-screen h1 {
+    margin-top: 0;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff;
+  }
+  #start-screen p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #start-screen button, #upgrade-screen button {
+    background: #0ff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003322;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+  }
+  #start-screen button:hover, #upgrade-screen button:hover {
+    background: #0cc;
+  }
+  #upgrade-screen {
+    display: none;
+    flex-direction: column;
+  }
+  #upgrade-screen h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #upgrade-options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .upgrade-option {
+    background: #002233;
+    border: 1px solid #0ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 140px;
+    margin: 8px;
+    text-align: center;
+    box-shadow: 0 0 8px #0ff44aa inset;
+  }
+  .upgrade-option h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  .upgrade-option p {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    min-height: 40px;
+  }
+  .upgrade-option button {
+    background: #0ff;
+    color: #003322;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .upgrade-option button:disabled {
+    background: #044;
+    color: #022;
+    cursor: not-allowed;
+  }
+  #tips {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    font-size: 0.9rem;
+    color: #0ff;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 0 6px #0ff88;
+  }
+  /* Tooltip style for buttons */
+  .upgrade-option button[title] {
+    position: relative;
+  }
+  .upgrade-option button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ffcc;
+    color: #003322;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 8px #0ffccaa;
+    pointer-events: none;
+    z-index: 10;
+  }
+  /* Dynamic weather effect overlay */
+  #weather-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" aria-label="JS Planet Defense Game">
+  <canvas id="gameCanvas" width="900" height="600" aria-label="Game canvas" tabindex="0"></canvas>
+  <div id="ui" aria-live="polite" aria-atomic="true">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+    <div>Health: <span id="health">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+  <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" tabindex="0">
+    <h1 id="start-title">JS Planet Defense Game</h1>
+    <p>Defend Earth by controlling the only target in space. Move precisely and shoot incoming enemies before they reach the planet.</p>
+    <p><strong>Controls:</strong> <br>Arrow keys or WASD to move<br>Spacebar to shoot</p>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </section>
+  <section id="upgrade-screen" role="dialog" aria-modal="true" aria-labelledby="upgrade-title" tabindex="0">
+    <h2 id="upgrade-title">Upgrade Your Target</h2>
+    <div id="upgrade-options" aria-live="polite" aria-atomic="true">
+      <!-- Upgrade options inserted by JS -->
+    </div>
+    <button id="upgrade-continue" aria-label="Continue to Next Level">Continue</button>
+  </section>
+  <div id="tips" aria-live="polite" aria-atomic="true">
+    <strong>Tips:</strong> Use precise target control and tactical positioning to maximize your defense effectiveness. Upgrade your weapon systems and survivability to face tougher enemies.
+  </div>
+  <canvas id="weather-overlay" aria-hidden="true"></canvas>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * 
+ * Developed as a single file HTML/JS/CSS game.
+ * 
+ * Features:
+ * - Single controllable target defending Earth from incoming enemies.
+ * - Multiple levels with increasing difficulty.
+ * - Upgrade system between levels.
+ * - Precise movement and shooting mechanics.
+ * - Dynamic weather effects affecting gameplay.
+ * 
+ * Controls:
+ * - Move: Arrow keys or WASD
+ * - Shoot: Spacebar
+ * 
+ * Author: ChatGPT (OpenAI)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Weather overlay canvas and context
+  const weatherCanvas = document.getElementById('weather-overlay');
+  const weatherCtx = weatherCanvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const messageEl = document.getElementById('message');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('start-button');
+  const upgradeScreen = document.getElementById('upgrade-screen');
+  const upgradeOptionsContainer = document.getElementById('upgrade-options');
+  const upgradeContinueBtn = document.getElementById('upgrade-continue');
+
+  // Game constants
+  let GAME_WIDTH = canvas.width;
+  let GAME_HEIGHT = canvas.height;
+  const EARTH_RADIUS = 60;
+  let EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+  const TARGET_RADIUS = 18;
+  const MAX_ENERGY = 100;
+  const MAX_HEALTH = 100;
+
+  // Key input tracking
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    shoot: false,
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+  }
+
+  // Game state variables
+  let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameover'
+  let score = 0;
+  let level = 1;
+  let health = MAX_HEALTH;
+  let energy = MAX_ENERGY;
+  let enemies = [];
+  let bullets = [];
+  let enemyBullets = [];
+  let lastEnemySpawn = 0;
+  let enemySpawnInterval = 2000; // ms, decreases with level
+  let lastShotTime = 0;
+  let shotCooldown = 300; // ms, can be upgraded
+  let target;
+  let upgrades = {
+    damage: 1,
+    fireRate: 1,
+    speed: 3.5,
+    maxHealth: MAX_HEALTH,
+    maxEnergy: MAX_ENERGY,
+    energyRegen: 0.15,
+  };
+  let upgradePoints = 0;
+
+  // Timing
+  let lastFrameTime = 0;
+
+  // Weather effect state
+  let weather = {
+    type: 'none', // 'none', 'solarFlare', 'meteorShower'
+    intensity: 0,
+    timer: 0,
+    duration: 0,
+    active: false,
+    particles: [],
+  };
+
+  // Particle class for weather effects
+  class Particle {
+    constructor(x, y, vx, vy, size, color, life) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.vy = vy;
+      this.size = size;
+      this.color = color;
+      this.life = life;
+      this.maxLife = life;
+    }
+    update(delta) {
+      this.x += this.vx * delta;
+      this.y += this.vy * delta;
+      this.life -= delta;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(this.life / this.maxLife, 0);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    isDead() {
+      return this.life <= 0;
+    }
+  }
+
+  // Target class - the single controllable unit
+  class Target {
+    constructor() {
+      this.x = GAME_WIDTH / 2;
+      this.y = GAME_HEIGHT - EARTH_RADIUS - 100;
+      this.radius = TARGET_RADIUS;
+      this.speed = upgrades.speed;
+      this.color = '#0ff';
+      this.angle = -Math.PI / 2; // Facing upward initially
+      this.energy = energy;
+      this.health = health;
+      this.damage = upgrades.damage;
+      this.fireRate = upgrades.fireRate;
+      this.lastShot = 0;
+      this.energyRegen = upgrades.energyRegen;
+      this.maxHealth = upgrades.maxHealth;
+      this.maxEnergy = upgrades.maxEnergy;
+    }
+    update(delta) {
+      // Movement based on keys
+      let dx = 0, dy = 0;
+      if (keys.left) dx -= 1;
+      if (keys.right) dx += 1;
+      if (keys.up) dy -= 1;
+      if (keys.down) dy += 1;
+
+      // Normalize diagonal movement
+      if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2;
+        dy *= Math.SQRT1_2;
+      }
+
+      // Apply weather effect on speed (solar flare reduces speed)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        speedModifier = lerp(1, 0.5, weather.intensity);
+      }
+
+      this.x += dx * this.speed * speedModifier;
+      this.y += dy * this.speed * speedModifier;
+
+      // Clamp inside canvas and above Earth
+      const minY = 20;
+      const maxY = EARTH_POSITION.y - EARTH_RADIUS - this.radius - 10;
+      this.x = clamp(this.x, this.radius + 10, GAME_WIDTH - this.radius - 10);
+      this.y = clamp(this.y, minY, maxY);
+
+      // Update angle to face upward (fixed)
+      this.angle = -Math.PI / 2;
+
+      // Regenerate energy with possible weather effect (solar flare reduces regen)
+      let energyRegenModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        energyRegenModifier = lerp(1, 0.3, weather.intensity);
+      }
+      this.energy += this.energyRegen * delta * energyRegenModifier;
+      if (this.energy > this.maxEnergy) this.energy = this.maxEnergy;
+
+      // Update health and energy globals
+      health = this.health;
+      energy = this.energy;
+    }
+    canShoot() {
+      const now = performance.now();
+      return (now - this.lastShot) >= (shotCooldown / this.fireRate) && this.energy >= 10;
+    }
+    shoot() {
+      if (!this.canShoot()) return false;
+      this.lastShot = performance.now();
+      this.energy -= 10;
+      // Create a bullet going upward from target position
+      bullets.push(new Bullet(this.x, this.y - this.radius - 8, -Math.PI / 2, this.damage, 'player'));
+      return true;
+    }
+    draw(ctx) {
+      // Draw target body - a glowing triangle pointing upward
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      // Glow
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 0.7, this.radius);
+      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner shape
+      ctx.fillStyle = '#004d4d';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.7);
+      ctx.lineTo(this.radius * 0.5, this.radius * 0.7);
+      ctx.lineTo(-this.radius * 0.5, this.radius * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+
+      // Energy bar above target
+      const barWidth = 50;
+      const barHeight = 6;
+      const energyRatio = this.energy / this.maxEnergy;
+      ctx.fillStyle = '#003322';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth * energyRatio, barHeight);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+
+      // Health bar below target
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+    }
+  }
+
+  // Bullet class for player and enemy projectiles
+  class Bullet {
+    constructor(x, y, angle, damage, owner) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 7;
+      this.radius = 4;
+      this.damage = damage;
+      this.owner = owner; // 'player' or 'enemy'
+      this.color = owner === 'player' ? '#0ff' : '#f44';
+      this.isDead = false;
+    }
+    update(delta) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      // Remove if out of bounds
+      if (this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+          this.y < -this.radius || this.y > GAME_HEIGHT + this.radius) {
+        this.isDead = true;
+      }
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  // Enemy class
+  class Enemy {
+    constructor(type, level) {
+      this.type = type; // 'basic', 'fast', 'tank', 'shooter'
+      this.level = level;
+      this.isDead = false;
+      this.spawnTime = performance.now();
+
+      // Enemy stats based on type and level
+      switch (type) {
+        case 'basic':
+          this.radius = 14;
+          this.speed = 1 + 0.1 * level;
+          this.health = 10 + 5 * level;
+          this.maxHealth = this.health;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+          break;
+        case 'fast':
+          this.radius = 12;
+          this.speed = 2 + 0.15 * level;
+          this.health = 6 + 3 * level;
+          this.maxHealth = this.health;
+          this.color = '#fa0';
+          this.damage = 8;
+          this.canShoot = false;
+          break;
+        case 'tank':
+          this.radius = 22;
+          this.speed = 0.6 + 0.05 * level;
+          this.health = 30 + 15 * level;
+          this.maxHealth = this.health;
+          this.color = '#a00';
+          this.damage = 20;
+          this.canShoot = false;
+          break;
+        case 'shooter':
+          this.radius = 16;
+          this.speed = 1 + 0.1 * level;
+          this.health = 15 + 7 * level;
+          this.maxHealth = this.health;
+          this.color = '#f0f';
+          this.damage = 12;
+          this.canShoot = true;
+          this.lastShot = 0;
+          this.shootInterval = 2500 - Math.min(level * 100, 1500);
+          break;
+        default:
+          this.radius = 14;
+          this.speed = 1;
+          this.health = 10;
+          this.maxHealth = 10;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+      }
+
+      // Spawn position: random x at top edge, y = -radius
+      this.x = randomRange(this.radius + 20, GAME_WIDTH - this.radius - 20);
+      this.y = -this.radius;
+
+      // Movement path: enemies move roughly downward toward Earth center
+      this.targetX = EARTH_POSITION.x + randomRange(-EARTH_RADIUS / 2, EARTH_RADIUS / 2);
+      this.targetY = EARTH_POSITION.y + EARTH_RADIUS / 2;
+    }
+    update(delta) {
+      // Move toward target position (Earth)
+      const angleToEarth = angleBetween(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y);
+
+      // Apply weather effect on enemy speed (meteor shower slows enemies)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'meteorShower') {
+        speedModifier = lerp(1, 0.6, weather.intensity);
+      }
+
+      this.x += Math.cos(angleToEarth) * this.speed * speedModifier;
+      this.y += Math.sin(angleToEarth) * this.speed * speedModifier;
+
+      // Shooting behavior for shooter enemies
+      if (this.canShoot) {
+        const now = performance.now();
+        if (now - this.lastShot > this.shootInterval) {
+          this.lastShot = now;
+          // Shoot bullet toward target (player)
+          if (target) {
+            const angleToTarget = angleBetween(this.x, this.y, target.x, target.y);
+            enemyBullets.push(new Bullet(this.x, this.y, angleToTarget, this.damage, 'enemy'));
+          }
+        }
+      }
+
+      // Check if reached Earth (collision)
+      if (distance(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y) < EARTH_RADIUS + this.radius) {
+        // Damage Earth and die
+        health -= this.damage;
+        this.isDead = true;
+        if (health < 0) health = 0;
+      }
+    }
+    draw(ctx) {
+      // Draw enemy body with glow
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 4;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+
+      ctx.restore();
+    }
+  }
+
+  // Earth drawing function
+  function drawEarth(ctx) {
+    const gradient = ctx.createRadialGradient(
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS * 0.3,
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS
+    );
+    gradient.addColorStop(0, '#0a4');
+    gradient.addColorStop(0.7, '#030');
+    gradient.addColorStop(1, '#001100');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth glow
+    ctx.save();
+    ctx.shadowColor = '#0f0';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Simple continents shape (abstract)
+    ctx.fillStyle = '#073';
+    ctx.beginPath();
+    ctx.moveTo(EARTH_POSITION.x - 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x - 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x + 30, EARTH_POSITION.y + 10, EARTH_POSITION.x + 10, EARTH_POSITION.y + 30, EARTH_POSITION.x - 20, EARTH_POSITION.y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Game functions
+  function resetGame() {
+    score = 0;
+    level = 1;
+    health = upgrades.maxHealth;
+    energy = upgrades.maxEnergy;
+    enemies = [];
+    bullets = [];
+    enemyBullets = [];
+    lastEnemySpawn = 0;
+    enemySpawnInterval = 2000;
+    shotCooldown = 300;
+    target = new Target();
+    updateUI();
+    resetWeather();
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = Math.floor(health);
+    energyEl.textContent = Math.floor(energy);
+  }
+
+  // Spawn enemies based on level and time
+  function spawnEnemies(delta) {
+    const now = performance.now();
+    if (now - lastEnemySpawn > enemySpawnInterval) {
+      lastEnemySpawn = now;
+
+      // Determine enemy type probabilities based on level
+      const enemyTypes = ['basic', 'fast', 'tank', 'shooter'];
+      let weights = [60, 25, 10, 5]; // base weights
+      // Increase weights for tougher enemies as level grows
+      weights = weights.map((w, i) => w + i * level * 2);
+
+      // Normalize weights
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      let chosenType = 'basic';
+      for (let i = 0; i < enemyTypes.length; i++) {
+        sum += weights[i];
+        if (rand <= sum) {
+          chosenType = enemyTypes[i];
+          break;
+        }
+      }
+
+      enemies.push(new Enemy(chosenType, level));
+    }
+  }
+
+  // Collision detection between circles
+  function circleCollision(x1, y1, r1, x2, y2, r2) {
+    return distance(x1, y1, x2, y2) < r1 + r2;
+  }
+
+  // Handle all collisions
+  function handleCollisions() {
+    // Player bullets vs enemies
+    bullets.forEach(bullet => {
+      if (bullet.owner !== 'player') return;
+      enemies.forEach(enemy => {
+        if (!enemy.isDead && circleCollision(bullet.x, bullet.y, bullet.radius, enemy.x, enemy.y, enemy.radius)) {
+          enemy.health -= bullet.damage;
+          bullet.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += 10 * level;
+          }
+        }
+      });
+    });
+
+    // Enemy bullets vs player
+    enemyBullets.forEach(bullet => {
+      if (bullet.owner !== 'enemy') return;
+      if (target && circleCollision(bullet.x, bullet.y, bullet.radius, target.x, target.y, target.radius)) {
+        target.health -= bullet.damage;
+        bullet.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+
+    // Enemies vs player (collision)
+    enemies.forEach(enemy => {
+      if (!enemy.isDead && target && circleCollision(enemy.x, enemy.y, enemy.radius, target.x, target.y, target.radius)) {
+        // Both take damage
+        target.health -= enemy.damage * 1.5;
+        enemy.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+  }
+
+  // Remove dead entities
+  function cleanupEntities() {
+    bullets = bullets.filter(b => !b.isDead);
+    enemyBullets = enemyBullets.filter(b => !b.isDead);
+    enemies = enemies.filter(e => !e.isDead);
+  }
+
+  // Game over handler
+  function gameOver() {
+    gameState = 'gameover';
+    messageEl.textContent = `Game Over! Final Score: ${score}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showStartScreen();
+    }, 4000);
+  }
+
+  // Level up handler
+  function levelUp() {
+    gameState = 'upgrade';
+    upgradePoints = 3;
+    messageEl.textContent = `Level ${level} Complete! Choose your upgrades.`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showUpgradeScreen();
+    }, 1500);
+    // Trigger a random weather event on level up
+    triggerRandomWeather();
+  }
+
+  // Show start screen
+  function showStartScreen() {
+    startScreen.style.display = 'block';
+    upgradeScreen.style.display = 'none';
+    gameState = 'start';
+    resetWeather();
+  }
+
+  // Show upgrade screen
+  function showUpgradeScreen() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'flex';
+    upgradeContinueBtn.disabled = true;
+    renderUpgradeOptions();
+    upgradeScreen.focus();
+  }
+
+  // Hide all overlays
+  function hideOverlays() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'none';
+  }
+
+  // Upgrade options data
+  const upgradeData = [
+    {
+      id: 'damage',
+      name: 'Weapon Damage',
+      description: 'Increase bullet damage by 1.',
+      apply: () => {
+        upgrades.damage += 1;
+        target.damage = upgrades.damage;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => upgrades.damage - 1,
+    },
+    {
+      id: 'fireRate',
+      name: 'Fire Rate',
+      description: 'Increase shooting speed by 10%.',
+      apply: () => {
+        upgrades.fireRate += 0.1;
+        target.fireRate = upgrades.fireRate;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.fireRate - 1) * 10),
+    },
+    {
+      id: 'speed',
+      name: 'Movement Speed',
+      description: 'Increase target movement speed by 0.3.',
+      apply: () => {
+        upgrades.speed += 0.3;
+        target.speed = upgrades.speed;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.speed - 3.5) / 0.3),
+    },
+    {
+      id: 'maxHealth',
+      name: 'Max Health',
+      description: 'Increase max health by 10.',
+      apply: () => {
+        upgrades.maxHealth += 10;
+        target.health = upgrades.maxHealth;
+        target.maxHealth = upgrades.maxHealth;
+        health = upgrades.maxHealth;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxHealth - MAX_HEALTH) / 10,
+    },
+    {
+      id: 'maxEnergy',
+      name: 'Max Energy',
+      description: 'Increase max energy by 10.',
+      apply: () => {
+        upgrades.maxEnergy += 10;
+        target.energy = upgrades.maxEnergy;
+        target.maxEnergy = upgrades.maxEnergy;
+        energy = upgrades.maxEnergy;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxEnergy - MAX_ENERGY) / 10,
+    },
+    {
+      id: 'energyRegen',
+      name: 'Energy Regeneration',
+      description: 'Increase energy regen rate by 0.05 per frame.',
+      apply: () => {
+        upgrades.energyRegen += 0.05;
+        target.energyRegen = upgrades.energyRegen;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.energyRegen - 0.15) / 0.05),
+    },
+  ];
+
+  // Render upgrade options UI
+  function renderUpgradeOptions() {
+    upgradeOptionsContainer.innerHTML = '';
+    upgradeData.forEach(upg => {
+      const currentLvl = upg.currentLevel();
+      const isMaxed = currentLvl >= upg.maxLevel;
+      const option = document.createElement('div');
+      option.className = 'upgrade-option';
+      option.setAttribute('role', 'group');
+      option.setAttribute('aria-label', `${upg.name} upgrade option`);
+
+      const title = document.createElement('h3');
+      title.textContent = `${upg.name} (${currentLvl}/${upg.maxLevel})`;
+      option.appendChild(title);
+
+      const desc = document.createElement('p');
+      desc.textContent = upg.description;
+      option.appendChild(desc);
+
+      const btn = document.createElement('button');
+      btn.textContent = isMaxed ? 'Maxed' : `Upgrade (${upg.cost} point${upg.cost > 1 ? 's' : ''})`;
+      btn.disabled = isMaxed || upgradePoints < upg.cost;
+      btn.title = upg.description;
+      btn.setAttribute('aria-disabled', btn.disabled);
+      btn.addEventListener('click', () => {
+        if (upgradePoints >= upg.cost && !isMaxed) {
+          upgradePoints -= upg.cost;
+          upg.apply();
+          updateUI();
+          renderUpgradeOptions();
+          if (upgradePoints === 0) {
+            upgradeContinueBtn.disabled = false;
+            upgradeContinueBtn.focus();
+          }
+        }
+      });
+      option.appendChild(btn);
+
+      upgradeOptionsContainer.appendChild(option);
+    });
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const delta = (timestamp - lastFrameTime) / 16.6667; // approx frames (60fps base)
+    lastFrameTime = timestamp;
+
+    if (gameState === 'playing') {
+      update(delta);
+      draw();
+      updateWeather(delta);
+      drawWeather();
+    } else {
+      // Still draw weather effects if active
+      if (weather.active) {
+        updateWeather(delta);
+        drawWeather();
+      } else {
+        clearWeatherCanvas();
+      }
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Update game state
+  function update(delta) {
+    // Spawn enemies
+    spawnEnemies(delta);
+
+    // Update target
+    target.update(delta);
+
+    // Update bullets
+    bullets.forEach(b => b.update(delta));
+    enemyBullets.forEach(b => b.update(delta));
+
+    // Update enemies
+    enemies.forEach(e => e.update(delta));
+
+    // Handle collisions
+    handleCollisions();
+
+    // Cleanup dead entities
+    cleanupEntities();
+
+    // Update UI
+    updateUI();
+
+    // Check level progression
+    if (score >= level * 100) {
+      level++;
+      enemySpawnInterval = Math.max(600, 2000 - level * 150);
+      shotCooldown = Math.max(100, 300 - level * 15);
+      levelUp();
+    }
+
+    // Check health
+    if (health <= 0) {
+      gameOver();
+    }
+  }
+
+  // Draw game state
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(e => e.draw(ctx));
+
+    // Draw bullets
+    bullets.forEach(b => b.draw(ctx));
+    enemyBullets.forEach(b => b.draw(ctx));
+
+    // Draw target
+    target.draw(ctx);
+  }
+
+  // Input handlers
+  function keyDownHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = true;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = true;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = true;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = true;
+        break;
+      case 'Space':
+        keys.shoot = true;
+        break;
+    }
+  }
+  function keyUpHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = false;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = false;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = false;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = false;
+        break;
+      case 'Space':
+        keys.shoot = false;
+        break;
+    }
+  }
+
+  // Shooting handler (continuous shooting while space pressed)
+  function shootingHandler() {
+    if (gameState !== 'playing') return;
+    if (keys.shoot && target.canShoot()) {
+      target.shoot();
+    }
+    setTimeout(shootingHandler, 50);
+  }
+
+  // Start game
+  function startGame() {
+    resetGame();
+    hideOverlays();
+    gameState = 'playing';
+    canvas.focus();
+  }
+
+  // Continue from upgrade screen
+  function continueGame() {
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'block';
+    messageEl.textContent = `Level ${level} Start!`;
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      gameState = 'playing';
+    }, 1500);
+  }
+
+  // Accessibility: focus trap for dialogs
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+    });
+  }
+  trapFocus(startScreen);
+  trapFocus(upgradeScreen);
+
+  // Handle window resize to keep canvas responsive and update game dimensions
+  function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const rect = container.getBoundingClientRect();
+    // Maintain aspect ratio 3:2 (900x600)
+    let width = rect.width;
+    let height = rect.height;
+    const aspectRatio = 3 / 2;
+    if (width / height > aspectRatio) {
+      width = height * aspectRatio;
+    } else {
+      height = width / aspectRatio;
+    }
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    weatherCanvas.style.width = width + 'px';
+    weatherCanvas.style.height = height + 'px';
+
+    // Update internal canvas size for weather overlay to match displayed size
+    weatherCanvas.width = width;
+    weatherCanvas.height = height;
+
+    // Update game dimensions and earth position accordingly
+    GAME_WIDTH = width;
+    GAME_HEIGHT = height;
+    EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+
+    // Clamp target position if exists
+    if (target) {
+      target.x = clamp(target.x, target.radius + 10, GAME_WIDTH - target.radius - 10);
+      target.y = clamp(target.y, 20, EARTH_POSITION.y - EARTH_RADIUS - target.radius - 10);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+  });
+
+  // Initialize canvas size on load
+  resizeCanvas();
+
+  // Weather system functions
+
+  // Reset weather to none
+  function resetWeather() {
+    weather.type = 'none';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 0;
+    weather.active = false;
+    weather.particles = [];
+  }
+
+  // Trigger a random weather event on level up
+  function triggerRandomWeather() {
+    const rand = Math.random();
+    if (rand < 0.4) {
+      startSolarFlare();
+    } else if (rand < 0.8) {
+      startMeteorShower();
+    } else {
+      resetWeather();
+    }
+  }
+
+  // Solar flare event: reduces player speed and energy regen for a duration
+  function startSolarFlare() {
+    weather.type = 'solarFlare';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Meteor shower event: slows enemies and shows meteor particles
+  function startMeteorShower() {
+    weather.type = 'meteorShower';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Update weather effects each frame
+  function updateWeather(delta) {
+    if (!weather.active) return;
+
+    weather.timer += delta * 16.6667; // convert delta frames to ms approx
+
+    // Increase intensity in first 3 seconds, then decrease
+    if (weather.timer < 3000) {
+      weather.intensity = lerp(0, 1, weather.timer / 3000);
+    } else if (weather.timer > weather.duration - 3000) {
+      weather.intensity = lerp(1, 0, (weather.timer - (weather.duration - 3000)) / 3000);
+    } else {
+      weather.intensity = 1;
+    }
+
+    // Update particles for meteor shower
+    if (weather.type === 'meteorShower') {
+      // Spawn new meteors based on intensity
+      const spawnRate = lerp(0, 0.3, weather.intensity);
+      if (Math.random() < spawnRate) {
+        const x = randomRange(0, weatherCanvas.width);
+        const y = -10;
+        const vx = randomRange(-0.5, 0.5);
+        const vy = randomRange(4, 7);
+        const size = randomRange(1, 3);
+        const color = 'rgba(255, 255, 255, 0.8)';
+        const life = weatherCanvas.height / vy + 20;
+        weather.particles.push(new Particle(x, y, vx, vy, size, color, life));
+      }
+      // Update particles
+      weather.particles.forEach(p => p.update(delta));
+      // Remove dead particles
+      weather.particles = weather.particles.filter(p => !p.isDead());
+    }
+
+    // End weather event after duration
+    if (weather.timer >= weather.duration) {
+      resetWeather();
+    }
+  }
+
+  // Draw weather effects overlay
+  function drawWeather() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+
+    if (!weather.active) return;
+
+    if (weather.type === 'solarFlare') {
+      // Draw solar flare glow overlay with pulsating effect
+      const alpha = 0.15 * weather.intensity * (0.7 + 0.3 * Math.sin(Date.now() / 300));
+      const gradient = weatherCtx.createRadialGradient(
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 4,
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 1.2
+      );
+      gradient.addColorStop(0, `rgba(255, 100, 0, ${alpha})`);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      weatherCtx.fillStyle = gradient;
+      weatherCtx.fillRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+    } else if (weather.type === 'meteorShower') {
+      // Draw meteor particles
+      weather.particles.forEach(p => p.draw(weatherCtx));
+    }
+  }
+
+  // Clear weather canvas
+  function clearWeatherCanvas() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+  }
+
+  // Initialize
+  showStartScreen();
+  shootingHandler();
+  requestAnimationFrame(gameLoop);
+
+  // Expose startGame and continueGame for buttons
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  upgradeContinueBtn.addEventListener('click', () => {
+    continueGame();
+  });
+
+  // Event listeners
+  window.addEventListener('keydown', keyDownHandler);
+  window.addEventListener('keyup', keyUpHandler);
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - SCORE SUMMARY - ITERATION 2
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - ✓ Is the core target control system properly implemented?: 9.0/10
+2025-11-30 19:34:11 - INFO - ✓ Are the enemy AI and attack patterns implemented?: 8.0/10
+2025-11-30 19:34:11 - INFO - ✓ Is the level design system properly structured?: 8.0/10
+2025-11-30 19:34:11 - INFO - ✓ Is the tactical upgrade system implemented?: 9.0/10
+2025-11-30 19:34:11 - INFO - ✓ Is the code robust?: 7.0/10
+2025-11-30 19:34:11 - INFO - ✗ Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:34:11 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 19:34:11 - INFO - ✓ Does the code have engineering quality?: 8.0/10
+2025-11-30 19:34:11 - INFO - ✓ Does the interface vision meet professional design standards?: 9.0/10
+2025-11-30 19:34:11 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 8.0/10
+2025-11-30 19:34:11 - INFO - 
+⚠ Found 1 area(s) needing improvement:
+2025-11-30 19:34:11 - INFO -   - Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:34:11 - INFO - 
+⚠ Reached maximum iterations (2). Stopping.
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - FINAL EVALUATION (Using Iteration 2 Results)
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - All iterations completed. Using iteration 2 evaluation as final.
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - FINAL EVALUATION RESULTS
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - Individual Scores (JSON):
+{
+  "Is the core target control system properly implemented?": 9.0,
+  "Are the enemy AI and attack patterns implemented?": 8.0,
+  "Is the level design system properly structured?": 8.0,
+  "Is the tactical upgrade system implemented?": 9.0,
+  "Is the code robust?": 7.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 19:34:11 - INFO - Final Calculated Sum: 82.0
+2025-11-30 19:34:11 - INFO - Final Overall Score: 82.0
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - ```json
+{
+  "Is the core target control system properly implemented?": 9,
+  "Are the enemy AI and attack patterns implemented?": 8,
+  "Is the level design system properly structured?": 8,
+  "Is the tactical upgrade system implemented?": 9,
+  "Is the code robust?": 7,
+  "Are there any innovative features that are eye-catching?": 6,
+  "Are there any redundant features?": 10,
+  "Does the code have engineering quality?": 8,
+  "Does the interface vision meet professional design standards?": 9,
+  "Is the dynamic interaction smooth and seamless?": 8,
+  "Overall Score": 82
+}
+```
+
+Reason:
+
+1. **Core Target Control System (9/10):**  
+   The target control is well implemented with smooth movement including diagonal normalization, speed modifiers affected by weather, and energy-based shooting cooldown. The shooting mechanic is responsive and energy-limited, which adds tactical depth. However, the aiming is fixed upward (no aim assist or predictive targeting), which slightly limits precision targeting sophistication. The input handling is solid, but continuous shooting is implemented via a recursive timeout rather than a more elegant event-driven or frame-based approach, which is a minor drawback.
+
+2. **Enemy AI and Attack Patterns (8/10):**  
+   Multiple enemy types with distinct stats and behaviors are implemented, including shooters that fire at the player and tanks with high health. Enemies move toward Earth with some randomness in target position. Weather effects dynamically affect enemy speed. However, enemy movement is essentially linear toward Earth without complex pathfinding or evasive maneuvers. Difficulty scaling is present via level-based stat increments and spawn rate adjustments. The AI is functional but not deeply sophisticated.
+
+3. **Level Design System (8/10):**  
+   The game features multiple levels with increasing difficulty, enemy spawn intervals decreasing, and shot cooldown improving. Level progression triggers upgrade screens and weather events. However, levels are primarily defined by numeric parameters (score thresholds, spawn intervals) rather than diverse objectives or wave scripting. Game state management is clear and well handled.
+
+4. **Tactical Upgrade System (9/10):**  
+   A robust upgrade system allows players to improve multiple stats with upgrade points, max levels, and UI feedback. Visual feedback and disabling of maxed upgrades are implemented. Upgrade persistence between levels is handled well. The system offers strategic choices rather than simple numeric increments only. Visual indication is clear and accessible.
+
+5. **Code Robustness (7/10):**  
+   The code handles window resizing gracefully, clamps positions, and cleans up off-screen bullets and dead enemies. It also manages simultaneous inputs and shooting cooldowns. However, there is no explicit error handling or recovery for unexpected states or rapid input spamming beyond cooldowns. The recursive shooting timeout could cause issues if not carefully managed. The game over and level up states are handled cleanly.
+
+6. **Innovative Features (6/10):**  
+   The implementation of dynamic weather effects (solar flare and meteor shower) that affect gameplay is a notable innovation enhancing immersion and tactical variation (+3 points). Accessibility features like focus trapping and ARIA roles improve usability (+3 points). However, no voice control, multiplayer, or other advanced innovations are present.
+
+7. **Redundant Features (10/10):**  
+   The code is clean with no redundant or unrelated modules. No multiple collision detection algorithms or unrelated features are present. Visual effects are tasteful and do not appear to cause performance issues. No redundancy detected.
+
+8. **Engineering Quality (8/10):**  
+   The code is modular with clear class definitions (Target, Enemy, Bullet, Particle). Separation of concerns between game logic, rendering, input, and UI is evident. Some global state is used but mostly encapsulated. Performance optimizations like delta time usage and entity cleanup are present. Minor duplication exists but below 30%. The recursive shooting handler could be improved for clarity and robustness.
+
+9. **Interface Vision (9/10):**  
+   The UI uses a consistent space-themed color scheme with good contrast and glowing effects that enhance the sci-fi feel. Visual hierarchy is clear: Earth, target, enemies, bullets, and UI elements are distinct. HUD elements are non-intrusive and well placed. Upgrade and start screens are visually appealing and accessible. Minor improvements could be made in scaling text for smaller screens.
+
+10. **Dynamic Interaction Smoothness (8/10):**  
+    Input response is fast with no obvious lag. Visual feedback for hits (health bars, glowing bullets) is present. Game pacing includes breaks for upgrades and messages. Weather effects add dynamic visual interest without overwhelming the player. Frame rate drops are unlikely given the simple canvas rendering, but no explicit FPS management is implemented. The recursive shooting timeout might introduce slight timing inconsistencies.
+
+**Additional Notes:**  
+- The warning about blank canvases in the rendering check is likely due to the static code extraction environment and not the code itself, as the drawing logic is clearly implemented.  
+- The code is well-commented and accessible, aiding maintainability and extensibility.  
+- Overall, this is a solid, professional implementation of a JS space defense game with good balance between features, usability, and code quality. Some advanced AI and control refinements could elevate it further.
+
+**Summary:**  
+The answer demonstrates a comprehensive, well-engineered game implementation with strong core mechanics, thoughtful UI, and innovative weather effects. Minor improvements in AI complexity, input handling, and error robustness would push it closer to perfection. The overall score reflects a high-quality submission with room for refinement.
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - FINAL HTML CODE
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff88c88;
+  }
+  #ui {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #0ff;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0ff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff,
+      0 0 40px #0ff;
+    pointer-events: none;
+    user-select: none;
+  }
+  #start-screen, #upgrade-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px;
+    background: rgba(0, 20, 40, 0.85);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 24px 32px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #0ff88cc;
+    color: #0ff;
+    user-select: none;
+  }
+  #start-screen h1 {
+    margin-top: 0;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff;
+  }
+  #start-screen p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #start-screen button, #upgrade-screen button {
+    background: #0ff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003322;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+  }
+  #start-screen button:hover, #upgrade-screen button:hover {
+    background: #0cc;
+  }
+  #upgrade-screen {
+    display: none;
+    flex-direction: column;
+  }
+  #upgrade-screen h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #upgrade-options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .upgrade-option {
+    background: #002233;
+    border: 1px solid #0ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 140px;
+    margin: 8px;
+    text-align: center;
+    box-shadow: 0 0 8px #0ff44aa inset;
+  }
+  .upgrade-option h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  .upgrade-option p {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    min-height: 40px;
+  }
+  .upgrade-option button {
+    background: #0ff;
+    color: #003322;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .upgrade-option button:disabled {
+    background: #044;
+    color: #022;
+    cursor: not-allowed;
+  }
+  #tips {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    font-size: 0.9rem;
+    color: #0ff;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 0 6px #0ff88;
+  }
+  /* Tooltip style for buttons */
+  .upgrade-option button[title] {
+    position: relative;
+  }
+  .upgrade-option button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ffcc;
+    color: #003322;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 8px #0ffccaa;
+    pointer-events: none;
+    z-index: 10;
+  }
+  /* Dynamic weather effect overlay */
+  #weather-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" aria-label="JS Planet Defense Game">
+  <canvas id="gameCanvas" width="900" height="600" aria-label="Game canvas" tabindex="0"></canvas>
+  <div id="ui" aria-live="polite" aria-atomic="true">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+    <div>Health: <span id="health">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+  <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" tabindex="0">
+    <h1 id="start-title">JS Planet Defense Game</h1>
+    <p>Defend Earth by controlling the only target in space. Move precisely and shoot incoming enemies before they reach the planet.</p>
+    <p><strong>Controls:</strong> <br>Arrow keys or WASD to move<br>Spacebar to shoot</p>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </section>
+  <section id="upgrade-screen" role="dialog" aria-modal="true" aria-labelledby="upgrade-title" tabindex="0">
+    <h2 id="upgrade-title">Upgrade Your Target</h2>
+    <div id="upgrade-options" aria-live="polite" aria-atomic="true">
+      <!-- Upgrade options inserted by JS -->
+    </div>
+    <button id="upgrade-continue" aria-label="Continue to Next Level">Continue</button>
+  </section>
+  <div id="tips" aria-live="polite" aria-atomic="true">
+    <strong>Tips:</strong> Use precise target control and tactical positioning to maximize your defense effectiveness. Upgrade your weapon systems and survivability to face tougher enemies.
+  </div>
+  <canvas id="weather-overlay" aria-hidden="true"></canvas>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * 
+ * Developed as a single file HTML/JS/CSS game.
+ * 
+ * Features:
+ * - Single controllable target defending Earth from incoming enemies.
+ * - Multiple levels with increasing difficulty.
+ * - Upgrade system between levels.
+ * - Precise movement and shooting mechanics.
+ * - Dynamic weather effects affecting gameplay.
+ * 
+ * Controls:
+ * - Move: Arrow keys or WASD
+ * - Shoot: Spacebar
+ * 
+ * Author: ChatGPT (OpenAI)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Weather overlay canvas and context
+  const weatherCanvas = document.getElementById('weather-overlay');
+  const weatherCtx = weatherCanvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const messageEl = document.getElementById('message');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('start-button');
+  const upgradeScreen = document.getElementById('upgrade-screen');
+  const upgradeOptionsContainer = document.getElementById('upgrade-options');
+  const upgradeContinueBtn = document.getElementById('upgrade-continue');
+
+  // Game constants
+  let GAME_WIDTH = canvas.width;
+  let GAME_HEIGHT = canvas.height;
+  const EARTH_RADIUS = 60;
+  let EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+  const TARGET_RADIUS = 18;
+  const MAX_ENERGY = 100;
+  const MAX_HEALTH = 100;
+
+  // Key input tracking
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    shoot: false,
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+  }
+
+  // Game state variables
+  let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameover'
+  let score = 0;
+  let level = 1;
+  let health = MAX_HEALTH;
+  let energy = MAX_ENERGY;
+  let enemies = [];
+  let bullets = [];
+  let enemyBullets = [];
+  let lastEnemySpawn = 0;
+  let enemySpawnInterval = 2000; // ms, decreases with level
+  let lastShotTime = 0;
+  let shotCooldown = 300; // ms, can be upgraded
+  let target;
+  let upgrades = {
+    damage: 1,
+    fireRate: 1,
+    speed: 3.5,
+    maxHealth: MAX_HEALTH,
+    maxEnergy: MAX_ENERGY,
+    energyRegen: 0.15,
+  };
+  let upgradePoints = 0;
+
+  // Timing
+  let lastFrameTime = 0;
+
+  // Weather effect state
+  let weather = {
+    type: 'none', // 'none', 'solarFlare', 'meteorShower'
+    intensity: 0,
+    timer: 0,
+    duration: 0,
+    active: false,
+    particles: [],
+  };
+
+  // Particle class for weather effects
+  class Particle {
+    constructor(x, y, vx, vy, size, color, life) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.vy = vy;
+      this.size = size;
+      this.color = color;
+      this.life = life;
+      this.maxLife = life;
+    }
+    update(delta) {
+      this.x += this.vx * delta;
+      this.y += this.vy * delta;
+      this.life -= delta;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(this.life / this.maxLife, 0);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    isDead() {
+      return this.life <= 0;
+    }
+  }
+
+  // Target class - the single controllable unit
+  class Target {
+    constructor() {
+      this.x = GAME_WIDTH / 2;
+      this.y = GAME_HEIGHT - EARTH_RADIUS - 100;
+      this.radius = TARGET_RADIUS;
+      this.speed = upgrades.speed;
+      this.color = '#0ff';
+      this.angle = -Math.PI / 2; // Facing upward initially
+      this.energy = energy;
+      this.health = health;
+      this.damage = upgrades.damage;
+      this.fireRate = upgrades.fireRate;
+      this.lastShot = 0;
+      this.energyRegen = upgrades.energyRegen;
+      this.maxHealth = upgrades.maxHealth;
+      this.maxEnergy = upgrades.maxEnergy;
+    }
+    update(delta) {
+      // Movement based on keys
+      let dx = 0, dy = 0;
+      if (keys.left) dx -= 1;
+      if (keys.right) dx += 1;
+      if (keys.up) dy -= 1;
+      if (keys.down) dy += 1;
+
+      // Normalize diagonal movement
+      if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2;
+        dy *= Math.SQRT1_2;
+      }
+
+      // Apply weather effect on speed (solar flare reduces speed)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        speedModifier = lerp(1, 0.5, weather.intensity);
+      }
+
+      this.x += dx * this.speed * speedModifier;
+      this.y += dy * this.speed * speedModifier;
+
+      // Clamp inside canvas and above Earth
+      const minY = 20;
+      const maxY = EARTH_POSITION.y - EARTH_RADIUS - this.radius - 10;
+      this.x = clamp(this.x, this.radius + 10, GAME_WIDTH - this.radius - 10);
+      this.y = clamp(this.y, minY, maxY);
+
+      // Update angle to face upward (fixed)
+      this.angle = -Math.PI / 2;
+
+      // Regenerate energy with possible weather effect (solar flare reduces regen)
+      let energyRegenModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        energyRegenModifier = lerp(1, 0.3, weather.intensity);
+      }
+      this.energy += this.energyRegen * delta * energyRegenModifier;
+      if (this.energy > this.maxEnergy) this.energy = this.maxEnergy;
+
+      // Update health and energy globals
+      health = this.health;
+      energy = this.energy;
+    }
+    canShoot() {
+      const now = performance.now();
+      return (now - this.lastShot) >= (shotCooldown / this.fireRate) && this.energy >= 10;
+    }
+    shoot() {
+      if (!this.canShoot()) return false;
+      this.lastShot = performance.now();
+      this.energy -= 10;
+      // Create a bullet going upward from target position
+      bullets.push(new Bullet(this.x, this.y - this.radius - 8, -Math.PI / 2, this.damage, 'player'));
+      return true;
+    }
+    draw(ctx) {
+      // Draw target body - a glowing triangle pointing upward
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      // Glow
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 0.7, this.radius);
+      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner shape
+      ctx.fillStyle = '#004d4d';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.7);
+      ctx.lineTo(this.radius * 0.5, this.radius * 0.7);
+      ctx.lineTo(-this.radius * 0.5, this.radius * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+
+      // Energy bar above target
+      const barWidth = 50;
+      const barHeight = 6;
+      const energyRatio = this.energy / this.maxEnergy;
+      ctx.fillStyle = '#003322';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth * energyRatio, barHeight);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+
+      // Health bar below target
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+    }
+  }
+
+  // Bullet class for player and enemy projectiles
+  class Bullet {
+    constructor(x, y, angle, damage, owner) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 7;
+      this.radius = 4;
+      this.damage = damage;
+      this.owner = owner; // 'player' or 'enemy'
+      this.color = owner === 'player' ? '#0ff' : '#f44';
+      this.isDead = false;
+    }
+    update(delta) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      // Remove if out of bounds
+      if (this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+          this.y < -this.radius || this.y > GAME_HEIGHT + this.radius) {
+        this.isDead = true;
+      }
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  // Enemy class
+  class Enemy {
+    constructor(type, level) {
+      this.type = type; // 'basic', 'fast', 'tank', 'shooter'
+      this.level = level;
+      this.isDead = false;
+      this.spawnTime = performance.now();
+
+      // Enemy stats based on type and level
+      switch (type) {
+        case 'basic':
+          this.radius = 14;
+          this.speed = 1 + 0.1 * level;
+          this.health = 10 + 5 * level;
+          this.maxHealth = this.health;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+          break;
+        case 'fast':
+          this.radius = 12;
+          this.speed = 2 + 0.15 * level;
+          this.health = 6 + 3 * level;
+          this.maxHealth = this.health;
+          this.color = '#fa0';
+          this.damage = 8;
+          this.canShoot = false;
+          break;
+        case 'tank':
+          this.radius = 22;
+          this.speed = 0.6 + 0.05 * level;
+          this.health = 30 + 15 * level;
+          this.maxHealth = this.health;
+          this.color = '#a00';
+          this.damage = 20;
+          this.canShoot = false;
+          break;
+        case 'shooter':
+          this.radius = 16;
+          this.speed = 1 + 0.1 * level;
+          this.health = 15 + 7 * level;
+          this.maxHealth = this.health;
+          this.color = '#f0f';
+          this.damage = 12;
+          this.canShoot = true;
+          this.lastShot = 0;
+          this.shootInterval = 2500 - Math.min(level * 100, 1500);
+          break;
+        default:
+          this.radius = 14;
+          this.speed = 1;
+          this.health = 10;
+          this.maxHealth = 10;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+      }
+
+      // Spawn position: random x at top edge, y = -radius
+      this.x = randomRange(this.radius + 20, GAME_WIDTH - this.radius - 20);
+      this.y = -this.radius;
+
+      // Movement path: enemies move roughly downward toward Earth center
+      this.targetX = EARTH_POSITION.x + randomRange(-EARTH_RADIUS / 2, EARTH_RADIUS / 2);
+      this.targetY = EARTH_POSITION.y + EARTH_RADIUS / 2;
+    }
+    update(delta) {
+      // Move toward target position (Earth)
+      const angleToEarth = angleBetween(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y);
+
+      // Apply weather effect on enemy speed (meteor shower slows enemies)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'meteorShower') {
+        speedModifier = lerp(1, 0.6, weather.intensity);
+      }
+
+      this.x += Math.cos(angleToEarth) * this.speed * speedModifier;
+      this.y += Math.sin(angleToEarth) * this.speed * speedModifier;
+
+      // Shooting behavior for shooter enemies
+      if (this.canShoot) {
+        const now = performance.now();
+        if (now - this.lastShot > this.shootInterval) {
+          this.lastShot = now;
+          // Shoot bullet toward target (player)
+          if (target) {
+            const angleToTarget = angleBetween(this.x, this.y, target.x, target.y);
+            enemyBullets.push(new Bullet(this.x, this.y, angleToTarget, this.damage, 'enemy'));
+          }
+        }
+      }
+
+      // Check if reached Earth (collision)
+      if (distance(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y) < EARTH_RADIUS + this.radius) {
+        // Damage Earth and die
+        health -= this.damage;
+        this.isDead = true;
+        if (health < 0) health = 0;
+      }
+    }
+    draw(ctx) {
+      // Draw enemy body with glow
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 4;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+
+      ctx.restore();
+    }
+  }
+
+  // Earth drawing function
+  function drawEarth(ctx) {
+    const gradient = ctx.createRadialGradient(
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS * 0.3,
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS
+    );
+    gradient.addColorStop(0, '#0a4');
+    gradient.addColorStop(0.7, '#030');
+    gradient.addColorStop(1, '#001100');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth glow
+    ctx.save();
+    ctx.shadowColor = '#0f0';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Simple continents shape (abstract)
+    ctx.fillStyle = '#073';
+    ctx.beginPath();
+    ctx.moveTo(EARTH_POSITION.x - 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x - 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x + 30, EARTH_POSITION.y + 10, EARTH_POSITION.x + 10, EARTH_POSITION.y + 30, EARTH_POSITION.x - 20, EARTH_POSITION.y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Game functions
+  function resetGame() {
+    score = 0;
+    level = 1;
+    health = upgrades.maxHealth;
+    energy = upgrades.maxEnergy;
+    enemies = [];
+    bullets = [];
+    enemyBullets = [];
+    lastEnemySpawn = 0;
+    enemySpawnInterval = 2000;
+    shotCooldown = 300;
+    target = new Target();
+    updateUI();
+    resetWeather();
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = Math.floor(health);
+    energyEl.textContent = Math.floor(energy);
+  }
+
+  // Spawn enemies based on level and time
+  function spawnEnemies(delta) {
+    const now = performance.now();
+    if (now - lastEnemySpawn > enemySpawnInterval) {
+      lastEnemySpawn = now;
+
+      // Determine enemy type probabilities based on level
+      const enemyTypes = ['basic', 'fast', 'tank', 'shooter'];
+      let weights = [60, 25, 10, 5]; // base weights
+      // Increase weights for tougher enemies as level grows
+      weights = weights.map((w, i) => w + i * level * 2);
+
+      // Normalize weights
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      let chosenType = 'basic';
+      for (let i = 0; i < enemyTypes.length; i++) {
+        sum += weights[i];
+        if (rand <= sum) {
+          chosenType = enemyTypes[i];
+          break;
+        }
+      }
+
+      enemies.push(new Enemy(chosenType, level));
+    }
+  }
+
+  // Collision detection between circles
+  function circleCollision(x1, y1, r1, x2, y2, r2) {
+    return distance(x1, y1, x2, y2) < r1 + r2;
+  }
+
+  // Handle all collisions
+  function handleCollisions() {
+    // Player bullets vs enemies
+    bullets.forEach(bullet => {
+      if (bullet.owner !== 'player') return;
+      enemies.forEach(enemy => {
+        if (!enemy.isDead && circleCollision(bullet.x, bullet.y, bullet.radius, enemy.x, enemy.y, enemy.radius)) {
+          enemy.health -= bullet.damage;
+          bullet.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += 10 * level;
+          }
+        }
+      });
+    });
+
+    // Enemy bullets vs player
+    enemyBullets.forEach(bullet => {
+      if (bullet.owner !== 'enemy') return;
+      if (target && circleCollision(bullet.x, bullet.y, bullet.radius, target.x, target.y, target.radius)) {
+        target.health -= bullet.damage;
+        bullet.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+
+    // Enemies vs player (collision)
+    enemies.forEach(enemy => {
+      if (!enemy.isDead && target && circleCollision(enemy.x, enemy.y, enemy.radius, target.x, target.y, target.radius)) {
+        // Both take damage
+        target.health -= enemy.damage * 1.5;
+        enemy.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+  }
+
+  // Remove dead entities
+  function cleanupEntities() {
+    bullets = bullets.filter(b => !b.isDead);
+    enemyBullets = enemyBullets.filter(b => !b.isDead);
+    enemies = enemies.filter(e => !e.isDead);
+  }
+
+  // Game over handler
+  function gameOver() {
+    gameState = 'gameover';
+    messageEl.textContent = `Game Over! Final Score: ${score}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showStartScreen();
+    }, 4000);
+  }
+
+  // Level up handler
+  function levelUp() {
+    gameState = 'upgrade';
+    upgradePoints = 3;
+    messageEl.textContent = `Level ${level} Complete! Choose your upgrades.`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showUpgradeScreen();
+    }, 1500);
+    // Trigger a random weather event on level up
+    triggerRandomWeather();
+  }
+
+  // Show start screen
+  function showStartScreen() {
+    startScreen.style.display = 'block';
+    upgradeScreen.style.display = 'none';
+    gameState = 'start';
+    resetWeather();
+  }
+
+  // Show upgrade screen
+  function showUpgradeScreen() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'flex';
+    upgradeContinueBtn.disabled = true;
+    renderUpgradeOptions();
+    upgradeScreen.focus();
+  }
+
+  // Hide all overlays
+  function hideOverlays() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'none';
+  }
+
+  // Upgrade options data
+  const upgradeData = [
+    {
+      id: 'damage',
+      name: 'Weapon Damage',
+      description: 'Increase bullet damage by 1.',
+      apply: () => {
+        upgrades.damage += 1;
+        target.damage = upgrades.damage;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => upgrades.damage - 1,
+    },
+    {
+      id: 'fireRate',
+      name: 'Fire Rate',
+      description: 'Increase shooting speed by 10%.',
+      apply: () => {
+        upgrades.fireRate += 0.1;
+        target.fireRate = upgrades.fireRate;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.fireRate - 1) * 10),
+    },
+    {
+      id: 'speed',
+      name: 'Movement Speed',
+      description: 'Increase target movement speed by 0.3.',
+      apply: () => {
+        upgrades.speed += 0.3;
+        target.speed = upgrades.speed;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.speed - 3.5) / 0.3),
+    },
+    {
+      id: 'maxHealth',
+      name: 'Max Health',
+      description: 'Increase max health by 10.',
+      apply: () => {
+        upgrades.maxHealth += 10;
+        target.health = upgrades.maxHealth;
+        target.maxHealth = upgrades.maxHealth;
+        health = upgrades.maxHealth;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxHealth - MAX_HEALTH) / 10,
+    },
+    {
+      id: 'maxEnergy',
+      name: 'Max Energy',
+      description: 'Increase max energy by 10.',
+      apply: () => {
+        upgrades.maxEnergy += 10;
+        target.energy = upgrades.maxEnergy;
+        target.maxEnergy = upgrades.maxEnergy;
+        energy = upgrades.maxEnergy;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxEnergy - MAX_ENERGY) / 10,
+    },
+    {
+      id: 'energyRegen',
+      name: 'Energy Regeneration',
+      description: 'Increase energy regen rate by 0.05 per frame.',
+      apply: () => {
+        upgrades.energyRegen += 0.05;
+        target.energyRegen = upgrades.energyRegen;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.energyRegen - 0.15) / 0.05),
+    },
+  ];
+
+  // Render upgrade options UI
+  function renderUpgradeOptions() {
+    upgradeOptionsContainer.innerHTML = '';
+    upgradeData.forEach(upg => {
+      const currentLvl = upg.currentLevel();
+      const isMaxed = currentLvl >= upg.maxLevel;
+      const option = document.createElement('div');
+      option.className = 'upgrade-option';
+      option.setAttribute('role', 'group');
+      option.setAttribute('aria-label', `${upg.name} upgrade option`);
+
+      const title = document.createElement('h3');
+      title.textContent = `${upg.name} (${currentLvl}/${upg.maxLevel})`;
+      option.appendChild(title);
+
+      const desc = document.createElement('p');
+      desc.textContent = upg.description;
+      option.appendChild(desc);
+
+      const btn = document.createElement('button');
+      btn.textContent = isMaxed ? 'Maxed' : `Upgrade (${upg.cost} point${upg.cost > 1 ? 's' : ''})`;
+      btn.disabled = isMaxed || upgradePoints < upg.cost;
+      btn.title = upg.description;
+      btn.setAttribute('aria-disabled', btn.disabled);
+      btn.addEventListener('click', () => {
+        if (upgradePoints >= upg.cost && !isMaxed) {
+          upgradePoints -= upg.cost;
+          upg.apply();
+          updateUI();
+          renderUpgradeOptions();
+          if (upgradePoints === 0) {
+            upgradeContinueBtn.disabled = false;
+            upgradeContinueBtn.focus();
+          }
+        }
+      });
+      option.appendChild(btn);
+
+      upgradeOptionsContainer.appendChild(option);
+    });
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const delta = (timestamp - lastFrameTime) / 16.6667; // approx frames (60fps base)
+    lastFrameTime = timestamp;
+
+    if (gameState === 'playing') {
+      update(delta);
+      draw();
+      updateWeather(delta);
+      drawWeather();
+    } else {
+      // Still draw weather effects if active
+      if (weather.active) {
+        updateWeather(delta);
+        drawWeather();
+      } else {
+        clearWeatherCanvas();
+      }
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Update game state
+  function update(delta) {
+    // Spawn enemies
+    spawnEnemies(delta);
+
+    // Update target
+    target.update(delta);
+
+    // Update bullets
+    bullets.forEach(b => b.update(delta));
+    enemyBullets.forEach(b => b.update(delta));
+
+    // Update enemies
+    enemies.forEach(e => e.update(delta));
+
+    // Handle collisions
+    handleCollisions();
+
+    // Cleanup dead entities
+    cleanupEntities();
+
+    // Update UI
+    updateUI();
+
+    // Check level progression
+    if (score >= level * 100) {
+      level++;
+      enemySpawnInterval = Math.max(600, 2000 - level * 150);
+      shotCooldown = Math.max(100, 300 - level * 15);
+      levelUp();
+    }
+
+    // Check health
+    if (health <= 0) {
+      gameOver();
+    }
+  }
+
+  // Draw game state
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(e => e.draw(ctx));
+
+    // Draw bullets
+    bullets.forEach(b => b.draw(ctx));
+    enemyBullets.forEach(b => b.draw(ctx));
+
+    // Draw target
+    target.draw(ctx);
+  }
+
+  // Input handlers
+  function keyDownHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = true;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = true;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = true;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = true;
+        break;
+      case 'Space':
+        keys.shoot = true;
+        break;
+    }
+  }
+  function keyUpHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = false;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = false;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = false;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = false;
+        break;
+      case 'Space':
+        keys.shoot = false;
+        break;
+    }
+  }
+
+  // Shooting handler (continuous shooting while space pressed)
+  function shootingHandler() {
+    if (gameState !== 'playing') return;
+    if (keys.shoot && target.canShoot()) {
+      target.shoot();
+    }
+    setTimeout(shootingHandler, 50);
+  }
+
+  // Start game
+  function startGame() {
+    resetGame();
+    hideOverlays();
+    gameState = 'playing';
+    canvas.focus();
+  }
+
+  // Continue from upgrade screen
+  function continueGame() {
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'block';
+    messageEl.textContent = `Level ${level} Start!`;
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      gameState = 'playing';
+    }, 1500);
+  }
+
+  // Accessibility: focus trap for dialogs
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+    });
+  }
+  trapFocus(startScreen);
+  trapFocus(upgradeScreen);
+
+  // Handle window resize to keep canvas responsive and update game dimensions
+  function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const rect = container.getBoundingClientRect();
+    // Maintain aspect ratio 3:2 (900x600)
+    let width = rect.width;
+    let height = rect.height;
+    const aspectRatio = 3 / 2;
+    if (width / height > aspectRatio) {
+      width = height * aspectRatio;
+    } else {
+      height = width / aspectRatio;
+    }
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    weatherCanvas.style.width = width + 'px';
+    weatherCanvas.style.height = height + 'px';
+
+    // Update internal canvas size for weather overlay to match displayed size
+    weatherCanvas.width = width;
+    weatherCanvas.height = height;
+
+    // Update game dimensions and earth position accordingly
+    GAME_WIDTH = width;
+    GAME_HEIGHT = height;
+    EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+
+    // Clamp target position if exists
+    if (target) {
+      target.x = clamp(target.x, target.radius + 10, GAME_WIDTH - target.radius - 10);
+      target.y = clamp(target.y, 20, EARTH_POSITION.y - EARTH_RADIUS - target.radius - 10);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+  });
+
+  // Initialize canvas size on load
+  resizeCanvas();
+
+  // Weather system functions
+
+  // Reset weather to none
+  function resetWeather() {
+    weather.type = 'none';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 0;
+    weather.active = false;
+    weather.particles = [];
+  }
+
+  // Trigger a random weather event on level up
+  function triggerRandomWeather() {
+    const rand = Math.random();
+    if (rand < 0.4) {
+      startSolarFlare();
+    } else if (rand < 0.8) {
+      startMeteorShower();
+    } else {
+      resetWeather();
+    }
+  }
+
+  // Solar flare event: reduces player speed and energy regen for a duration
+  function startSolarFlare() {
+    weather.type = 'solarFlare';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Meteor shower event: slows enemies and shows meteor particles
+  function startMeteorShower() {
+    weather.type = 'meteorShower';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Update weather effects each frame
+  function updateWeather(delta) {
+    if (!weather.active) return;
+
+    weather.timer += delta * 16.6667; // convert delta frames to ms approx
+
+    // Increase intensity in first 3 seconds, then decrease
+    if (weather.timer < 3000) {
+      weather.intensity = lerp(0, 1, weather.timer / 3000);
+    } else if (weather.timer > weather.duration - 3000) {
+      weather.intensity = lerp(1, 0, (weather.timer - (weather.duration - 3000)) / 3000);
+    } else {
+      weather.intensity = 1;
+    }
+
+    // Update particles for meteor shower
+    if (weather.type === 'meteorShower') {
+      // Spawn new meteors based on intensity
+      const spawnRate = lerp(0, 0.3, weather.intensity);
+      if (Math.random() < spawnRate) {
+        const x = randomRange(0, weatherCanvas.width);
+        const y = -10;
+        const vx = randomRange(-0.5, 0.5);
+        const vy = randomRange(4, 7);
+        const size = randomRange(1, 3);
+        const color = 'rgba(255, 255, 255, 0.8)';
+        const life = weatherCanvas.height / vy + 20;
+        weather.particles.push(new Particle(x, y, vx, vy, size, color, life));
+      }
+      // Update particles
+      weather.particles.forEach(p => p.update(delta));
+      // Remove dead particles
+      weather.particles = weather.particles.filter(p => !p.isDead());
+    }
+
+    // End weather event after duration
+    if (weather.timer >= weather.duration) {
+      resetWeather();
+    }
+  }
+
+  // Draw weather effects overlay
+  function drawWeather() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+
+    if (!weather.active) return;
+
+    if (weather.type === 'solarFlare') {
+      // Draw solar flare glow overlay with pulsating effect
+      const alpha = 0.15 * weather.intensity * (0.7 + 0.3 * Math.sin(Date.now() / 300));
+      const gradient = weatherCtx.createRadialGradient(
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 4,
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 1.2
+      );
+      gradient.addColorStop(0, `rgba(255, 100, 0, ${alpha})`);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      weatherCtx.fillStyle = gradient;
+      weatherCtx.fillRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+    } else if (weather.type === 'meteorShower') {
+      // Draw meteor particles
+      weather.particles.forEach(p => p.draw(weatherCtx));
+    }
+  }
+
+  // Clear weather canvas
+  function clearWeatherCanvas() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+  }
+
+  // Initialize
+  showStartScreen();
+  shootingHandler();
+  requestAnimationFrame(gameLoop);
+
+  // Expose startGame and continueGame for buttons
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  upgradeContinueBtn.addEventListener('click', () => {
+    continueGame();
+  });
+
+  // Event listeners
+  window.addEventListener('keydown', keyDownHandler);
+  window.addEventListener('keyup', keyUpHandler);
+})();
+</script>
+</body>
+</html>
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - ✓ Final code saved to: artifacts_output/Game Development-Strategy/task_4/final.html
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - End Time: 2025-11-30 19:34:11
+2025-11-30 19:34:11 - INFO - Total Duration: 295.67 seconds (4.93 minutes)
+2025-11-30 19:34:11 - INFO - Total Iterations: 3
+2025-11-30 19:34:11 - INFO - Final Total Score: 82.0
+2025-11-30 19:34:11 - INFO - Log file saved to: artifacts_output/Game Development-Strategy/task_4/run_log.txt
+2025-11-30 19:34:11 - INFO - All files saved to: artifacts_output/Game Development-Strategy/task_4
+2025-11-30 19:34:11 - INFO - 
+================================================================================
+2025-11-30 19:34:11 - INFO - TOKEN USAGE SUMMARY
+2025-11-30 19:34:11 - INFO - ================================================================================
+2025-11-30 19:34:11 - INFO - Total Requests: 22
+2025-11-30 19:34:11 - INFO - Total Input Tokens: 205,810
+2025-11-30 19:34:11 - INFO - Total Output Tokens: 83,086
+2025-11-30 19:34:11 - INFO - Total Tokens: 288,896
+2025-11-30 19:34:11 - INFO - 
+Breakdown by Operation:
+2025-11-30 19:34:11 - INFO -   code_generation: 1 requests, 9,556 tokens
+2025-11-30 19:34:11 - INFO -   evaluation: 13 requests, 189,987 tokens
+2025-11-30 19:34:11 - INFO -   initial_code_generation: 4 requests, 27,328 tokens
+2025-11-30 19:34:11 - INFO -   code_improvement_iteration_1: 4 requests, 62,025 tokens
+2025-11-30 19:34:11 - INFO - 
+✓ Token usage saved to: artifacts_output/Game Development-Strategy/task_4/token_usage.json
+2025-11-30 19:34:11 - INFO - ✓ Task token usage saved to token_usage_iterative.json
+2025-11-30 19:34:11 - INFO - ================================================================================

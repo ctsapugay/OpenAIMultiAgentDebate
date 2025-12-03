@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JS Planet Defense Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #00111f 0%, #000000 90%);
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    background: radial-gradient(circle at center, #0a1a2a 0%, #000000 100%);
+    margin: 0 auto;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #0ff88c88;
+  }
+  #ui {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #0ff;
+  }
+  #message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #0ff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff,
+      0 0 40px #0ff;
+    pointer-events: none;
+    user-select: none;
+  }
+  #start-screen, #upgrade-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 600px;
+    background: rgba(0, 20, 40, 0.85);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 24px 32px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #0ff88cc;
+    color: #0ff;
+    user-select: none;
+  }
+  #start-screen h1 {
+    margin-top: 0;
+    font-size: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 0 10px #0ff,
+      0 0 20px #0ff,
+      0 0 30px #0ff;
+  }
+  #start-screen p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #start-screen button, #upgrade-screen button {
+    background: #0ff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003322;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+  }
+  #start-screen button:hover, #upgrade-screen button:hover {
+    background: #0cc;
+  }
+  #upgrade-screen {
+    display: none;
+    flex-direction: column;
+  }
+  #upgrade-screen h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #upgrade-options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .upgrade-option {
+    background: #002233;
+    border: 1px solid #0ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 140px;
+    margin: 8px;
+    text-align: center;
+    box-shadow: 0 0 8px #0ff44aa inset;
+  }
+  .upgrade-option h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  .upgrade-option p {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    min-height: 40px;
+  }
+  .upgrade-option button {
+    background: #0ff;
+    color: #003322;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .upgrade-option button:disabled {
+    background: #044;
+    color: #022;
+    cursor: not-allowed;
+  }
+  #tips {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 900px;
+    font-size: 0.9rem;
+    color: #0ff;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 0 6px #0ff88;
+  }
+  /* Tooltip style for buttons */
+  .upgrade-option button[title] {
+    position: relative;
+  }
+  .upgrade-option button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ffcc;
+    color: #003322;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 8px #0ffccaa;
+    pointer-events: none;
+    z-index: 10;
+  }
+  /* Dynamic weather effect overlay */
+  #weather-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" aria-label="JS Planet Defense Game">
+  <canvas id="gameCanvas" width="900" height="600" aria-label="Game canvas" tabindex="0"></canvas>
+  <div id="ui" aria-live="polite" aria-atomic="true">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+    <div>Health: <span id="health">100</span></div>
+    <div>Energy: <span id="energy">100</span></div>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+  <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" tabindex="0">
+    <h1 id="start-title">JS Planet Defense Game</h1>
+    <p>Defend Earth by controlling the only target in space. Move precisely and shoot incoming enemies before they reach the planet.</p>
+    <p><strong>Controls:</strong> <br>Arrow keys or WASD to move<br>Spacebar to shoot</p>
+    <button id="start-button" aria-label="Start Game">Start Game</button>
+  </section>
+  <section id="upgrade-screen" role="dialog" aria-modal="true" aria-labelledby="upgrade-title" tabindex="0">
+    <h2 id="upgrade-title">Upgrade Your Target</h2>
+    <div id="upgrade-options" aria-live="polite" aria-atomic="true">
+      <!-- Upgrade options inserted by JS -->
+    </div>
+    <button id="upgrade-continue" aria-label="Continue to Next Level">Continue</button>
+  </section>
+  <div id="tips" aria-live="polite" aria-atomic="true">
+    <strong>Tips:</strong> Use precise target control and tactical positioning to maximize your defense effectiveness. Upgrade your weapon systems and survivability to face tougher enemies.
+  </div>
+  <canvas id="weather-overlay" aria-hidden="true"></canvas>
+</div>
+
+<script>
+/**
+ * JS Planet Defense Game
+ * 
+ * Developed as a single file HTML/JS/CSS game.
+ * 
+ * Features:
+ * - Single controllable target defending Earth from incoming enemies.
+ * - Multiple levels with increasing difficulty.
+ * - Upgrade system between levels.
+ * - Precise movement and shooting mechanics.
+ * - Dynamic weather effects affecting gameplay.
+ * 
+ * Controls:
+ * - Move: Arrow keys or WASD
+ * - Shoot: Spacebar
+ * 
+ * Author: ChatGPT (OpenAI)
+ */
+
+(() => {
+  // Canvas and context
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Weather overlay canvas and context
+  const weatherCanvas = document.getElementById('weather-overlay');
+  const weatherCtx = weatherCanvas.getContext('2d');
+
+  // UI elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const healthEl = document.getElementById('health');
+  const energyEl = document.getElementById('energy');
+  const messageEl = document.getElementById('message');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('start-button');
+  const upgradeScreen = document.getElementById('upgrade-screen');
+  const upgradeOptionsContainer = document.getElementById('upgrade-options');
+  const upgradeContinueBtn = document.getElementById('upgrade-continue');
+
+  // Game constants
+  let GAME_WIDTH = canvas.width;
+  let GAME_HEIGHT = canvas.height;
+  const EARTH_RADIUS = 60;
+  let EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+  const TARGET_RADIUS = 18;
+  const MAX_ENERGY = 100;
+  const MAX_HEALTH = 100;
+
+  // Key input tracking
+  const keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    shoot: false,
+  };
+
+  // Utility functions
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  function distance(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+  }
+
+  // Game state variables
+  let gameState = 'start'; // 'start', 'playing', 'upgrade', 'gameover'
+  let score = 0;
+  let level = 1;
+  let health = MAX_HEALTH;
+  let energy = MAX_ENERGY;
+  let enemies = [];
+  let bullets = [];
+  let enemyBullets = [];
+  let lastEnemySpawn = 0;
+  let enemySpawnInterval = 2000; // ms, decreases with level
+  let lastShotTime = 0;
+  let shotCooldown = 300; // ms, can be upgraded
+  let target;
+  let upgrades = {
+    damage: 1,
+    fireRate: 1,
+    speed: 3.5,
+    maxHealth: MAX_HEALTH,
+    maxEnergy: MAX_ENERGY,
+    energyRegen: 0.15,
+  };
+  let upgradePoints = 0;
+
+  // Timing
+  let lastFrameTime = 0;
+
+  // Weather effect state
+  let weather = {
+    type: 'none', // 'none', 'solarFlare', 'meteorShower'
+    intensity: 0,
+    timer: 0,
+    duration: 0,
+    active: false,
+    particles: [],
+  };
+
+  // Particle class for weather effects
+  class Particle {
+    constructor(x, y, vx, vy, size, color, life) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.vy = vy;
+      this.size = size;
+      this.color = color;
+      this.life = life;
+      this.maxLife = life;
+    }
+    update(delta) {
+      this.x += this.vx * delta;
+      this.y += this.vy * delta;
+      this.life -= delta;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(this.life / this.maxLife, 0);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    isDead() {
+      return this.life <= 0;
+    }
+  }
+
+  // Target class - the single controllable unit
+  class Target {
+    constructor() {
+      this.x = GAME_WIDTH / 2;
+      this.y = GAME_HEIGHT - EARTH_RADIUS - 100;
+      this.radius = TARGET_RADIUS;
+      this.speed = upgrades.speed;
+      this.color = '#0ff';
+      this.angle = -Math.PI / 2; // Facing upward initially
+      this.energy = energy;
+      this.health = health;
+      this.damage = upgrades.damage;
+      this.fireRate = upgrades.fireRate;
+      this.lastShot = 0;
+      this.energyRegen = upgrades.energyRegen;
+      this.maxHealth = upgrades.maxHealth;
+      this.maxEnergy = upgrades.maxEnergy;
+    }
+    update(delta) {
+      // Movement based on keys
+      let dx = 0, dy = 0;
+      if (keys.left) dx -= 1;
+      if (keys.right) dx += 1;
+      if (keys.up) dy -= 1;
+      if (keys.down) dy += 1;
+
+      // Normalize diagonal movement
+      if (dx !== 0 && dy !== 0) {
+        dx *= Math.SQRT1_2;
+        dy *= Math.SQRT1_2;
+      }
+
+      // Apply weather effect on speed (solar flare reduces speed)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        speedModifier = lerp(1, 0.5, weather.intensity);
+      }
+
+      this.x += dx * this.speed * speedModifier;
+      this.y += dy * this.speed * speedModifier;
+
+      // Clamp inside canvas and above Earth
+      const minY = 20;
+      const maxY = EARTH_POSITION.y - EARTH_RADIUS - this.radius - 10;
+      this.x = clamp(this.x, this.radius + 10, GAME_WIDTH - this.radius - 10);
+      this.y = clamp(this.y, minY, maxY);
+
+      // Update angle to face upward (fixed)
+      this.angle = -Math.PI / 2;
+
+      // Regenerate energy with possible weather effect (solar flare reduces regen)
+      let energyRegenModifier = 1;
+      if (weather.active && weather.type === 'solarFlare') {
+        energyRegenModifier = lerp(1, 0.3, weather.intensity);
+      }
+      this.energy += this.energyRegen * delta * energyRegenModifier;
+      if (this.energy > this.maxEnergy) this.energy = this.maxEnergy;
+
+      // Update health and energy globals
+      health = this.health;
+      energy = this.energy;
+    }
+    canShoot() {
+      const now = performance.now();
+      return (now - this.lastShot) >= (shotCooldown / this.fireRate) && this.energy >= 10;
+    }
+    shoot() {
+      if (!this.canShoot()) return false;
+      this.lastShot = performance.now();
+      this.energy -= 10;
+      // Create a bullet going upward from target position
+      bullets.push(new Bullet(this.x, this.y - this.radius - 8, -Math.PI / 2, this.damage, 'player'));
+      return true;
+    }
+    draw(ctx) {
+      // Draw target body - a glowing triangle pointing upward
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      // Glow
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 0.7, this.radius);
+      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner shape
+      ctx.fillStyle = '#004d4d';
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.7);
+      ctx.lineTo(this.radius * 0.5, this.radius * 0.7);
+      ctx.lineTo(-this.radius * 0.5, this.radius * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+
+      // Energy bar above target
+      const barWidth = 50;
+      const barHeight = 6;
+      const energyRatio = this.energy / this.maxEnergy;
+      ctx.fillStyle = '#003322';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth * energyRatio, barHeight);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y - this.radius - 20, barWidth, barHeight);
+
+      // Health bar below target
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - barWidth / 2, this.y + this.radius + 10, barWidth, barHeight);
+    }
+  }
+
+  // Bullet class for player and enemy projectiles
+  class Bullet {
+    constructor(x, y, angle, damage, owner) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 7;
+      this.radius = 4;
+      this.damage = damage;
+      this.owner = owner; // 'player' or 'enemy'
+      this.color = owner === 'player' ? '#0ff' : '#f44';
+      this.isDead = false;
+    }
+    update(delta) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+
+      // Remove if out of bounds
+      if (this.x < -this.radius || this.x > GAME_WIDTH + this.radius ||
+          this.y < -this.radius || this.y > GAME_HEIGHT + this.radius) {
+        this.isDead = true;
+      }
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  // Enemy class
+  class Enemy {
+    constructor(type, level) {
+      this.type = type; // 'basic', 'fast', 'tank', 'shooter'
+      this.level = level;
+      this.isDead = false;
+      this.spawnTime = performance.now();
+
+      // Enemy stats based on type and level
+      switch (type) {
+        case 'basic':
+          this.radius = 14;
+          this.speed = 1 + 0.1 * level;
+          this.health = 10 + 5 * level;
+          this.maxHealth = this.health;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+          break;
+        case 'fast':
+          this.radius = 12;
+          this.speed = 2 + 0.15 * level;
+          this.health = 6 + 3 * level;
+          this.maxHealth = this.health;
+          this.color = '#fa0';
+          this.damage = 8;
+          this.canShoot = false;
+          break;
+        case 'tank':
+          this.radius = 22;
+          this.speed = 0.6 + 0.05 * level;
+          this.health = 30 + 15 * level;
+          this.maxHealth = this.health;
+          this.color = '#a00';
+          this.damage = 20;
+          this.canShoot = false;
+          break;
+        case 'shooter':
+          this.radius = 16;
+          this.speed = 1 + 0.1 * level;
+          this.health = 15 + 7 * level;
+          this.maxHealth = this.health;
+          this.color = '#f0f';
+          this.damage = 12;
+          this.canShoot = true;
+          this.lastShot = 0;
+          this.shootInterval = 2500 - Math.min(level * 100, 1500);
+          break;
+        default:
+          this.radius = 14;
+          this.speed = 1;
+          this.health = 10;
+          this.maxHealth = 10;
+          this.color = '#f55';
+          this.damage = 10;
+          this.canShoot = false;
+      }
+
+      // Spawn position: random x at top edge, y = -radius
+      this.x = randomRange(this.radius + 20, GAME_WIDTH - this.radius - 20);
+      this.y = -this.radius;
+
+      // Movement path: enemies move roughly downward toward Earth center
+      this.targetX = EARTH_POSITION.x + randomRange(-EARTH_RADIUS / 2, EARTH_RADIUS / 2);
+      this.targetY = EARTH_POSITION.y + EARTH_RADIUS / 2;
+    }
+    update(delta) {
+      // Move toward target position (Earth)
+      const angleToEarth = angleBetween(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y);
+
+      // Apply weather effect on enemy speed (meteor shower slows enemies)
+      let speedModifier = 1;
+      if (weather.active && weather.type === 'meteorShower') {
+        speedModifier = lerp(1, 0.6, weather.intensity);
+      }
+
+      this.x += Math.cos(angleToEarth) * this.speed * speedModifier;
+      this.y += Math.sin(angleToEarth) * this.speed * speedModifier;
+
+      // Shooting behavior for shooter enemies
+      if (this.canShoot) {
+        const now = performance.now();
+        if (now - this.lastShot > this.shootInterval) {
+          this.lastShot = now;
+          // Shoot bullet toward target (player)
+          if (target) {
+            const angleToTarget = angleBetween(this.x, this.y, target.x, target.y);
+            enemyBullets.push(new Bullet(this.x, this.y, angleToTarget, this.damage, 'enemy'));
+          }
+        }
+      }
+
+      // Check if reached Earth (collision)
+      if (distance(this.x, this.y, EARTH_POSITION.x, EARTH_POSITION.y) < EARTH_RADIUS + this.radius) {
+        // Damage Earth and die
+        health -= this.damage;
+        this.isDead = true;
+        if (health < 0) health = 0;
+      }
+    }
+    draw(ctx) {
+      // Draw enemy body with glow
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Health bar above enemy
+      const barWidth = this.radius * 2;
+      const barHeight = 4;
+      const healthRatio = this.health / this.maxHealth;
+      ctx.fillStyle = '#330000';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(this.x - this.radius, this.y - this.radius - 10, barWidth * healthRatio, barHeight);
+      ctx.strokeStyle = '#f00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(this.x - this.radius, this.y - this.radius - 10, barWidth, barHeight);
+
+      ctx.restore();
+    }
+  }
+
+  // Earth drawing function
+  function drawEarth(ctx) {
+    const gradient = ctx.createRadialGradient(
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS * 0.3,
+      EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS
+    );
+    gradient.addColorStop(0, '#0a4');
+    gradient.addColorStop(0.7, '#030');
+    gradient.addColorStop(1, '#001100');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth glow
+    ctx.save();
+    ctx.shadowColor = '#0f0';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(EARTH_POSITION.x, EARTH_POSITION.y, EARTH_RADIUS + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Simple continents shape (abstract)
+    ctx.fillStyle = '#073';
+    ctx.beginPath();
+    ctx.moveTo(EARTH_POSITION.x - 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x - 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 10, EARTH_POSITION.y - 30, EARTH_POSITION.x + 20, EARTH_POSITION.y - 10);
+    ctx.bezierCurveTo(EARTH_POSITION.x + 30, EARTH_POSITION.y + 10, EARTH_POSITION.x + 10, EARTH_POSITION.y + 30, EARTH_POSITION.x - 20, EARTH_POSITION.y + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Game functions
+  function resetGame() {
+    score = 0;
+    level = 1;
+    health = upgrades.maxHealth;
+    energy = upgrades.maxEnergy;
+    enemies = [];
+    bullets = [];
+    enemyBullets = [];
+    lastEnemySpawn = 0;
+    enemySpawnInterval = 2000;
+    shotCooldown = 300;
+    target = new Target();
+    updateUI();
+    resetWeather();
+  }
+
+  function updateUI() {
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    healthEl.textContent = Math.floor(health);
+    energyEl.textContent = Math.floor(energy);
+  }
+
+  // Spawn enemies based on level and time
+  function spawnEnemies(delta) {
+    const now = performance.now();
+    if (now - lastEnemySpawn > enemySpawnInterval) {
+      lastEnemySpawn = now;
+
+      // Determine enemy type probabilities based on level
+      const enemyTypes = ['basic', 'fast', 'tank', 'shooter'];
+      let weights = [60, 25, 10, 5]; // base weights
+      // Increase weights for tougher enemies as level grows
+      weights = weights.map((w, i) => w + i * level * 2);
+
+      // Normalize weights
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      let chosenType = 'basic';
+      for (let i = 0; i < enemyTypes.length; i++) {
+        sum += weights[i];
+        if (rand <= sum) {
+          chosenType = enemyTypes[i];
+          break;
+        }
+      }
+
+      enemies.push(new Enemy(chosenType, level));
+    }
+  }
+
+  // Collision detection between circles
+  function circleCollision(x1, y1, r1, x2, y2, r2) {
+    return distance(x1, y1, x2, y2) < r1 + r2;
+  }
+
+  // Handle all collisions
+  function handleCollisions() {
+    // Player bullets vs enemies
+    bullets.forEach(bullet => {
+      if (bullet.owner !== 'player') return;
+      enemies.forEach(enemy => {
+        if (!enemy.isDead && circleCollision(bullet.x, bullet.y, bullet.radius, enemy.x, enemy.y, enemy.radius)) {
+          enemy.health -= bullet.damage;
+          bullet.isDead = true;
+          if (enemy.health <= 0) {
+            enemy.isDead = true;
+            score += 10 * level;
+          }
+        }
+      });
+    });
+
+    // Enemy bullets vs player
+    enemyBullets.forEach(bullet => {
+      if (bullet.owner !== 'enemy') return;
+      if (target && circleCollision(bullet.x, bullet.y, bullet.radius, target.x, target.y, target.radius)) {
+        target.health -= bullet.damage;
+        bullet.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+
+    // Enemies vs player (collision)
+    enemies.forEach(enemy => {
+      if (!enemy.isDead && target && circleCollision(enemy.x, enemy.y, enemy.radius, target.x, target.y, target.radius)) {
+        // Both take damage
+        target.health -= enemy.damage * 1.5;
+        enemy.isDead = true;
+        if (target.health <= 0) {
+          target.health = 0;
+          gameOver();
+        }
+      }
+    });
+  }
+
+  // Remove dead entities
+  function cleanupEntities() {
+    bullets = bullets.filter(b => !b.isDead);
+    enemyBullets = enemyBullets.filter(b => !b.isDead);
+    enemies = enemies.filter(e => !e.isDead);
+  }
+
+  // Game over handler
+  function gameOver() {
+    gameState = 'gameover';
+    messageEl.textContent = `Game Over! Final Score: ${score}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showStartScreen();
+    }, 4000);
+  }
+
+  // Level up handler
+  function levelUp() {
+    gameState = 'upgrade';
+    upgradePoints = 3;
+    messageEl.textContent = `Level ${level} Complete! Choose your upgrades.`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      showUpgradeScreen();
+    }, 1500);
+    // Trigger a random weather event on level up
+    triggerRandomWeather();
+  }
+
+  // Show start screen
+  function showStartScreen() {
+    startScreen.style.display = 'block';
+    upgradeScreen.style.display = 'none';
+    gameState = 'start';
+    resetWeather();
+  }
+
+  // Show upgrade screen
+  function showUpgradeScreen() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'flex';
+    upgradeContinueBtn.disabled = true;
+    renderUpgradeOptions();
+    upgradeScreen.focus();
+  }
+
+  // Hide all overlays
+  function hideOverlays() {
+    startScreen.style.display = 'none';
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'none';
+  }
+
+  // Upgrade options data
+  const upgradeData = [
+    {
+      id: 'damage',
+      name: 'Weapon Damage',
+      description: 'Increase bullet damage by 1.',
+      apply: () => {
+        upgrades.damage += 1;
+        target.damage = upgrades.damage;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => upgrades.damage - 1,
+    },
+    {
+      id: 'fireRate',
+      name: 'Fire Rate',
+      description: 'Increase shooting speed by 10%.',
+      apply: () => {
+        upgrades.fireRate += 0.1;
+        target.fireRate = upgrades.fireRate;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.fireRate - 1) * 10),
+    },
+    {
+      id: 'speed',
+      name: 'Movement Speed',
+      description: 'Increase target movement speed by 0.3.',
+      apply: () => {
+        upgrades.speed += 0.3;
+        target.speed = upgrades.speed;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.speed - 3.5) / 0.3),
+    },
+    {
+      id: 'maxHealth',
+      name: 'Max Health',
+      description: 'Increase max health by 10.',
+      apply: () => {
+        upgrades.maxHealth += 10;
+        target.health = upgrades.maxHealth;
+        target.maxHealth = upgrades.maxHealth;
+        health = upgrades.maxHealth;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxHealth - MAX_HEALTH) / 10,
+    },
+    {
+      id: 'maxEnergy',
+      name: 'Max Energy',
+      description: 'Increase max energy by 10.',
+      apply: () => {
+        upgrades.maxEnergy += 10;
+        target.energy = upgrades.maxEnergy;
+        target.maxEnergy = upgrades.maxEnergy;
+        energy = upgrades.maxEnergy;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => (upgrades.maxEnergy - MAX_ENERGY) / 10,
+    },
+    {
+      id: 'energyRegen',
+      name: 'Energy Regeneration',
+      description: 'Increase energy regen rate by 0.05 per frame.',
+      apply: () => {
+        upgrades.energyRegen += 0.05;
+        target.energyRegen = upgrades.energyRegen;
+      },
+      cost: 1,
+      maxLevel: 10,
+      currentLevel: () => Math.round((upgrades.energyRegen - 0.15) / 0.05),
+    },
+  ];
+
+  // Render upgrade options UI
+  function renderUpgradeOptions() {
+    upgradeOptionsContainer.innerHTML = '';
+    upgradeData.forEach(upg => {
+      const currentLvl = upg.currentLevel();
+      const isMaxed = currentLvl >= upg.maxLevel;
+      const option = document.createElement('div');
+      option.className = 'upgrade-option';
+      option.setAttribute('role', 'group');
+      option.setAttribute('aria-label', `${upg.name} upgrade option`);
+
+      const title = document.createElement('h3');
+      title.textContent = `${upg.name} (${currentLvl}/${upg.maxLevel})`;
+      option.appendChild(title);
+
+      const desc = document.createElement('p');
+      desc.textContent = upg.description;
+      option.appendChild(desc);
+
+      const btn = document.createElement('button');
+      btn.textContent = isMaxed ? 'Maxed' : `Upgrade (${upg.cost} point${upg.cost > 1 ? 's' : ''})`;
+      btn.disabled = isMaxed || upgradePoints < upg.cost;
+      btn.title = upg.description;
+      btn.setAttribute('aria-disabled', btn.disabled);
+      btn.addEventListener('click', () => {
+        if (upgradePoints >= upg.cost && !isMaxed) {
+          upgradePoints -= upg.cost;
+          upg.apply();
+          updateUI();
+          renderUpgradeOptions();
+          if (upgradePoints === 0) {
+            upgradeContinueBtn.disabled = false;
+            upgradeContinueBtn.focus();
+          }
+        }
+      });
+      option.appendChild(btn);
+
+      upgradeOptionsContainer.appendChild(option);
+    });
+  }
+
+  // Game loop
+  function gameLoop(timestamp = 0) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    const delta = (timestamp - lastFrameTime) / 16.6667; // approx frames (60fps base)
+    lastFrameTime = timestamp;
+
+    if (gameState === 'playing') {
+      update(delta);
+      draw();
+      updateWeather(delta);
+      drawWeather();
+    } else {
+      // Still draw weather effects if active
+      if (weather.active) {
+        updateWeather(delta);
+        drawWeather();
+      } else {
+        clearWeatherCanvas();
+      }
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Update game state
+  function update(delta) {
+    // Spawn enemies
+    spawnEnemies(delta);
+
+    // Update target
+    target.update(delta);
+
+    // Update bullets
+    bullets.forEach(b => b.update(delta));
+    enemyBullets.forEach(b => b.update(delta));
+
+    // Update enemies
+    enemies.forEach(e => e.update(delta));
+
+    // Handle collisions
+    handleCollisions();
+
+    // Cleanup dead entities
+    cleanupEntities();
+
+    // Update UI
+    updateUI();
+
+    // Check level progression
+    if (score >= level * 100) {
+      level++;
+      enemySpawnInterval = Math.max(600, 2000 - level * 150);
+      shotCooldown = Math.max(100, 300 - level * 15);
+      levelUp();
+    }
+
+    // Check health
+    if (health <= 0) {
+      gameOver();
+    }
+  }
+
+  // Draw game state
+  function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    // Draw Earth
+    drawEarth(ctx);
+
+    // Draw enemies
+    enemies.forEach(e => e.draw(ctx));
+
+    // Draw bullets
+    bullets.forEach(b => b.draw(ctx));
+    enemyBullets.forEach(b => b.draw(ctx));
+
+    // Draw target
+    target.draw(ctx);
+  }
+
+  // Input handlers
+  function keyDownHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = true;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = true;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = true;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = true;
+        break;
+      case 'Space':
+        keys.shoot = true;
+        break;
+    }
+  }
+  function keyUpHandler(e) {
+    switch (e.code) {
+      case 'ArrowLeft':
+      case 'KeyA':
+        keys.left = false;
+        break;
+      case 'ArrowRight':
+      case 'KeyD':
+        keys.right = false;
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        keys.up = false;
+        break;
+      case 'ArrowDown':
+      case 'KeyS':
+        keys.down = false;
+        break;
+      case 'Space':
+        keys.shoot = false;
+        break;
+    }
+  }
+
+  // Shooting handler (continuous shooting while space pressed)
+  function shootingHandler() {
+    if (gameState !== 'playing') return;
+    if (keys.shoot && target.canShoot()) {
+      target.shoot();
+    }
+    setTimeout(shootingHandler, 50);
+  }
+
+  // Start game
+  function startGame() {
+    resetGame();
+    hideOverlays();
+    gameState = 'playing';
+    canvas.focus();
+  }
+
+  // Continue from upgrade screen
+  function continueGame() {
+    upgradeScreen.style.display = 'none';
+    messageEl.style.display = 'block';
+    messageEl.textContent = `Level ${level} Start!`;
+    setTimeout(() => {
+      messageEl.style.display = 'none';
+      gameState = 'playing';
+    }, 1500);
+  }
+
+  // Accessibility: focus trap for dialogs
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
+    });
+  }
+  trapFocus(startScreen);
+  trapFocus(upgradeScreen);
+
+  // Handle window resize to keep canvas responsive and update game dimensions
+  function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const rect = container.getBoundingClientRect();
+    // Maintain aspect ratio 3:2 (900x600)
+    let width = rect.width;
+    let height = rect.height;
+    const aspectRatio = 3 / 2;
+    if (width / height > aspectRatio) {
+      width = height * aspectRatio;
+    } else {
+      height = width / aspectRatio;
+    }
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    weatherCanvas.style.width = width + 'px';
+    weatherCanvas.style.height = height + 'px';
+
+    // Update internal canvas size for weather overlay to match displayed size
+    weatherCanvas.width = width;
+    weatherCanvas.height = height;
+
+    // Update game dimensions and earth position accordingly
+    GAME_WIDTH = width;
+    GAME_HEIGHT = height;
+    EARTH_POSITION = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - EARTH_RADIUS - 20 };
+
+    // Clamp target position if exists
+    if (target) {
+      target.x = clamp(target.x, target.radius + 10, GAME_WIDTH - target.radius - 10);
+      target.y = clamp(target.y, 20, EARTH_POSITION.y - EARTH_RADIUS - target.radius - 10);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+  });
+
+  // Initialize canvas size on load
+  resizeCanvas();
+
+  // Weather system functions
+
+  // Reset weather to none
+  function resetWeather() {
+    weather.type = 'none';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 0;
+    weather.active = false;
+    weather.particles = [];
+  }
+
+  // Trigger a random weather event on level up
+  function triggerRandomWeather() {
+    const rand = Math.random();
+    if (rand < 0.4) {
+      startSolarFlare();
+    } else if (rand < 0.8) {
+      startMeteorShower();
+    } else {
+      resetWeather();
+    }
+  }
+
+  // Solar flare event: reduces player speed and energy regen for a duration
+  function startSolarFlare() {
+    weather.type = 'solarFlare';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Meteor shower event: slows enemies and shows meteor particles
+  function startMeteorShower() {
+    weather.type = 'meteorShower';
+    weather.intensity = 0;
+    weather.timer = 0;
+    weather.duration = 15000; // 15 seconds
+    weather.active = true;
+    weather.particles = [];
+  }
+
+  // Update weather effects each frame
+  function updateWeather(delta) {
+    if (!weather.active) return;
+
+    weather.timer += delta * 16.6667; // convert delta frames to ms approx
+
+    // Increase intensity in first 3 seconds, then decrease
+    if (weather.timer < 3000) {
+      weather.intensity = lerp(0, 1, weather.timer / 3000);
+    } else if (weather.timer > weather.duration - 3000) {
+      weather.intensity = lerp(1, 0, (weather.timer - (weather.duration - 3000)) / 3000);
+    } else {
+      weather.intensity = 1;
+    }
+
+    // Update particles for meteor shower
+    if (weather.type === 'meteorShower') {
+      // Spawn new meteors based on intensity
+      const spawnRate = lerp(0, 0.3, weather.intensity);
+      if (Math.random() < spawnRate) {
+        const x = randomRange(0, weatherCanvas.width);
+        const y = -10;
+        const vx = randomRange(-0.5, 0.5);
+        const vy = randomRange(4, 7);
+        const size = randomRange(1, 3);
+        const color = 'rgba(255, 255, 255, 0.8)';
+        const life = weatherCanvas.height / vy + 20;
+        weather.particles.push(new Particle(x, y, vx, vy, size, color, life));
+      }
+      // Update particles
+      weather.particles.forEach(p => p.update(delta));
+      // Remove dead particles
+      weather.particles = weather.particles.filter(p => !p.isDead());
+    }
+
+    // End weather event after duration
+    if (weather.timer >= weather.duration) {
+      resetWeather();
+    }
+  }
+
+  // Draw weather effects overlay
+  function drawWeather() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+
+    if (!weather.active) return;
+
+    if (weather.type === 'solarFlare') {
+      // Draw solar flare glow overlay with pulsating effect
+      const alpha = 0.15 * weather.intensity * (0.7 + 0.3 * Math.sin(Date.now() / 300));
+      const gradient = weatherCtx.createRadialGradient(
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 4,
+        weatherCanvas.width / 2, weatherCanvas.height / 2, weatherCanvas.height / 1.2
+      );
+      gradient.addColorStop(0, `rgba(255, 100, 0, ${alpha})`);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      weatherCtx.fillStyle = gradient;
+      weatherCtx.fillRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+    } else if (weather.type === 'meteorShower') {
+      // Draw meteor particles
+      weather.particles.forEach(p => p.draw(weatherCtx));
+    }
+  }
+
+  // Clear weather canvas
+  function clearWeatherCanvas() {
+    weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+  }
+
+  // Initialize
+  showStartScreen();
+  shootingHandler();
+  requestAnimationFrame(gameLoop);
+
+  // Expose startGame and continueGame for buttons
+  startButton.addEventListener('click', () => {
+    startGame();
+  });
+  upgradeContinueBtn.addEventListener('click', () => {
+    continueGame();
+  });
+
+  // Event listeners
+  window.addEventListener('keydown', keyDownHandler);
+  window.addEventListener('keyup', keyUpHandler);
+})();
+</script>
+</body>
+</html>

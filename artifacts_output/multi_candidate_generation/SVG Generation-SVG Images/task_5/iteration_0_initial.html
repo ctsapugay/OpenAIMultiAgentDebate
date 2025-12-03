@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cleaning Up a Mess with a Wet Mop - SVG Animation</title>
+<style>
+  body {
+    margin: 0;
+    background: #e0f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  svg {
+    width: 400px;
+    height: 400px;
+    background: #a7d8de;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 400 400" aria-label="Cleaning up a mess with a wet mop" role="img" >
+  <!-- Floor -->
+  <rect width="400" height="400" fill="#cce7e8" />
+
+  <!-- Mess: irregular puddle shape -->
+  <path id="puddle" fill="#4fc3f7" fill-opacity="0.7" d="
+    M120 280
+    Q130 270 150 275
+    Q170 280 180 265
+    Q190 250 210 260
+    Q230 270 240 255
+    Q250 240 270 245
+    Q290 250 300 270
+    Q310 290 280 300
+    Q250 310 220 305
+    Q190 300 160 310
+    Q130 320 120 300
+    Z
+  " />
+
+  <!-- Mop handle -->
+  <rect id="mop-handle" x="190" y="50" width="12" height="150" rx="4" ry="4" fill="#8d6e63" transform-origin="196 200" />
+
+  <!-- Mop head -->
+  <g id="mop-head" transform="translate(196, 200)">
+    <rect x="-30" y="0" width="60" height="20" rx="8" ry="8" fill="#b3e5fc" />
+    <rect x="-28" y="5" width="56" height="10" rx="5" ry="5" fill="#81d4fa" />
+    <line x1="-20" y1="0" x2="-20" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="-10" y1="0" x2="-10" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="0" y1="0" x2="0" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="10" y1="0" x2="10" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="20" y1="0" x2="20" y2="20" stroke="#4fc3f7" stroke-width="2" />
+  </g>
+
+  <!-- Wipe cloth -->
+  <rect id="wipe-cloth" x="140" y="320" width="120" height="40" rx="12" ry="12" fill="#ffccbc" opacity="0" />
+
+  <!-- Text label -->
+  <text x="200" y="30" text-anchor="middle" fill="#004d40" font-weight="700" font-size="20" font-family="Segoe UI, Tahoma, Geneva, Verdana, sans-serif">
+    Cleaning Up a Mess
+  </text>
+</svg>
+
+<script>
+  const svg = document.querySelector('svg');
+  const mopHandle = document.getElementById('mop-handle');
+  const mopHead = document.getElementById('mop-head');
+  const puddle = document.getElementById('puddle');
+  const wipeCloth = document.getElementById('wipe-cloth');
+
+  // Animation parameters
+  const mopStartAngle = -40;
+  const mopEndAngle = 40;
+  const mopCenterX = 196;
+  const mopCenterY = 200;
+
+  // Puddle initial path and empty path (wiped away)
+  const puddlePathInitial = puddle.getAttribute('d');
+  // Empty puddle path (small shape to simulate wiped away)
+  const puddlePathEmpty = "M0 0 Z";
+
+  // Animation timing
+  const mopSweepDuration = 4000; // 4 seconds for mop sweeping
+  const wipeDuration = 3000; // 3 seconds for wiping cloth
+
+  // Helper: interpolate between two paths (simple morph)
+  // Since paths are complex, we will animate opacity and scale instead of morphing path
+
+  // Animate mop sweeping back and forth over the puddle
+  function animateMopSweep() {
+    let start = null;
+    let direction = 1; // 1 = forward, -1 = backward
+    let angle = mopStartAngle;
+
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = elapsed / mopSweepDuration;
+
+      // Calculate angle based on progress and direction
+      if (direction === 1) {
+        angle = mopStartAngle + (mopEndAngle - mopStartAngle) * progress;
+      } else {
+        angle = mopEndAngle - (mopEndAngle - mopStartAngle) * progress;
+      }
+
+      mopHandle.setAttribute('transform', `rotate(${angle} ${mopCenterX} ${mopCenterY})`);
+      mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(${angle})`);
+
+      if (elapsed >= mopSweepDuration) {
+        direction *= -1;
+        start = timestamp;
+      }
+
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Animate puddle fading out to simulate cleaning
+  function animatePuddleFade() {
+    puddle.style.transition = `opacity ${mopSweepDuration * 2}ms linear`;
+    puddle.style.opacity = '0';
+  }
+
+  // Animate wipe cloth sliding over remaining wet area
+  function animateWipeCloth() {
+    wipeCloth.style.opacity = '1';
+    wipeCloth.style.transition = 'none';
+    wipeCloth.setAttribute('x', '140');
+    let start = null;
+    const startX = 140;
+    const endX = 140 + 120;
+
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = Math.min(elapsed / wipeDuration, 1);
+      const currentX = startX + (endX - startX) * progress;
+      wipeCloth.setAttribute('x', currentX);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        // After wiping, fade out the cloth
+        wipeCloth.style.transition = 'opacity 1.5s ease-out';
+        wipeCloth.style.opacity = '0';
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Sequence the animations:
+  // 1. Mop sweeps back and forth for 8 seconds (2 full cycles)
+  // 2. Puddle fades out during mop sweeping
+  // 3. After mop sweeping, wipe cloth slides over and fades out
+
+  function runAnimationSequence() {
+    // Mop sweep animation (back and forth)
+    let cycles = 0;
+    let maxCycles = 2;
+    let direction = 1;
+    let start = null;
+
+    function mopStep(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = elapsed / mopSweepDuration;
+
+      let angle;
+      if (direction === 1) {
+        angle = mopStartAngle + (mopEndAngle - mopStartAngle) * progress;
+      } else {
+        angle = mopEndAngle - (mopEndAngle - mopStartAngle) * progress;
+      }
+
+      mopHandle.setAttribute('transform', `rotate(${angle} ${mopCenterX} ${mopCenterY})`);
+      mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(${angle})`);
+
+      if (elapsed >= mopSweepDuration) {
+        direction *= -1;
+        start = timestamp;
+        cycles++;
+      }
+
+      if (cycles < maxCycles * 2) {
+        requestAnimationFrame(mopStep);
+      } else {
+        // Mop sweep finished
+        mopHandle.setAttribute('transform', `rotate(0 ${mopCenterX} ${mopCenterY})`);
+        mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(0)`);
+        // Start puddle fade out and wipe cloth animation
+        puddle.style.transition = `opacity 2000ms ease-out`;
+        puddle.style.opacity = '0';
+
+        setTimeout(() => {
+          animateWipeCloth();
+        }, 500);
+      }
+    }
+
+    // Start mop sweeping and puddle fade simultaneously
+    puddle.style.opacity = '0.7';
+    requestAnimationFrame(mopStep);
+  }
+
+  // Start animation on load
+  window.onload = () => {
+    runAnimationSequence();
+  };
+</script>
+</body>
+</html>

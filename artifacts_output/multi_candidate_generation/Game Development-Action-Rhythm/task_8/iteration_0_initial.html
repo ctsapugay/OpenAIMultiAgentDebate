@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Dance!</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #111;
+    color: #eee;
+    font-family: 'Press Start 2P', cursive, monospace;
+    user-select: none;
+    overflow: hidden;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  /* Container */
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #222 0%, #000 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  /* Stage */
+  #stage {
+    position: relative;
+    width: 640px;
+    height: 360px;
+    margin-top: 20px;
+    background: #222;
+    border: 4px solid #555;
+    box-shadow:
+      0 0 10px #0ff,
+      inset 0 0 20px #0ff;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel dancer container */
+  #dancer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+  }
+
+  /* Pixel art style canvas */
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent;
+  }
+
+  /* Arrow prompts container */
+  #prompts {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    user-select: none;
+  }
+
+  /* Each arrow prompt */
+  .arrow {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #0ff;
+    border-radius: 8px;
+    background: #003344;
+    filter: drop-shadow(0 0 3px #0ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: default;
+  }
+  .arrow.active {
+    background: #0ff;
+    border-color: #0ff;
+    filter: drop-shadow(0 0 10px #0ff);
+  }
+  .arrow.correct {
+    background: #0f0;
+    border-color: #0f0;
+    filter: drop-shadow(0 0 10px #0f0);
+  }
+  .arrow.wrong {
+    background: #f00;
+    border-color: #f00;
+    filter: drop-shadow(0 0 10px #f00);
+  }
+
+  /* Arrow SVG icons */
+  .arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #0ff;
+    pointer-events: none;
+  }
+  .arrow.correct svg {
+    fill: #0f0;
+  }
+  .arrow.wrong svg {
+    fill: #f00;
+  }
+
+  /* Score and info */
+  #info {
+    margin-top: 12px;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-align: center;
+    color: #0ff;
+    text-shadow:
+      0 0 5px #0ff,
+      0 0 10px #0ff;
+  }
+  #score {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 6px;
+    color: #0f0;
+    text-shadow:
+      0 0 8px #0f0,
+      0 0 15px #0f0;
+  }
+
+  /* Start screen overlay */
+  #startScreen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #0ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  #startScreen button {
+    margin-top: 20px;
+    background: #0ff;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow:
+      0 0 10px #0ff;
+    transition: background 0.3s ease;
+  }
+  #startScreen button:hover {
+    background: #0cc;
+  }
+
+  /* Pixel flicker effect on stage */
+  @keyframes pixelFlicker {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.2) contrast(1.1); }
+  }
+  #stage {
+    animation: pixelFlicker 3s infinite ease-in-out;
+  }
+
+  /* Pixel dancer animation frames */
+  .frame-0 { opacity: 1; }
+  .frame-1 { opacity: 0; }
+  .frame-2 { opacity: 0; }
+  .frame-3 { opacity: 0; }
+  .frame-4 { opacity: 0; }
+  .frame-5 { opacity: 0; }
+  .frame-6 { opacity: 0; }
+  .frame-7 { opacity: 0; }
+
+  /* Pixel font for score */
+  #score {
+    font-family: 'Press Start 2P', monospace;
+  }
+</style>
+</head>
+<body>
+<div id="game" role="main" aria-label="Pixel Dance rhythm game">
+  <div id="stage" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <canvas id="dancer" width="32" height="32" aria-label="Dancing character"></canvas>
+    <div id="prompts" aria-label="Dance move prompts" role="list"></div>
+  </div>
+  <div id="info" aria-live="polite" aria-atomic="true">
+    Press arrow keys in sequence and SPACE at the right moment to dance!
+  </div>
+  <div id="score" aria-live="polite" aria-atomic="true" aria-label="Current score">Score: 0</div>
+  <div id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle" aria-describedby="startDesc">
+    <h1 id="startTitle">Pixel Dance!</h1>
+    <p id="startDesc">
+      Follow the arrow prompts and press SPACE at the right beat to perform dance moves.<br />
+      Try to keep in rhythm and get the highest score possible!<br />
+      Use arrow keys + SPACE to play.<br />
+      Press Start to begin.
+    </p>
+    <button id="startBtn" aria-label="Start the game">Start</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Constants for directions
+  const DIRECTIONS = ['left', 'down', 'up', 'right'];
+  const KEY_TO_DIR = {
+    'ArrowLeft': 'left',
+    'ArrowDown': 'down',
+    'ArrowUp': 'up',
+    'ArrowRight': 'right',
+  };
+
+  // Timing constants
+  const BEAT_INTERVAL = 600; // ms between beats (100 BPM)
+  const PROMPT_DISPLAY_TIME = 2000; // ms prompts stay visible before timing out
+  const INPUT_WINDOW = 250; // ms before/after beat to accept input
+
+  // Game state
+  let score = 0;
+  let combo = 0;
+  let currentStep = 0;
+  let gameStarted = false;
+  let beatTimer = null;
+  let lastBeatTime = 0;
+  let inputBuffer = [];
+  let awaitingSpace = false;
+  let currentPrompt = null;
+  let promptTimeout = null;
+  let animationFrameId = null;
+
+  // Elements
+  const startScreen = document.getElementById('startScreen');
+  const startBtn = document.getElementById('startBtn');
+  const promptsContainer = document.getElementById('prompts');
+  const scoreDisplay = document.getElementById('score');
+  const infoDisplay = document.getElementById('info');
+  const dancerCanvas = document.getElementById('dancer');
+  const ctx = dancerCanvas.getContext('2d');
+
+  // Audio context and buffers
+  let audioCtx = null;
+  let musicBuffer = null;
+  let musicSource = null;
+  let musicStartTime = 0;
+
+  // Dance move sequence generator
+  // Each step: array of directions + space press at beat
+  // For simplicity, each step is a sequence of 1-3 arrows + space
+  // We'll generate a fixed length sequence for demo
+  const SEQUENCE_LENGTH = 30;
+  let danceSequence = [];
+
+  // Pixel art dancer frames (8 frames for simple dance animation)
+  // Each frame is a 32x32 pixel grid with color codes
+  // We'll draw pixel rectangles on canvas for pixel art style
+  // Colors: transparent, skin, shirt, pants, shoes, hair, eyes
+  // We'll define frames as arrays of color indices per pixel row
+  // For simplicity, 16x16 pixels scaled 2x to 32x32 canvas
+
+  // Color palette
+  const COLORS = {
+    0: null, // transparent
+    1: '#f9c9a7', // skin
+    2: '#0ff', // shirt cyan
+    3: '#005577', // pants dark cyan
+    4: '#222', // shoes black
+    5: '#a52a2a', // hair brown
+    6: '#000', // eyes black
+    7: '#0f0', // green highlight (for success)
+    8: '#f00', // red highlight (for fail)
+  };
+
+  // Define 8 frames of a simple pixel dancer animation (16x16)
+  // Each frame is a 16x16 array of color indices
+  // We'll create a simple dancing character with arm/leg movement
+
+  // For brevity, define a base frame and then variations for limbs
+  // Base frame (frame 0)
+  const baseFrame = [
+    // 16 rows, each 16 pixels
+    // 0=transparent, 1=skin, 2=shirt, 3=pants, 4=shoes, 5=hair, 6=eyes
+    // We'll create a simple humanoid pixel art
+    [0,0,0,0,0,5,5,5,5,5,5,0,0,0,0,0], // hair top
+    [0,0,0,0,5,5,5,5,5,5,5,5,0,0,0,0], // hair top
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0], // face row 1
+    [0,0,0,1,6,1,1,1,1,1,6,1,1,0,0,0], // face row 2 eyes
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt top
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt mid
+    [0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0], // shirt bottom
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants top
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants mid
+    [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // pants bottom
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0], // shoes
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // empty
+  ];
+
+  // We'll create 8 frames by shifting arms and legs pixels
+  // For simplicity, only move some pixels in arms and legs area
+
+  // Helper to clone 2D array
+  function cloneFrame(frame) {
+    return frame.map(row => row.slice());
+  }
+
+  // Create frames array
+  const frames = [];
+
+  // Frame 0: base
+  frames.push(cloneFrame(baseFrame));
+
+  // Frame 1: left arm up, right leg forward
+  let f1 = cloneFrame(baseFrame);
+  // Left arm pixels (row 4-6, col 3)
+  f1[4][3] = 0; f1[5][3] = 1; f1[6][3] = 1;
+  // Right leg forward (row 9-11, col 12)
+  f1[9][12] = 4; f1[10][12] = 4; f1[11][12] = 4;
+  frames.push(f1);
+
+  // Frame 2: left arm down, right leg back
+  let f2 = cloneFrame(baseFrame);
+  // Left arm pixels down (row 7-9, col 3)
+  f2[7][3] = 1; f2[8][3] = 1; f2[9][3] = 0;
+  // Right leg back (row 9-11, col 11)
+  f2[9][11] = 4; f2[10][11] = 4; f2[11][11] = 4;
+  frames.push(f2);
+
+  // Frame 3: right arm up, left leg forward
+  let f3 = cloneFrame(baseFrame);
+  // Right arm pixels (row 4-6, col 12)
+  f3[4][12] = 0; f3[5][12] = 1; f3[6][12] = 1;
+  // Left leg forward (row 9-11, col 3)
+  f3[9][3] = 4; f3[10][3] = 4; f3[11][3] = 4;
+  frames.push(f3);
+
+  // Frame 4: right arm down, left leg back
+  let f4 = cloneFrame(baseFrame);
+  // Right arm pixels down (row 7-9, col 12)
+  f4[7][12] = 1; f4[8][12] = 1; f4[9][12] = 0;
+  // Left leg back (row 9-11, col 4)
+  f4[9][4] = 4; f4[10][4] = 4; f4[11][4] = 4;
+  frames.push(f4);
+
+  // Frame 5: both arms up
+  let f5 = cloneFrame(baseFrame);
+  f5[4][3] = 0; f5[5][3] = 1; f5[6][3] = 1;
+  f5[4][12] = 0; f5[5][12] = 1; f5[6][12] = 1;
+  frames.push(f5);
+
+  // Frame 6: both arms down
+  let f6 = cloneFrame(baseFrame);
+  f6[7][3] = 1; f6[8][3] = 1; f6[9][3] = 0;
+  f6[7][12] = 1; f6[8][12] = 1; f6[9][12] = 0;
+  frames.push(f6);
+
+  // Frame 7: jump pose (arms and legs spread)
+  let f7 = cloneFrame(baseFrame);
+  // Arms spread
+  f7[4][2] = 1; f7[5][1] = 1; f7[6][0] = 1;
+  f7[4][13] = 1; f7[5][14] = 1; f7[6][15] = 1;
+  // Legs spread
+  f7[9][2] = 4; f7[10][1] = 4; f7[11][0] = 4;
+  f7[9][13] = 4; f7[10][14] = 4; f7[11][15] = 4;
+  frames.push(f7);
+
+  // Draw a frame on canvas
+  function drawFrame(frame, highlight = null) {
+    const pixelSize = 2; // 16x16 * 2 = 32x32 canvas
+    ctx.clearRect(0, 0, dancerCanvas.width, dancerCanvas.height);
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        let colorIndex = frame[y][x];
+        if (colorIndex === 0) continue;
+        let color = COLORS[colorIndex];
+        if (highlight === 'correct') color = COLORS[7];
+        else if (highlight === 'wrong') color = COLORS[8];
+        ctx.fillStyle = color;
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+
+  // Arrow SVG icons for prompts
+  const ARROW_SVGS = {
+    left: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 19l-7-7 7-7"/></svg>`,
+    down: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 9l-7 7-7-7"/></svg>`,
+    up: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 15l-7-7-7 7"/></svg>`,
+    right: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>`,
+  };
+
+  // Create prompt elements for a step
+  function createPromptElements(directions) {
+    promptsContainer.innerHTML = '';
+    directions.forEach(dir => {
+      const div = document.createElement('div');
+      div.classList.add('arrow');
+      div.dataset.direction = dir;
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('aria-label', `Press ${dir.toUpperCase()} arrow`);
+      div.innerHTML = ARROW_SVGS[dir];
+      promptsContainer.appendChild(div);
+    });
+  }
+
+  // Highlight prompt arrows for feedback
+  function highlightPrompt(direction, result) {
+    // result: 'correct' or 'wrong'
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      if (arrow.dataset.direction === direction) {
+        arrow.classList.remove('active');
+        arrow.classList.add(result);
+      }
+    });
+  }
+
+  // Clear prompt highlights
+  function clearPromptHighlights() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => {
+      arrow.classList.remove('correct', 'wrong', 'active');
+    });
+  }
+
+  // Activate prompts (glow)
+  function activatePrompts() {
+    const arrows = promptsContainer.querySelectorAll('.arrow');
+    arrows.forEach(arrow => arrow.classList.add('active'));
+  }
+
+  // Generate a random dance step (1-3 directions)
+  function generateStep() {
+    const count = Math.floor(Math.random() * 3) + 1; // 1 to 3 arrows
+    const stepDirs = [];
+    while (stepDirs.length < count) {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      if (!stepDirs.includes(dir)) stepDirs.push(dir);
+    }
+    return stepDirs;
+  }
+
+  // Generate full dance sequence
+  function generateSequence() {
+    danceSequence = [];
+    for (let i = 0; i < SEQUENCE_LENGTH; i++) {
+      danceSequence.push(generateStep());
+    }
+  }
+
+  // Play background music (simple beat)
+  // We'll generate a simple beep rhythm using Web Audio API
+  function playMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+    // Create a simple beat sound buffer
+    const sampleRate = audioCtx.sampleRate;
+    const duration = 0.1; // 100ms beep
+    const frameCount = sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, frameCount, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frameCount; i++) {
+      // Simple sine wave beep 440Hz with fade out
+      data[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * (1 - i / frameCount);
+    }
+    musicBuffer = buffer;
+
+    // Create a buffer source and loop it every BEAT_INTERVAL
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = musicBuffer;
+    musicSource.loop = true;
+    musicSource.loopStart = 0;
+    musicSource.loopEnd = duration;
+    musicSource.connect(audioCtx.destination);
+    musicSource.start();
+
+    musicStartTime = audioCtx.currentTime;
+  }
+
+  // Stop music
+  function stopMusic() {
+    if (musicSource) {
+      musicSource.stop();
+      musicSource.disconnect();
+      musicSource = null;
+    }
+  }
+
+  // Get current music time in ms
+  function getMusicTime() {
+    if (!audioCtx) return 0;
+    return (audioCtx.currentTime - musicStartTime) * 1000;
+  }
+
+  // Game loop: handle beats and prompts
+  function gameLoop(timestamp) {
+    if (!gameStarted) return;
+
+    const now = getMusicTime();
+
+    // Check if it's time for next beat
+    if (now - lastBeatTime >= BEAT_INTERVAL) {
+      lastBeatTime += BEAT_INTERVAL;
+
+      // Show next prompt
+      if (currentStep < danceSequence.length) {
+        currentPrompt = danceSequence[currentStep];
+        createPromptElements(currentPrompt);
+        activatePrompts();
+        awaitingSpace = true;
+        inputBuffer = [];
+        clearPromptHighlights();
+
+        // Set timeout to fail if no input in time
+        if (promptTimeout) clearTimeout(promptTimeout);
+        promptTimeout = setTimeout(() => {
+          // If player didn't press space in time, fail step
+          if (awaitingSpace) {
+            failStep();
+          }
+        }, PROMPT_DISPLAY_TIME);
+
+        currentStep++;
+      } else {
+        // Sequence finished - end game
+        endGame();
+        return;
+      }
+    }
+
+    // Animate dancer based on current step and time
+    animateDancer(now);
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // Animate dancer frames synced to beat
+  function animateDancer(now) {
+    if (!currentPrompt) {
+      drawFrame(frames[0]);
+      return;
+    }
+    // Calculate frame index based on time within beat interval
+    const beatProgress = ((now - lastBeatTime) % BEAT_INTERVAL) / BEAT_INTERVAL;
+    // 8 frames per beat cycle
+    const frameIndex = Math.floor(beatProgress * 8) % 8;
+    drawFrame(frames[frameIndex]);
+  }
+
+  // Handle player input
+  function handleInput(e) {
+    if (!gameStarted) return;
+
+    if (e.repeat) return; // ignore held keys
+
+    const key = e.key;
+
+    if (key === ' ') {
+      // Space pressed - check if input matches prompt
+      if (!awaitingSpace) return;
+
+      // Check timing window
+      const now = getMusicTime();
+      const delta = Math.abs(now - lastBeatTime);
+      if (delta > INPUT_WINDOW) {
+        // Too early or late
+        failStep();
+        return;
+      }
+
+      // Check if all directions were input correctly
+      if (arraysEqualUnordered(inputBuffer, currentPrompt)) {
+        // Success
+        successStep();
+      } else {
+        // Fail
+        failStep();
+      }
+    } else if (KEY_TO_DIR[key]) {
+      // Direction key pressed
+      if (!awaitingSpace) return;
+
+      // Add to input buffer if not already present
+      const dir = KEY_TO_DIR[key];
+      if (!inputBuffer.includes(dir)) {
+        inputBuffer.push(dir);
+        // Highlight pressed arrow
+        highlightPressedArrow(dir);
+      }
+    }
+  }
+
+  // Highlight pressed arrow in prompts
+  function highlightPressedArrow(dir) {
+    const arrow = promptsContainer.querySelector(`.arrow[data-direction="${dir}"]`);
+    if (!arrow) return;
+    arrow.classList.add('active');
+  }
+
+  // Compare two arrays ignoring order
+  function arraysEqualUnordered(a, b) {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    for (let i = 0; i < sortedA.length; i++) {
+      if (sortedA[i] !== sortedB[i]) return false;
+    }
+    return true;
+  }
+
+  // Success step feedback
+  function successStep() {
+    awaitingSpace = false;
+    combo++;
+    score += 100 + combo * 10;
+    updateScore();
+    infoDisplay.textContent = `Great! Combo x${combo}`;
+    // Highlight prompts green
+    currentPrompt.forEach(dir => highlightPrompt(dir, 'correct'));
+    // Flash dancer green
+    flashDancer('correct');
+    clearTimeout(promptTimeout);
+  }
+
+  // Fail step feedback
+  function failStep() {
+    awaitingSpace = false;
+    combo = 0;
+    infoDisplay.textContent = `Miss! Try to keep the rhythm!`;
+    // Highlight prompts red
+    if (currentPrompt) currentPrompt.forEach(dir => highlightPrompt(dir, 'wrong'));
+    // Flash dancer red
+    flashDancer('wrong');
+    clearTimeout(promptTimeout);
+  }
+
+  // Flash dancer with highlight color for 400ms
+  let flashTimeout = null;
+  function flashDancer(type) {
+    drawFrame(frames[0], type);
+    if (flashTimeout) clearTimeout(flashTimeout);
+    flashTimeout = setTimeout(() => {
+      drawFrame(frames[0]);
+    }, 400);
+  }
+
+  // Update score display
+  function updateScore() {
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  // Start game
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    score = 0;
+    combo = 0;
+    currentStep = 0;
+    updateScore();
+    infoDisplay.textContent = 'Get ready...';
+    generateSequence();
+    playMusic();
+    lastBeatTime = getMusicTime();
+    currentPrompt = null;
+    inputBuffer = [];
+    awaitingSpace = false;
+    promptsContainer.innerHTML = '';
+    startScreen.style.display = 'none';
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // End game
+  function endGame() {
+    gameStarted = false;
+    stopMusic();
+    promptsContainer.innerHTML = '';
+    infoDisplay.textContent = `Game Over! Final Score: ${score}`;
+    startScreen.style.display = 'flex';
+    startBtn.textContent = 'Restart';
+    drawFrame(frames[0]);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  }
+
+  // Event listeners
+  window.addEventListener('keydown', handleInput);
+  startBtn.addEventListener('click', () => {
+    if (!audioCtx) {
+      // Resume audio context on user interaction
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx.resume();
+    }
+    startGame();
+  });
+
+  // Initial draw
+  drawFrame(frames[0]);
+
+  // Accessibility: focus start button on load
+  window.addEventListener('load', () => {
+    startBtn.focus();
+  });
+})();
+</script>
+</body>
+</html>

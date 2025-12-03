@@ -1,0 +1,3337 @@
+2025-11-30 19:26:23 - INFO - 
+================================================================================
+2025-11-30 19:26:23 - INFO - ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-11-30 19:26:23 - INFO - ================================================================================
+2025-11-30 19:26:23 - INFO - Task ID: 3
+2025-11-30 19:26:23 - INFO - Task Class: Game Development-Role-Playing
+2025-11-30 19:26:23 - INFO - Task Difficulty: easy
+2025-11-30 19:26:23 - INFO - Improvement Threshold: 7.0
+2025-11-30 19:26:23 - INFO - Max Iterations: 2
+2025-11-30 19:26:23 - INFO - Start Time: 2025-11-30 19:26:23
+2025-11-30 19:26:23 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:26:23 - INFO - Screenshots Enabled: True
+2025-11-30 19:26:23 - INFO - Use Screenshots in Evaluation: True
+2025-11-30 19:26:23 - INFO - ================================================================================
+2025-11-30 19:26:23 - INFO - 
+================================================================================
+2025-11-30 19:26:23 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-11-30 19:26:23 - INFO - ================================================================================
+2025-11-30 19:26:23 - INFO - 
+================================================================================
+2025-11-30 19:26:23 - INFO - GENERATING INITIAL CODE...
+2025-11-30 19:26:23 - INFO - ================================================================================
+2025-11-30 19:26:23 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:26:23 - INFO - Temperature: 0.0
+2025-11-30 19:26:23 - INFO - Task Question (first 200 chars): You are a code expert. Please use your professional knowledge to generate accurate and professional responses. Make sure the code you generate is executable for demonstration purposes.
+
+Please use HTM...
+2025-11-30 19:27:18 - INFO - ✓ Initial code generated (took 55.57 seconds)
+2025-11-30 19:27:18 - INFO - Generated code length: 17568 characters
+2025-11-30 19:27:18 - INFO - Response length: 17568 characters
+2025-11-30 19:27:18 - INFO - 
+================================================================================
+2025-11-30 19:27:18 - INFO - INITIAL HTML CODE
+2025-11-30 19:27:18 - INFO - ================================================================================
+2025-11-30 19:27:18 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive NPC System</title>
+<style>
+  /* Basic reset and styling */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar for NPC list */
+  #npc-list {
+    width: 220px;
+    background: #2c2c44;
+    border-right: 2px solid #444466;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #npc-list h2 {
+    margin: 1rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  .npc-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #444466;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  .npc-item:hover, .npc-item.active {
+    background-color: #4a4a7a;
+  }
+
+  /* Main content area */
+  #npc-dialogue {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #282843;
+    padding: 1.5rem;
+  }
+
+  #npc-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #a0c4ff;
+  }
+
+  #dialogue-text {
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+  }
+
+  #choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  button.choice-btn {
+    background: #4a4a7a;
+    border: none;
+    color: #eee;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  button.choice-btn:hover:not(:disabled) {
+    background-color: #6a6ab0;
+  }
+
+  button.choice-btn:disabled {
+    background-color: #2a2a4a;
+    cursor: default;
+  }
+
+  /* Player status panel */
+  #player-status {
+    width: 280px;
+    background: #2c2c44;
+    border-left: 2px solid #444466;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #player-status h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  #quest-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+  }
+
+  .quest-item {
+    background: #3a3a6a;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.95rem;
+  }
+
+  .quest-item.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  #clues-list {
+    margin-top: 1rem;
+  }
+
+  .clue-item {
+    background: #3a3a6a;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  /* Scrollbar styling */
+  #quest-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  #quest-list::-webkit-scrollbar-thumb {
+    background: #555577;
+    border-radius: 4px;
+  }
+  #quest-list::-webkit-scrollbar-track {
+    background: #2c2c44;
+  }
+</style>
+</head>
+<body>
+  <!-- NPC List Sidebar -->
+  <nav id="npc-list" aria-label="NPC List">
+    <h2>NPCs</h2>
+    <!-- NPC items inserted dynamically -->
+  </nav>
+
+  <!-- Dialogue and interaction area -->
+  <main id="npc-dialogue" role="main" aria-live="polite" aria-atomic="true">
+    <div id="npc-name" aria-label="NPC Name"></div>
+    <div id="dialogue-text" aria-label="Dialogue Text"></div>
+    <div id="choices" role="list" aria-label="Dialogue Choices"></div>
+  </main>
+
+  <!-- Player status panel -->
+  <aside id="player-status" aria-label="Player Status">
+    <h2>Quests</h2>
+    <div id="quest-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+    <h2>Clues</h2>
+    <div id="clues-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+  </aside>
+
+<script>
+/**
+ * Interactive NPC System
+ * 
+ * This system allows players to select NPCs, converse with them,
+ * accept quests, and obtain clues. Player progression is tracked
+ * and dialogue changes based on quest states.
+ * 
+ * Author: Code Expert
+ * Date: 2024
+ */
+
+// Define NPC data with dialogues, quests, and clues
+const npcs = [
+  {
+    id: 'elder_mira',
+    name: 'Elder Mira',
+    dialogues: {
+      start: {
+        text: "Greetings, traveler. Our village is in peril. Will you help us?",
+        choices: [
+          { text: "Tell me more about the danger.", next: 'danger_info' },
+          { text: "I'm not interested.", next: 'decline' }
+        ]
+      },
+      danger_info: {
+        text: "A dark shadow looms in the forest. Strange creatures have been seen. Will you investigate?",
+        choices: [
+          { text: "I will investigate the forest.", action: 'acceptQuest', questId: 'forest_shadow', next: 'quest_accepted' },
+          { text: "Sounds too dangerous.", next: 'decline' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you, brave one. Return when you have news.",
+        choices: [
+          { text: "I will be back.", next: 'end' }
+        ]
+      },
+      decline: {
+        text: "I see. May fortune favor you elsewhere.",
+        choices: [
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Have you discovered the source of the shadow?",
+        choices: [
+          { text: "Yes, the forest is safe now.", action: 'completeQuest', questId: 'forest_shadow', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "You have our eternal gratitude. Please take this amulet as a token.",
+        choices: [
+          { text: "Thank you.", action: 'giveClue', clue: 'Amulet of Light', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Farewell.",
+        choices: []
+      }
+    },
+    // Quests this NPC can give
+    quests: [
+      {
+        id: 'forest_shadow',
+        title: 'Investigate the Forest Shadow',
+        description: 'Explore the forest and find the source of the dark shadow threatening the village.',
+        status: 'not accepted' // can be 'not accepted', 'active', 'completed'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'merchant_lyra',
+    name: 'Merchant Lyra',
+    dialogues: {
+      start: {
+        text: "Welcome! Looking for something special? I might have some rare items.",
+        choices: [
+          { text: "Do you have any quests?", next: 'quest_offer' },
+          { text: "Any rumors or clues?", next: 'clues' },
+          { text: "Just browsing, thanks.", next: 'end' }
+        ]
+      },
+      quest_offer: {
+        text: "Actually, yes. I lost a precious gem in the caves nearby. Can you retrieve it?",
+        choices: [
+          { text: "I will find your gem.", action: 'acceptQuest', questId: 'find_gem', next: 'quest_accepted' },
+          { text: "Not right now.", next: 'end' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you! The gem is valuable to me. Please hurry.",
+        choices: [
+          { text: "On my way.", next: 'end' }
+        ]
+      },
+      clues: {
+        text: "I heard the blacksmith saw strange lights near the old ruins last night.",
+        choices: [
+          { text: "Thanks for the info.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Did you find my gem?",
+        choices: [
+          { text: "Yes, here it is.", action: 'completeQuest', questId: 'find_gem', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "Wonderful! Here's a discount coupon for your trouble.",
+        choices: [
+          { text: "Thanks!", action: 'giveClue', clue: 'Discount Coupon', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Safe travels!",
+        choices: []
+      }
+    },
+    quests: [
+      {
+        id: 'find_gem',
+        title: 'Retrieve the Lost Gem',
+        description: 'Find and return the precious gem lost in the caves.',
+        status: 'not accepted'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'blacksmith_tor',
+    name: 'Blacksmith Tor',
+    dialogues: {
+      start: {
+        text: "Hey there! If you need weapons or info, I'm your man.",
+        choices: [
+          { text: "Any news about the ruins?", next: 'ruins_info' },
+          { text: "Can you forge me a weapon?", next: 'forge_weapon' },
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      ruins_info: {
+        text: "Strange lights and noises come from the ruins at night. Some say it's haunted.",
+        choices: [
+          { text: "Thanks for the tip.", next: 'end' }
+        ]
+      },
+      forge_weapon: {
+        text: "I can forge a sword if you bring me 5 iron ores. Do you have them?",
+        choices: [
+          { text: "Yes, here they are.", action: 'forgeWeapon', next: 'weapon_forged' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      weapon_forged: {
+        text: "Here's your new sword! Use it well.",
+        choices: [
+          { text: "Thank you!", next: 'end' }
+        ]
+      },
+      end: {
+        text: "Take care!",
+        choices: []
+      }
+    },
+    quests: [],
+    clues: []
+  }
+];
+
+// Player state to track quests, clues, inventory, and current NPC/dialogue
+const playerState = {
+  currentNpcId: null,
+  currentDialogueKey: 'start',
+  quests: {}, // questId -> status ('not accepted', 'active', 'completed')
+  clues: new Set(),
+  inventory: {
+    ironOre: 0
+  }
+};
+
+// Cache DOM elements for performance
+const npcListEl = document.getElementById('npc-list');
+const npcNameEl = document.getElementById('npc-name');
+const dialogueTextEl = document.getElementById('dialogue-text');
+const choicesEl = document.getElementById('choices');
+const questListEl = document.getElementById('quest-list');
+const cluesListEl = document.getElementById('clues-list');
+
+/**
+ * Initialize the NPC list sidebar with clickable NPCs.
+ */
+function initNpcList() {
+  npcs.forEach(npc => {
+    const npcItem = document.createElement('div');
+    npcItem.classList.add('npc-item');
+    npcItem.textContent = npc.name;
+    npcItem.setAttribute('tabindex', '0');
+    npcItem.setAttribute('role', 'button');
+    npcItem.setAttribute('aria-pressed', 'false');
+    npcItem.dataset.npcId = npc.id;
+
+    // Click and keyboard support
+    npcItem.addEventListener('click', () => selectNpc(npc.id));
+    npcItem.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNpc(npc.id);
+      }
+    });
+
+    npcListEl.appendChild(npcItem);
+  });
+}
+
+/**
+ * Select an NPC to start or continue conversation.
+ * @param {string} npcId 
+ */
+function selectNpc(npcId) {
+  if (playerState.currentNpcId === npcId) return; // Already selected
+
+  playerState.currentNpcId = npcId;
+
+  // Reset dialogue key to 'start' or to a special dialogue if quest active/completed
+  const npc = getCurrentNpc();
+
+  // Determine dialogue start point based on quest states
+  let dialogueKey = 'start';
+
+  // Check if NPC has quests and if any are active or completed to adjust dialogue
+  if (npc.quests.length > 0) {
+    for (const quest of npc.quests) {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') {
+        dialogueKey = 'after_quest';
+        break;
+      } else if (status === 'completed') {
+        dialogueKey = 'quest_completed';
+        break;
+      }
+    }
+  }
+
+  playerState.currentDialogueKey = dialogueKey;
+
+  updateNpcListActive();
+  renderDialogue();
+}
+
+/**
+ * Get the currently selected NPC object.
+ * @returns {object|null}
+ */
+function getCurrentNpc() {
+  return npcs.find(npc => npc.id === playerState.currentNpcId) || null;
+}
+
+/**
+ * Update the NPC list UI to highlight the selected NPC.
+ */
+function updateNpcListActive() {
+  const npcItems = npcListEl.querySelectorAll('.npc-item');
+  npcItems.forEach(item => {
+    if (item.dataset.npcId === playerState.currentNpcId) {
+      item.classList.add('active');
+      item.setAttribute('aria-pressed', 'true');
+      item.focus();
+    } else {
+      item.classList.remove('active');
+      item.setAttribute('aria-pressed', 'false');
+    }
+  });
+}
+
+/**
+ * Render the current dialogue text and choices for the selected NPC.
+ */
+function renderDialogue() {
+  const npc = getCurrentNpc();
+  if (!npc) {
+    npcNameEl.textContent = '';
+    dialogueTextEl.textContent = 'Select an NPC to start conversation.';
+    choicesEl.innerHTML = '';
+    return;
+  }
+
+  npcNameEl.textContent = npc.name;
+
+  // Get dialogue node by currentDialogueKey
+  let dialogueNode = npc.dialogues[playerState.currentDialogueKey];
+
+  // If dialogue node not found, fallback to 'start'
+  if (!dialogueNode) {
+    dialogueNode = npc.dialogues['start'];
+    playerState.currentDialogueKey = 'start';
+  }
+
+  dialogueTextEl.textContent = dialogueNode.text;
+
+  // Clear previous choices
+  choicesEl.innerHTML = '';
+
+  // If no choices, show a disabled button to close dialogue
+  if (!dialogueNode.choices || dialogueNode.choices.length === 0) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Close';
+    btn.disabled = true;
+    choicesEl.appendChild(btn);
+    return;
+  }
+
+  // Create buttons for each choice
+  dialogueNode.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.setAttribute('role', 'listitem');
+    btn.addEventListener('click', () => handleChoice(choice));
+    choicesEl.appendChild(btn);
+  });
+}
+
+/**
+ * Handle a player's choice selection.
+ * @param {object} choice 
+ */
+function handleChoice(choice) {
+  // Process any action associated with the choice
+  if (choice.action) {
+    switch (choice.action) {
+      case 'acceptQuest':
+        acceptQuest(choice.questId);
+        break;
+      case 'completeQuest':
+        completeQuest(choice.questId);
+        break;
+      case 'giveClue':
+        addClue(choice.clue);
+        break;
+      case 'forgeWeapon':
+        forgeWeapon();
+        break;
+      default:
+        console.warn('Unknown action:', choice.action);
+    }
+  }
+
+  // Move to the next dialogue node if specified
+  if (choice.next) {
+    playerState.currentDialogueKey = choice.next;
+  } else {
+    // If no next, end conversation (reset dialogue)
+    playerState.currentDialogueKey = 'end';
+  }
+
+  renderDialogue();
+  renderPlayerStatus();
+}
+
+/**
+ * Accept a quest by questId.
+ * @param {string} questId 
+ */
+function acceptQuest(questId) {
+  // Mark quest as active in player state
+  playerState.quests[questId] = 'active';
+}
+
+/**
+ * Complete a quest by questId.
+ * @param {string} questId 
+ */
+function completeQuest(questId) {
+  // Mark quest as completed in player state
+  playerState.quests[questId] = 'completed';
+}
+
+/**
+ * Add a clue to the player's clue list.
+ * @param {string} clue 
+ */
+function addClue(clue) {
+  playerState.clues.add(clue);
+}
+
+/**
+ * Simulate forging a weapon if player has enough iron ore.
+ */
+function forgeWeapon() {
+  if (playerState.inventory.ironOre >= 5) {
+    playerState.inventory.ironOre -= 5;
+    alert("Blacksmith Tor has forged a sword for you!");
+  } else {
+    alert("You don't have enough iron ore. Collect 5 to forge a weapon.");
+    // Force dialogue back to start since forging failed
+    playerState.currentDialogueKey = 'start';
+  }
+}
+
+/**
+ * Render the player's current quests and clues in the status panel.
+ */
+function renderPlayerStatus() {
+  // Clear quest list
+  questListEl.innerHTML = '';
+
+  // Show quests with their status
+  const activeQuests = [];
+  const completedQuests = [];
+
+  // Collect quests from all NPCs and merge with player state
+  npcs.forEach(npc => {
+    npc.quests.forEach(quest => {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') activeQuests.push({ ...quest, status });
+      else if (status === 'completed') completedQuests.push({ ...quest, status });
+    });
+  });
+
+  if (activeQuests.length === 0 && completedQuests.length === 0) {
+    const noQuest = document.createElement('div');
+    noQuest.textContent = 'No active quests.';
+    noQuest.style.opacity = '0.7';
+    questListEl.appendChild(noQuest);
+  } else {
+    activeQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item';
+      questEl.textContent = `🕒 ${quest.title}`;
+      questEl.title = quest.description;
+      questListEl.appendChild(questEl);
+    });
+    completedQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item completed';
+      questEl.textContent = `✔ ${quest.title}`;
+      questEl.title = quest.description;
+      questListEl.appendChild(questEl);
+    });
+  }
+
+  // Render clues
+  cluesListEl.innerHTML = '';
+  if (playerState.clues.size === 0) {
+    const noClue = document.createElement('div');
+    noClue.textContent = 'No clues obtained.';
+    noClue.style.opacity = '0.7';
+    cluesListEl.appendChild(noClue);
+  } else {
+    playerState.clues.forEach(clue => {
+      const clueEl = document.createElement('div');
+      clueEl.className = 'clue-item';
+      clueEl.textContent = `🔍 ${clue}`;
+      cluesListEl.appendChild(clueEl);
+    });
+  }
+}
+
+/**
+ * Initialize the entire system.
+ */
+function init() {
+  initNpcList();
+  renderPlayerStatus();
+  // Select first NPC by default
+  if (npcs.length > 0) {
+    selectNpc(npcs[0].id);
+  } else {
+    dialogueTextEl.textContent = 'No NPCs available.';
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+2025-11-30 19:27:18 - INFO - ================================================================================
+2025-11-30 19:27:18 - INFO - 
+✓ Initial code saved to: artifacts_output/Game Development-Role-Playing/task_3/iteration_0_initial.html
+2025-11-30 19:27:18 - INFO - 
+================================================================================
+2025-11-30 19:27:18 - INFO - EVALUATING INITIAL CODE
+2025-11-30 19:27:18 - INFO - ================================================================================
+2025-11-30 19:27:18 - INFO - Generating screenshots for initial code...
+2025-11-30 19:27:27 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 19:27:27 - INFO - Evaluating initial code...
+2025-11-30 19:27:40 - INFO - Initial evaluation completed in 13.26 seconds
+2025-11-30 19:27:40 - INFO - 
+Initial Scores:
+2025-11-30 19:27:40 - INFO - Individual Scores (JSON):
+{
+  "Is the NPC dialogue system fully implemented?": 9.0,
+  "Is the quest/task system functional?": 9.0,
+  "Is the NPC state management implemented?": 8.0,
+  "Is there a clue/information system that affects gameplay?": 9.0,
+  "Is the code robust?": 6.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-11-30 19:27:40 - INFO - Initial Calculated Sum: 83.0
+2025-11-30 19:27:40 - INFO - 
+================================================================================
+2025-11-30 19:27:40 - INFO - STEP 2: ITERATIVE IMPROVEMENT LOOP
+2025-11-30 19:27:40 - INFO - ================================================================================
+2025-11-30 19:27:40 - INFO - 
+================================================================================
+2025-11-30 19:27:40 - INFO - ITERATION 1
+2025-11-30 19:27:40 - INFO - ================================================================================
+2025-11-30 19:27:40 - INFO - Iteration Start Time: 2025-11-30 19:27:40
+2025-11-30 19:27:40 - INFO - 
+Generating screenshots for iteration 1...
+2025-11-30 19:27:48 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 19:27:48 - INFO - 
+Evaluating code for iteration 1...
+2025-11-30 19:27:59 - INFO - Evaluation completed in 10.41 seconds
+2025-11-30 19:27:59 - INFO - 
+================================================================================
+2025-11-30 19:27:59 - INFO - EVALUATION RESULTS - ITERATION 1
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - Individual Scores (JSON):
+{
+  "Is the NPC dialogue system fully implemented?": 9.0,
+  "Is the quest/task system functional?": 9.0,
+  "Is the NPC state management implemented?": 8.0,
+  "Is there a clue/information system that affects gameplay?": 9.0,
+  "Is the code robust?": 6.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-11-30 19:27:59 - INFO - Calculated Sum: 83.0
+2025-11-30 19:27:59 - INFO - Overall Score (from LLM): 79.0
+2025-11-30 19:27:59 - INFO - 
+================================================================================
+2025-11-30 19:27:59 - INFO - FULL EVALUATION FEEDBACK - ITERATION 1
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - ```json
+{
+  "Is the NPC dialogue system fully implemented?": "9",
+  "Is the quest/task system functional?": "9",
+  "Is the NPC state management implemented?": "8",
+  "Is there a clue/information system that affects gameplay?": "9",
+  "Is the code robust?": "6",
+  "Are there any innovative features that are eye-catching?": "6",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "9",
+  "Overall Score": "79"
+}
+```
+
+Reason:
+
+1. **Is the NPC dialogue system fully implemented? (9/10)**  
+   The dialogue system supports multiple NPCs, branching dialogue paths, and contextual responses based on quest states. It handles different dialogue nodes and player choices well. However, it lacks deeper contextual memory beyond quest states (e.g., no complex conditional dialogue based on multiple past choices or player mood). Still, it is very close to a full implementation.
+
+2. **Is the quest/task system functional? (9/10)**  
+   The quest system allows NPCs to offer quests, track quest progress, and mark quests as active or completed. Quest states are updated and reflected in dialogue. However, quest state persistence across sessions is missing (no localStorage or backend persistence). This is a minor deduction.
+
+3. **Is the NPC state management implemented? (8/10)**  
+   NPCs adjust dialogue based on quest states, which is a good form of state management. However, NPCs do not have time-based or more complex state changes, nor is there persistence of NPC states beyond the current session. The system could be improved by remembering more nuanced player interactions or NPC moods.
+
+4. **Is there a clue/information system that affects gameplay? (9/10)**  
+   Clues are tracked and displayed, and some clues are given as quest rewards. The clues have potential gameplay impact as they are presented as important information. The system could be enhanced with more variety or red herrings, but it is well implemented for the scope.
+
+5. **Is the code robust? (6/10)**  
+   The code handles normal flows well but lacks explicit error handling for undefined inputs or corrupted data. For example, unknown actions log a warning but do not recover gracefully. User input errors (e.g., forging weapon without enough iron ore) are handled with alerts, which is acceptable but could be improved with inline UI feedback. No try-catch or fallback mechanisms are present.
+
+6. **Are there any innovative features that are eye-catching? (6/10)**  
+   The system includes a simple inventory interaction (iron ore for forging), quest and clue integration, and accessible keyboard navigation. These are practical features enhancing experience. However, it lacks advanced innovations like NPC mood systems, voice acting, or dynamic animations.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean with no redundant dialogue systems or unrelated modules. All features relate directly to NPC interaction. No unnecessary animations or performance-harming effects are present.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modular with clear separation of concerns: NPC data, player state, UI rendering, and event handling. Comments are present and helpful. Some global state pollution exists (e.g., playerState is global), but it is manageable in this scope. No advanced design patterns are used, and code duplication is minimal.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The UI uses harmonious colors with good contrast, consistent spacing (mostly following 8px multiples), and professional fonts with adequate size and line height. The layout is clear and accessible. Minor improvements could be made in spacing around buttons or text for even better visual balance.
+
+10. **Is the dynamic interaction smooth and seamless? (9/10)**  
+    Interaction feedback is immediate with no noticeable delay. Transitions are simple but effective. Dialogue options and NPC status are clearly indicated. Keyboard accessibility is well supported. Minor improvements could be made with subtle animations or transition effects to enhance smoothness.
+
+**Summary:**  
+This is a well-executed, professional, and clean implementation of an interactive NPC system with branching dialogue, quest and clue management, and a polished UI. It lacks persistence across sessions and deeper NPC state complexity, and robustness could be improved with better error handling and UI feedback. Innovative features are practical but not groundbreaking. Overall, it is a strong and commendable solution with room for further sophistication.
+
+Final overall score: 79/100.
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - 
+================================================================================
+2025-11-30 19:27:59 - INFO - HTML CODE - ITERATION 1
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive NPC System</title>
+<style>
+  /* Basic reset and styling */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar for NPC list */
+  #npc-list {
+    width: 220px;
+    background: #2c2c44;
+    border-right: 2px solid #444466;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #npc-list h2 {
+    margin: 1rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  .npc-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #444466;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  .npc-item:hover, .npc-item.active {
+    background-color: #4a4a7a;
+  }
+
+  /* Main content area */
+  #npc-dialogue {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #282843;
+    padding: 1.5rem;
+  }
+
+  #npc-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #a0c4ff;
+  }
+
+  #dialogue-text {
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+  }
+
+  #choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  button.choice-btn {
+    background: #4a4a7a;
+    border: none;
+    color: #eee;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  button.choice-btn:hover:not(:disabled) {
+    background-color: #6a6ab0;
+  }
+
+  button.choice-btn:disabled {
+    background-color: #2a2a4a;
+    cursor: default;
+  }
+
+  /* Player status panel */
+  #player-status {
+    width: 280px;
+    background: #2c2c44;
+    border-left: 2px solid #444466;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #player-status h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  #quest-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+  }
+
+  .quest-item {
+    background: #3a3a6a;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.95rem;
+  }
+
+  .quest-item.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  #clues-list {
+    margin-top: 1rem;
+  }
+
+  .clue-item {
+    background: #3a3a6a;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  /* Scrollbar styling */
+  #quest-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  #quest-list::-webkit-scrollbar-thumb {
+    background: #555577;
+    border-radius: 4px;
+  }
+  #quest-list::-webkit-scrollbar-track {
+    background: #2c2c44;
+  }
+</style>
+</head>
+<body>
+  <!-- NPC List Sidebar -->
+  <nav id="npc-list" aria-label="NPC List">
+    <h2>NPCs</h2>
+    <!-- NPC items inserted dynamically -->
+  </nav>
+
+  <!-- Dialogue and interaction area -->
+  <main id="npc-dialogue" role="main" aria-live="polite" aria-atomic="true">
+    <div id="npc-name" aria-label="NPC Name"></div>
+    <div id="dialogue-text" aria-label="Dialogue Text"></div>
+    <div id="choices" role="list" aria-label="Dialogue Choices"></div>
+  </main>
+
+  <!-- Player status panel -->
+  <aside id="player-status" aria-label="Player Status">
+    <h2>Quests</h2>
+    <div id="quest-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+    <h2>Clues</h2>
+    <div id="clues-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+  </aside>
+
+<script>
+/**
+ * Interactive NPC System
+ * 
+ * This system allows players to select NPCs, converse with them,
+ * accept quests, and obtain clues. Player progression is tracked
+ * and dialogue changes based on quest states.
+ * 
+ * Author: Code Expert
+ * Date: 2024
+ */
+
+// Define NPC data with dialogues, quests, and clues
+const npcs = [
+  {
+    id: 'elder_mira',
+    name: 'Elder Mira',
+    dialogues: {
+      start: {
+        text: "Greetings, traveler. Our village is in peril. Will you help us?",
+        choices: [
+          { text: "Tell me more about the danger.", next: 'danger_info' },
+          { text: "I'm not interested.", next: 'decline' }
+        ]
+      },
+      danger_info: {
+        text: "A dark shadow looms in the forest. Strange creatures have been seen. Will you investigate?",
+        choices: [
+          { text: "I will investigate the forest.", action: 'acceptQuest', questId: 'forest_shadow', next: 'quest_accepted' },
+          { text: "Sounds too dangerous.", next: 'decline' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you, brave one. Return when you have news.",
+        choices: [
+          { text: "I will be back.", next: 'end' }
+        ]
+      },
+      decline: {
+        text: "I see. May fortune favor you elsewhere.",
+        choices: [
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Have you discovered the source of the shadow?",
+        choices: [
+          { text: "Yes, the forest is safe now.", action: 'completeQuest', questId: 'forest_shadow', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "You have our eternal gratitude. Please take this amulet as a token.",
+        choices: [
+          { text: "Thank you.", action: 'giveClue', clue: 'Amulet of Light', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Farewell.",
+        choices: []
+      }
+    },
+    // Quests this NPC can give
+    quests: [
+      {
+        id: 'forest_shadow',
+        title: 'Investigate the Forest Shadow',
+        description: 'Explore the forest and find the source of the dark shadow threatening the village.',
+        status: 'not accepted' // can be 'not accepted', 'active', 'completed'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'merchant_lyra',
+    name: 'Merchant Lyra',
+    dialogues: {
+      start: {
+        text: "Welcome! Looking for something special? I might have some rare items.",
+        choices: [
+          { text: "Do you have any quests?", next: 'quest_offer' },
+          { text: "Any rumors or clues?", next: 'clues' },
+          { text: "Just browsing, thanks.", next: 'end' }
+        ]
+      },
+      quest_offer: {
+        text: "Actually, yes. I lost a precious gem in the caves nearby. Can you retrieve it?",
+        choices: [
+          { text: "I will find your gem.", action: 'acceptQuest', questId: 'find_gem', next: 'quest_accepted' },
+          { text: "Not right now.", next: 'end' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you! The gem is valuable to me. Please hurry.",
+        choices: [
+          { text: "On my way.", next: 'end' }
+        ]
+      },
+      clues: {
+        text: "I heard the blacksmith saw strange lights near the old ruins last night.",
+        choices: [
+          { text: "Thanks for the info.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Did you find my gem?",
+        choices: [
+          { text: "Yes, here it is.", action: 'completeQuest', questId: 'find_gem', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "Wonderful! Here's a discount coupon for your trouble.",
+        choices: [
+          { text: "Thanks!", action: 'giveClue', clue: 'Discount Coupon', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Safe travels!",
+        choices: []
+      }
+    },
+    quests: [
+      {
+        id: 'find_gem',
+        title: 'Retrieve the Lost Gem',
+        description: 'Find and return the precious gem lost in the caves.',
+        status: 'not accepted'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'blacksmith_tor',
+    name: 'Blacksmith Tor',
+    dialogues: {
+      start: {
+        text: "Hey there! If you need weapons or info, I'm your man.",
+        choices: [
+          { text: "Any news about the ruins?", next: 'ruins_info' },
+          { text: "Can you forge me a weapon?", next: 'forge_weapon' },
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      ruins_info: {
+        text: "Strange lights and noises come from the ruins at night. Some say it's haunted.",
+        choices: [
+          { text: "Thanks for the tip.", next: 'end' }
+        ]
+      },
+      forge_weapon: {
+        text: "I can forge a sword if you bring me 5 iron ores. Do you have them?",
+        choices: [
+          { text: "Yes, here they are.", action: 'forgeWeapon', next: 'weapon_forged' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      weapon_forged: {
+        text: "Here's your new sword! Use it well.",
+        choices: [
+          { text: "Thank you!", next: 'end' }
+        ]
+      },
+      end: {
+        text: "Take care!",
+        choices: []
+      }
+    },
+    quests: [],
+    clues: []
+  }
+];
+
+// Player state to track quests, clues, inventory, and current NPC/dialogue
+const playerState = {
+  currentNpcId: null,
+  currentDialogueKey: 'start',
+  quests: {}, // questId -> status ('not accepted', 'active', 'completed')
+  clues: new Set(),
+  inventory: {
+    ironOre: 0
+  }
+};
+
+// Cache DOM elements for performance
+const npcListEl = document.getElementById('npc-list');
+const npcNameEl = document.getElementById('npc-name');
+const dialogueTextEl = document.getElementById('dialogue-text');
+const choicesEl = document.getElementById('choices');
+const questListEl = document.getElementById('quest-list');
+const cluesListEl = document.getElementById('clues-list');
+
+/**
+ * Initialize the NPC list sidebar with clickable NPCs.
+ */
+function initNpcList() {
+  npcs.forEach(npc => {
+    const npcItem = document.createElement('div');
+    npcItem.classList.add('npc-item');
+    npcItem.textContent = npc.name;
+    npcItem.setAttribute('tabindex', '0');
+    npcItem.setAttribute('role', 'button');
+    npcItem.setAttribute('aria-pressed', 'false');
+    npcItem.dataset.npcId = npc.id;
+
+    // Click and keyboard support
+    npcItem.addEventListener('click', () => selectNpc(npc.id));
+    npcItem.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNpc(npc.id);
+      }
+    });
+
+    npcListEl.appendChild(npcItem);
+  });
+}
+
+/**
+ * Select an NPC to start or continue conversation.
+ * @param {string} npcId 
+ */
+function selectNpc(npcId) {
+  if (playerState.currentNpcId === npcId) return; // Already selected
+
+  playerState.currentNpcId = npcId;
+
+  // Reset dialogue key to 'start' or to a special dialogue if quest active/completed
+  const npc = getCurrentNpc();
+
+  // Determine dialogue start point based on quest states
+  let dialogueKey = 'start';
+
+  // Check if NPC has quests and if any are active or completed to adjust dialogue
+  if (npc.quests.length > 0) {
+    for (const quest of npc.quests) {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') {
+        dialogueKey = 'after_quest';
+        break;
+      } else if (status === 'completed') {
+        dialogueKey = 'quest_completed';
+        break;
+      }
+    }
+  }
+
+  playerState.currentDialogueKey = dialogueKey;
+
+  updateNpcListActive();
+  renderDialogue();
+}
+
+/**
+ * Get the currently selected NPC object.
+ * @returns {object|null}
+ */
+function getCurrentNpc() {
+  return npcs.find(npc => npc.id === playerState.currentNpcId) || null;
+}
+
+/**
+ * Update the NPC list UI to highlight the selected NPC.
+ */
+function updateNpcListActive() {
+  const npcItems = npcListEl.querySelectorAll('.npc-item');
+  npcItems.forEach(item => {
+    if (item.dataset.npcId === playerState.currentNpcId) {
+      item.classList.add('active');
+      item.setAttribute('aria-pressed', 'true');
+      item.focus();
+    } else {
+      item.classList.remove('active');
+      item.setAttribute('aria-pressed', 'false');
+    }
+  });
+}
+
+/**
+ * Render the current dialogue text and choices for the selected NPC.
+ */
+function renderDialogue() {
+  const npc = getCurrentNpc();
+  if (!npc) {
+    npcNameEl.textContent = '';
+    dialogueTextEl.textContent = 'Select an NPC to start conversation.';
+    choicesEl.innerHTML = '';
+    return;
+  }
+
+  npcNameEl.textContent = npc.name;
+
+  // Get dialogue node by currentDialogueKey
+  let dialogueNode = npc.dialogues[playerState.currentDialogueKey];
+
+  // If dialogue node not found, fallback to 'start'
+  if (!dialogueNode) {
+    dialogueNode = npc.dialogues['start'];
+    playerState.currentDialogueKey = 'start';
+  }
+
+  dialogueTextEl.textContent = dialogueNode.text;
+
+  // Clear previous choices
+  choicesEl.innerHTML = '';
+
+  // If no choices, show a disabled button to close dialogue
+  if (!dialogueNode.choices || dialogueNode.choices.length === 0) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Close';
+    btn.disabled = true;
+    choicesEl.appendChild(btn);
+    return;
+  }
+
+  // Create buttons for each choice
+  dialogueNode.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.setAttribute('role', 'listitem');
+    btn.addEventListener('click', () => handleChoice(choice));
+    choicesEl.appendChild(btn);
+  });
+}
+
+/**
+ * Handle a player's choice selection.
+ * @param {object} choice 
+ */
+function handleChoice(choice) {
+  // Process any action associated with the choice
+  if (choice.action) {
+    switch (choice.action) {
+      case 'acceptQuest':
+        acceptQuest(choice.questId);
+        break;
+      case 'completeQuest':
+        completeQuest(choice.questId);
+        break;
+      case 'giveClue':
+        addClue(choice.clue);
+        break;
+      case 'forgeWeapon':
+        forgeWeapon();
+        break;
+      default:
+        console.warn('Unknown action:', choice.action);
+    }
+  }
+
+  // Move to the next dialogue node if specified
+  if (choice.next) {
+    playerState.currentDialogueKey = choice.next;
+  } else {
+    // If no next, end conversation (reset dialogue)
+    playerState.currentDialogueKey = 'end';
+  }
+
+  renderDialogue();
+  renderPlayerStatus();
+}
+
+/**
+ * Accept a quest by questId.
+ * @param {string} questId 
+ */
+function acceptQuest(questId) {
+  // Mark quest as active in player state
+  playerState.quests[questId] = 'active';
+}
+
+/**
+ * Complete a quest by questId.
+ * @param {string} questId 
+ */
+function completeQuest(questId) {
+  // Mark quest as completed in player state
+  playerState.quests[questId] = 'completed';
+}
+
+/**
+ * Add a clue to the player's clue list.
+ * @param {string} clue 
+ */
+function addClue(clue) {
+  playerState.clues.add(clue);
+}
+
+/**
+ * Simulate forging a weapon if player has enough iron ore.
+ */
+function forgeWeapon() {
+  if (playerState.inventory.ironOre >= 5) {
+    playerState.inventory.ironOre -= 5;
+    alert("Blacksmith Tor has forged a sword for you!");
+  } else {
+    alert("You don't have enough iron ore. Collect 5 to forge a weapon.");
+    // Force dialogue back to start since forging failed
+    playerState.currentDialogueKey = 'start';
+  }
+}
+
+/**
+ * Render the player's current quests and clues in the status panel.
+ */
+function renderPlayerStatus() {
+  // Clear quest list
+  questListEl.innerHTML = '';
+
+  // Show quests with their status
+  const activeQuests = [];
+  const completedQuests = [];
+
+  // Collect quests from all NPCs and merge with player state
+  npcs.forEach(npc => {
+    npc.quests.forEach(quest => {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') activeQuests.push({ ...quest, status });
+      else if (status === 'completed') completedQuests.push({ ...quest, status });
+    });
+  });
+
+  if (activeQuests.length === 0 && completedQuests.length === 0) {
+    const noQuest = document.createElement('div');
+    noQuest.textContent = 'No active quests.';
+    noQuest.style.opacity = '0.7';
+    questListEl.appendChild(noQuest);
+  } else {
+    activeQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item';
+      questEl.textContent = `🕒 ${quest.title}`;
+      questEl.title = quest.description;
+      questListEl.appendChild(questEl);
+    });
+    completedQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item completed';
+      questEl.textContent = `✔ ${quest.title}`;
+      questEl.title = quest.description;
+      questListEl.appendChild(questEl);
+    });
+  }
+
+  // Render clues
+  cluesListEl.innerHTML = '';
+  if (playerState.clues.size === 0) {
+    const noClue = document.createElement('div');
+    noClue.textContent = 'No clues obtained.';
+    noClue.style.opacity = '0.7';
+    cluesListEl.appendChild(noClue);
+  } else {
+    playerState.clues.forEach(clue => {
+      const clueEl = document.createElement('div');
+      clueEl.className = 'clue-item';
+      clueEl.textContent = `🔍 ${clue}`;
+      cluesListEl.appendChild(clueEl);
+    });
+  }
+}
+
+/**
+ * Initialize the entire system.
+ */
+function init() {
+  initNpcList();
+  renderPlayerStatus();
+  // Select first NPC by default
+  if (npcs.length > 0) {
+    selectNpc(npcs[0].id);
+  } else {
+    dialogueTextEl.textContent = 'No NPCs available.';
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - 
+================================================================================
+2025-11-30 19:27:59 - INFO - SCORE SUMMARY - ITERATION 1
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - ✓ Is the NPC dialogue system fully implemented?: 9.0/10
+2025-11-30 19:27:59 - INFO - ✓ Is the quest/task system functional?: 9.0/10
+2025-11-30 19:27:59 - INFO - ✓ Is the NPC state management implemented?: 8.0/10
+2025-11-30 19:27:59 - INFO - ✓ Is there a clue/information system that affects gameplay?: 9.0/10
+2025-11-30 19:27:59 - INFO - ✗ Is the code robust?: 6.0/10
+2025-11-30 19:27:59 - INFO - ✗ Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:27:59 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 19:27:59 - INFO - ✓ Does the code have engineering quality?: 8.0/10
+2025-11-30 19:27:59 - INFO - ✓ Does the interface vision meet professional design standards?: 9.0/10
+2025-11-30 19:27:59 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 9.0/10
+2025-11-30 19:27:59 - INFO - 
+⚠ Found 2 area(s) needing improvement:
+2025-11-30 19:27:59 - INFO -   - Is the code robust?: 6.0/10
+2025-11-30 19:27:59 - INFO -   - Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:27:59 - INFO - 
+Creating improvement prompt for 2 weak area(s)...
+2025-11-30 19:27:59 - INFO - Improvement prompt created (length: 20415 characters)
+2025-11-30 19:27:59 - INFO - 
+================================================================================
+2025-11-30 19:27:59 - INFO - IMPROVEMENT ROUND 1
+2025-11-30 19:27:59 - INFO - ================================================================================
+2025-11-30 19:27:59 - INFO - Model: gpt-4.1-mini
+2025-11-30 19:27:59 - INFO - Temperature: 0.0
+2025-11-30 19:27:59 - INFO - Improvement Prompt Length: 20415 characters
+2025-11-30 19:27:59 - INFO - Improvement Prompt Preview:
+You are an expert web front-end developer. Your task is to improve existing code based on specific feedback.
+
+ORIGINAL TASK:
+You are a code expert. Please use your professional knowledge to generate accurate and professional responses. Make sure the code you generate is executable for demonstration purposes.
+
+Please use HTML and JavaScript to implement an interactive NPC.
+
+**Task**: Implement an interactive NPC system where players can converse with NPCs, accept quests, or obtain clues.
+
+**Hint*...
+2025-11-30 19:28:53 - INFO - ✓ Improved code generated for iteration 1 (took 54.03 seconds)
+2025-11-30 19:28:53 - INFO - Improved code length: 20691 characters
+2025-11-30 19:28:53 - INFO - ✓ Improved code saved to: artifacts_output/Game Development-Role-Playing/task_3/iteration_1.html
+2025-11-30 19:28:53 - INFO - Iteration 1 completed in 72.88 seconds
+2025-11-30 19:28:53 - INFO - 
+================================================================================
+2025-11-30 19:28:53 - INFO - ITERATION 2
+2025-11-30 19:28:53 - INFO - ================================================================================
+2025-11-30 19:28:53 - INFO - Iteration Start Time: 2025-11-30 19:28:53
+2025-11-30 19:28:53 - INFO - 
+Generating screenshots for iteration 2...
+2025-11-30 19:29:03 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 19:29:03 - INFO - 
+Evaluating code for iteration 2...
+2025-11-30 19:29:16 - INFO - Evaluation completed in 13.06 seconds
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - EVALUATION RESULTS - ITERATION 2
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - Individual Scores (JSON):
+{
+  "Is the NPC dialogue system fully implemented?": 9.0,
+  "Is the quest/task system functional?": 9.0,
+  "Is the NPC state management implemented?": 8.0,
+  "Is there a clue/information system that affects gameplay?": 9.0,
+  "Is the code robust?": 8.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-11-30 19:29:16 - INFO - Calculated Sum: 85.0
+2025-11-30 19:29:16 - INFO - Overall Score (from LLM): 83.0
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - FULL EVALUATION FEEDBACK - ITERATION 2
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - ```json
+{
+  "Is the NPC dialogue system fully implemented?": "9",
+  "Is the quest/task system functional?": "9",
+  "Is the NPC state management implemented?": "8",
+  "Is there a clue/information system that affects gameplay?": "9",
+  "Is the code robust?": "8",
+  "Are there any innovative features that are eye-catching?": "6",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "9",
+  "Overall Score": "83"
+}
+```
+
+Reason:
+
+1. **Is the NPC dialogue system fully implemented? (9/10)**  
+   The system supports multiple NPCs, branching dialogue paths, and contextual responses based on quest states. Dialogue nodes include choices that lead to different branches, and actions can trigger quest acceptance, completion, or clue acquisition. However, the dialogue system does not appear to support deeply nested or highly complex branching beyond the quest-related states, and there is no explicit memory of past dialogue choices beyond quest states. Hence, near full marks but not perfect.
+
+2. **Is the quest/task system functional? (9/10)**  
+   The quest system allows NPCs to offer quests, track quest progress (not accepted, active, completed), and provide rewards (clues). Quest states are tracked in the player state and reflected in dialogue changes. Quest persistence is in-memory only (no localStorage or backend persistence), which is acceptable for demonstration but deducts a point. Quest failure states are not implemented, which is a minor omission.
+
+3. **Is the NPC state management implemented? (8/10)**  
+   NPCs adjust dialogue based on quest states, reflecting player progress. The system remembers quest acceptance and completion, influencing dialogue nodes. However, NPC behavior beyond quest-related dialogue changes is static (e.g., no time-of-day or mood changes). Also, state persistence is only in-memory, so state is lost on page reload. This limits the score slightly.
+
+4. **Is there a clue/information system that affects gameplay? (9/10)**  
+   Clues are tracked and displayed in the player status panel. Clues are given as rewards and can be obtained multiple times with feedback preventing duplicates. The clues influence player knowledge but do not appear to directly affect dialogue branching or quest outcomes beyond being collectible items. The system is well implemented but could be more varied or impactful.
+
+5. **Is the code robust? (8/10)**  
+   The code includes error handling for invalid NPC or choice selections, missing quest IDs, and unknown actions, with user feedback messages. It uses try-catch blocks in critical areas and prevents crashes. However, robustness is limited to basic input validation and does not cover persistence failures or concurrency issues (not expected here). Overall, robustness is good for a demo.
+
+6. **Are there any innovative features that are eye-catching? (6/10)**  
+   The system includes:  
+   - Quest and clue integration with dialogue.  
+   - Inline feedback messages for user actions.  
+   - Keyboard accessibility for NPC selection.  
+   However, it lacks advanced innovations such as NPC mood systems, voice acting, dynamic facial expressions, or animations. The feedback message and accessibility features are positive but not groundbreaking.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean with no redundant dialogue systems or unrelated modules. The inventory system is minimal and connected to forging weapons, which is relevant. No unnecessary animations or performance-harming effects are present. No redundancy detected.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modular with clear separation of data (NPCs), state (playerState), and UI rendering functions. Functions are well named and scoped. Comments are present and helpful. There is no global state pollution beyond a single playerState object, which is acceptable here. Some minor improvements could be made by further separating concerns or using classes/modules, but overall quality is good.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The UI uses harmonious dark color schemes with good contrast and consistent spacing following 8px multiples. Font sizes are professional (≥14px) with good line height. Layout is clear and uncluttered with distinct panels for NPCs, dialogue, and player status. Minor improvements could be made in button sizing or responsiveness, but the design is very solid.
+
+10. **Is the dynamic interaction smooth and seamless? (9/10)**  
+    Interaction feedback is immediate with no noticeable delay. Transitions are simple but smooth with subtle hover effects and feedback message fade-ins. Dialogue options are clearly indicated as buttons with keyboard support. Navigation through conversation trees is intuitive. No jarring transitions or confusing navigation detected. Minor enhancements could include animated transitions or loading indicators.
+
+**Summary:**  
+This is a well-executed, professional, and clean implementation of an interactive NPC system with branching dialogue, quest management, and clue tracking. It demonstrates strong engineering practices, accessibility, and user experience design. Minor deductions are due to lack of persistence beyond session, limited NPC state complexity, and absence of advanced innovative features. Overall, it is a high-quality demonstration suitable for further extension in a game project.
+
+Final overall score: 83/100.
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - HTML CODE - ITERATION 2
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive NPC System</title>
+<style>
+  /* Basic reset and styling */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar for NPC list */
+  #npc-list {
+    width: 220px;
+    background: #2c2c44;
+    border-right: 2px solid #444466;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #npc-list h2 {
+    margin: 1rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  .npc-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #444466;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  .npc-item:hover, .npc-item.active {
+    background-color: #4a4a7a;
+  }
+
+  /* Main content area */
+  #npc-dialogue {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #282843;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  #npc-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #a0c4ff;
+  }
+
+  #dialogue-text {
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+  }
+
+  #choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  button.choice-btn {
+    background: #4a4a7a;
+    border: none;
+    color: #eee;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  button.choice-btn:hover:not(:disabled) {
+    background-color: #6a6ab0;
+  }
+
+  button.choice-btn:disabled {
+    background-color: #2a2a4a;
+    cursor: default;
+  }
+
+  /* Inline feedback message */
+  #feedback-message {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    background: #b23a3a;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  #feedback-message.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Player status panel */
+  #player-status {
+    width: 280px;
+    background: #2c2c44;
+    border-left: 2px solid #444466;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #player-status h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  #quest-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+  }
+
+  .quest-item {
+    background: #3a3a6a;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.95rem;
+  }
+
+  .quest-item.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  #clues-list {
+    margin-top: 1rem;
+  }
+
+  .clue-item {
+    background: #3a3a6a;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  /* Scrollbar styling */
+  #quest-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  #quest-list::-webkit-scrollbar-thumb {
+    background: #555577;
+    border-radius: 4px;
+  }
+  #quest-list::-webkit-scrollbar-track {
+    background: #2c2c44;
+  }
+</style>
+</head>
+<body>
+  <!-- NPC List Sidebar -->
+  <nav id="npc-list" aria-label="NPC List">
+    <h2>NPCs</h2>
+    <!-- NPC items inserted dynamically -->
+  </nav>
+
+  <!-- Dialogue and interaction area -->
+  <main id="npc-dialogue" role="main" aria-live="polite" aria-atomic="true">
+    <div id="npc-name" aria-label="NPC Name"></div>
+    <div id="dialogue-text" aria-label="Dialogue Text"></div>
+    <div id="choices" role="list" aria-label="Dialogue Choices"></div>
+    <div id="feedback-message" role="alert" aria-live="assertive" aria-atomic="true"></div>
+  </main>
+
+  <!-- Player status panel -->
+  <aside id="player-status" aria-label="Player Status">
+    <h2>Quests</h2>
+    <div id="quest-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+    <h2>Clues</h2>
+    <div id="clues-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+  </aside>
+
+<script>
+/**
+ * Interactive NPC System
+ * 
+ * This system allows players to select NPCs, converse with them,
+ * accept quests, and obtain clues. Player progression is tracked
+ * and dialogue changes based on quest states.
+ * 
+ * Author: Code Expert
+ * Date: 2024
+ */
+
+// Define NPC data with dialogues, quests, and clues
+const npcs = [
+  {
+    id: 'elder_mira',
+    name: 'Elder Mira',
+    dialogues: {
+      start: {
+        text: "Greetings, traveler. Our village is in peril. Will you help us?",
+        choices: [
+          { text: "Tell me more about the danger.", next: 'danger_info' },
+          { text: "I'm not interested.", next: 'decline' }
+        ]
+      },
+      danger_info: {
+        text: "A dark shadow looms in the forest. Strange creatures have been seen. Will you investigate?",
+        choices: [
+          { text: "I will investigate the forest.", action: 'acceptQuest', questId: 'forest_shadow', next: 'quest_accepted' },
+          { text: "Sounds too dangerous.", next: 'decline' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you, brave one. Return when you have news.",
+        choices: [
+          { text: "I will be back.", next: 'end' }
+        ]
+      },
+      decline: {
+        text: "I see. May fortune favor you elsewhere.",
+        choices: [
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Have you discovered the source of the shadow?",
+        choices: [
+          { text: "Yes, the forest is safe now.", action: 'completeQuest', questId: 'forest_shadow', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "You have our eternal gratitude. Please take this amulet as a token.",
+        choices: [
+          { text: "Thank you.", action: 'giveClue', clue: 'Amulet of Light', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Farewell.",
+        choices: []
+      }
+    },
+    // Quests this NPC can give
+    quests: [
+      {
+        id: 'forest_shadow',
+        title: 'Investigate the Forest Shadow',
+        description: 'Explore the forest and find the source of the dark shadow threatening the village.',
+        status: 'not accepted' // can be 'not accepted', 'active', 'completed'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'merchant_lyra',
+    name: 'Merchant Lyra',
+    dialogues: {
+      start: {
+        text: "Welcome! Looking for something special? I might have some rare items.",
+        choices: [
+          { text: "Do you have any quests?", next: 'quest_offer' },
+          { text: "Any rumors or clues?", next: 'clues' },
+          { text: "Just browsing, thanks.", next: 'end' }
+        ]
+      },
+      quest_offer: {
+        text: "Actually, yes. I lost a precious gem in the caves nearby. Can you retrieve it?",
+        choices: [
+          { text: "I will find your gem.", action: 'acceptQuest', questId: 'find_gem', next: 'quest_accepted' },
+          { text: "Not right now.", next: 'end' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you! The gem is valuable to me. Please hurry.",
+        choices: [
+          { text: "On my way.", next: 'end' }
+        ]
+      },
+      clues: {
+        text: "I heard the blacksmith saw strange lights near the old ruins last night.",
+        choices: [
+          { text: "Thanks for the info.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Did you find my gem?",
+        choices: [
+          { text: "Yes, here it is.", action: 'completeQuest', questId: 'find_gem', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "Wonderful! Here's a discount coupon for your trouble.",
+        choices: [
+          { text: "Thanks!", action: 'giveClue', clue: 'Discount Coupon', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Safe travels!",
+        choices: []
+      }
+    },
+    quests: [
+      {
+        id: 'find_gem',
+        title: 'Retrieve the Lost Gem',
+        description: 'Find and return the precious gem lost in the caves.',
+        status: 'not accepted'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'blacksmith_tor',
+    name: 'Blacksmith Tor',
+    dialogues: {
+      start: {
+        text: "Hey there! If you need weapons or info, I'm your man.",
+        choices: [
+          { text: "Any news about the ruins?", next: 'ruins_info' },
+          { text: "Can you forge me a weapon?", next: 'forge_weapon' },
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      ruins_info: {
+        text: "Strange lights and noises come from the ruins at night. Some say it's haunted.",
+        choices: [
+          { text: "Thanks for the tip.", next: 'end' }
+        ]
+      },
+      forge_weapon: {
+        text: "I can forge a sword if you bring me 5 iron ores. Do you have them?",
+        choices: [
+          { text: "Yes, here they are.", action: 'forgeWeapon', next: 'weapon_forged' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      weapon_forged: {
+        text: "Here's your new sword! Use it well.",
+        choices: [
+          { text: "Thank you!", next: 'end' }
+        ]
+      },
+      end: {
+        text: "Take care!",
+        choices: []
+      }
+    },
+    quests: [],
+    clues: []
+  }
+];
+
+// Player state to track quests, clues, inventory, and current NPC/dialogue
+const playerState = {
+  currentNpcId: null,
+  currentDialogueKey: 'start',
+  quests: {}, // questId -> status ('not accepted', 'active', 'completed')
+  clues: new Set(),
+  inventory: {
+    ironOre: 0
+  }
+};
+
+// Cache DOM elements for performance
+const npcListEl = document.getElementById('npc-list');
+const npcNameEl = document.getElementById('npc-name');
+const dialogueTextEl = document.getElementById('dialogue-text');
+const choicesEl = document.getElementById('choices');
+const questListEl = document.getElementById('quest-list');
+const cluesListEl = document.getElementById('clues-list');
+const feedbackMessageEl = document.getElementById('feedback-message');
+
+let feedbackTimeoutId = null;
+
+/**
+ * Show inline feedback message in the dialogue area.
+ * @param {string} message 
+ * @param {number} durationMs 
+ */
+function showFeedback(message, durationMs = 3000) {
+  if (!message) return;
+  clearTimeout(feedbackTimeoutId);
+  feedbackMessageEl.textContent = message;
+  feedbackMessageEl.classList.add('show');
+  feedbackTimeoutId = setTimeout(() => {
+    feedbackMessageEl.classList.remove('show');
+    feedbackMessageEl.textContent = '';
+  }, durationMs);
+}
+
+/**
+ * Initialize the NPC list sidebar with clickable NPCs.
+ */
+function initNpcList() {
+  npcs.forEach(npc => {
+    const npcItem = document.createElement('div');
+    npcItem.classList.add('npc-item');
+    npcItem.textContent = npc.name;
+    npcItem.setAttribute('tabindex', '0');
+    npcItem.setAttribute('role', 'button');
+    npcItem.setAttribute('aria-pressed', 'false');
+    npcItem.dataset.npcId = npc.id;
+
+    // Click and keyboard support
+    npcItem.addEventListener('click', () => selectNpc(npc.id));
+    npcItem.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNpc(npc.id);
+      }
+    });
+
+    npcListEl.appendChild(npcItem);
+  });
+}
+
+/**
+ * Select an NPC to start or continue conversation.
+ * @param {string} npcId 
+ */
+function selectNpc(npcId) {
+  if (!npcId || typeof npcId !== 'string') {
+    showFeedback('Invalid NPC selection.');
+    return;
+  }
+  if (playerState.currentNpcId === npcId) return; // Already selected
+
+  const npc = npcs.find(n => n.id === npcId);
+  if (!npc) {
+    showFeedback('NPC not found.');
+    return;
+  }
+
+  playerState.currentNpcId = npcId;
+
+  // Reset dialogue key to 'start' or to a special dialogue if quest active/completed
+  // Determine dialogue start point based on quest states
+  let dialogueKey = 'start';
+
+  try {
+    if (npc.quests && npc.quests.length > 0) {
+      for (const quest of npc.quests) {
+        const status = playerState.quests[quest.id] || 'not accepted';
+        if (status === 'active') {
+          dialogueKey = 'after_quest';
+          break;
+        } else if (status === 'completed') {
+          dialogueKey = 'quest_completed';
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error determining dialogue start:', e);
+    dialogueKey = 'start';
+  }
+
+  playerState.currentDialogueKey = dialogueKey;
+
+  updateNpcListActive();
+  renderDialogue();
+}
+
+/**
+ * Get the currently selected NPC object.
+ * @returns {object|null}
+ */
+function getCurrentNpc() {
+  if (!playerState.currentNpcId) return null;
+  return npcs.find(npc => npc.id === playerState.currentNpcId) || null;
+}
+
+/**
+ * Update the NPC list UI to highlight the selected NPC.
+ */
+function updateNpcListActive() {
+  const npcItems = npcListEl.querySelectorAll('.npc-item');
+  npcItems.forEach(item => {
+    if (item.dataset.npcId === playerState.currentNpcId) {
+      item.classList.add('active');
+      item.setAttribute('aria-pressed', 'true');
+      item.focus();
+    } else {
+      item.classList.remove('active');
+      item.setAttribute('aria-pressed', 'false');
+    }
+  });
+}
+
+/**
+ * Render the current dialogue text and choices for the selected NPC.
+ */
+function renderDialogue() {
+  const npc = getCurrentNpc();
+  if (!npc) {
+    npcNameEl.textContent = '';
+    dialogueTextEl.textContent = 'Select an NPC to start conversation.';
+    choicesEl.innerHTML = '';
+    return;
+  }
+
+  npcNameEl.textContent = npc.name;
+
+  // Get dialogue node by currentDialogueKey
+  let dialogueNode = null;
+  try {
+    dialogueNode = npc.dialogues[playerState.currentDialogueKey];
+  } catch (e) {
+    console.error('Error accessing dialogue node:', e);
+  }
+
+  // If dialogue node not found, fallback to 'start'
+  if (!dialogueNode) {
+    dialogueNode = npc.dialogues['start'];
+    playerState.currentDialogueKey = 'start';
+  }
+
+  dialogueTextEl.textContent = dialogueNode.text || '';
+
+  // Clear previous choices
+  choicesEl.innerHTML = '';
+
+  // If no choices, show a disabled button to close dialogue
+  if (!dialogueNode.choices || dialogueNode.choices.length === 0) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Close';
+    btn.disabled = true;
+    choicesEl.appendChild(btn);
+    return;
+  }
+
+  // Create buttons for each choice
+  dialogueNode.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text || '...';
+    btn.setAttribute('role', 'listitem');
+    btn.addEventListener('click', () => handleChoice(choice));
+    choicesEl.appendChild(btn);
+  });
+}
+
+/**
+ * Handle a player's choice selection.
+ * @param {object} choice 
+ */
+function handleChoice(choice) {
+  if (!choice || typeof choice !== 'object') {
+    showFeedback('Invalid choice selected.');
+    return;
+  }
+
+  // Process any action associated with the choice
+  if (choice.action) {
+    try {
+      switch (choice.action) {
+        case 'acceptQuest':
+          if (typeof choice.questId === 'string') {
+            acceptQuest(choice.questId);
+          } else {
+            showFeedback('Quest ID missing or invalid.');
+          }
+          break;
+        case 'completeQuest':
+          if (typeof choice.questId === 'string') {
+            completeQuest(choice.questId);
+          } else {
+            showFeedback('Quest ID missing or invalid.');
+          }
+          break;
+        case 'giveClue':
+          if (typeof choice.clue === 'string') {
+            addClue(choice.clue);
+          } else {
+            showFeedback('Clue data missing or invalid.');
+          }
+          break;
+        case 'forgeWeapon':
+          forgeWeapon();
+          break;
+        default:
+          console.warn('Unknown action:', choice.action);
+          showFeedback(`Unknown action: ${choice.action}`);
+      }
+    } catch (e) {
+      console.error('Error handling action:', e);
+      showFeedback('An error occurred processing your choice.');
+    }
+  }
+
+  // Move to the next dialogue node if specified
+  if (choice.next) {
+    playerState.currentDialogueKey = choice.next;
+  } else {
+    // If no next, end conversation (reset dialogue)
+    playerState.currentDialogueKey = 'end';
+  }
+
+  renderDialogue();
+  renderPlayerStatus();
+}
+
+/**
+ * Accept a quest by questId.
+ * @param {string} questId 
+ */
+function acceptQuest(questId) {
+  if (!questId) {
+    showFeedback('Invalid quest ID.');
+    return;
+  }
+  // Mark quest as active in player state
+  playerState.quests[questId] = 'active';
+  showFeedback('Quest accepted!');
+}
+
+/**
+ * Complete a quest by questId.
+ * @param {string} questId 
+ */
+function completeQuest(questId) {
+  if (!questId) {
+    showFeedback('Invalid quest ID.');
+    return;
+  }
+  // Mark quest as completed in player state
+  if (playerState.quests[questId] === 'active') {
+    playerState.quests[questId] = 'completed';
+    showFeedback('Quest completed!');
+  } else {
+    showFeedback('You have not accepted this quest.');
+  }
+}
+
+/**
+ * Add a clue to the player's clue list.
+ * @param {string} clue 
+ */
+function addClue(clue) {
+  if (!clue) {
+    showFeedback('Invalid clue.');
+    return;
+  }
+  if (!playerState.clues.has(clue)) {
+    playerState.clues.add(clue);
+    showFeedback(`New clue obtained: ${clue}`);
+  } else {
+    showFeedback(`You already have the clue: ${clue}`);
+  }
+}
+
+/**
+ * Simulate forging a weapon if player has enough iron ore.
+ */
+function forgeWeapon() {
+  if (playerState.inventory.ironOre >= 5) {
+    playerState.inventory.ironOre -= 5;
+    showFeedback("Blacksmith Tor has forged a sword for you!");
+  } else {
+    showFeedback("You don't have enough iron ore. Collect 5 to forge a weapon.");
+    // Force dialogue back to start since forging failed
+    playerState.currentDialogueKey = 'start';
+  }
+}
+
+/**
+ * Render the player's current quests and clues in the status panel.
+ */
+function renderPlayerStatus() {
+  // Clear quest list
+  questListEl.innerHTML = '';
+
+  // Show quests with their status
+  const activeQuests = [];
+  const completedQuests = [];
+
+  // Collect quests from all NPCs and merge with player state
+  npcs.forEach(npc => {
+    if (!npc.quests) return;
+    npc.quests.forEach(quest => {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') activeQuests.push({ ...quest, status });
+      else if (status === 'completed') completedQuests.push({ ...quest, status });
+    });
+  });
+
+  if (activeQuests.length === 0 && completedQuests.length === 0) {
+    const noQuest = document.createElement('div');
+    noQuest.textContent = 'No active quests.';
+    noQuest.style.opacity = '0.7';
+    questListEl.appendChild(noQuest);
+  } else {
+    activeQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item';
+      questEl.textContent = `🕒 ${quest.title}`;
+      questEl.title = quest.description || '';
+      questListEl.appendChild(questEl);
+    });
+    completedQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item completed';
+      questEl.textContent = `✔ ${quest.title}`;
+      questEl.title = quest.description || '';
+      questListEl.appendChild(questEl);
+    });
+  }
+
+  // Render clues
+  cluesListEl.innerHTML = '';
+  if (playerState.clues.size === 0) {
+    const noClue = document.createElement('div');
+    noClue.textContent = 'No clues obtained.';
+    noClue.style.opacity = '0.7';
+    cluesListEl.appendChild(noClue);
+  } else {
+    playerState.clues.forEach(clue => {
+      const clueEl = document.createElement('div');
+      clueEl.className = 'clue-item';
+      clueEl.textContent = `🔍 ${clue}`;
+      cluesListEl.appendChild(clueEl);
+    });
+  }
+}
+
+/**
+ * Initialize the entire system.
+ */
+function init() {
+  try {
+    initNpcList();
+    renderPlayerStatus();
+    // Select first NPC by default
+    if (npcs.length > 0) {
+      selectNpc(npcs[0].id);
+    } else {
+      dialogueTextEl.textContent = 'No NPCs available.';
+    }
+  } catch (e) {
+    console.error('Initialization error:', e);
+    dialogueTextEl.textContent = 'An error occurred initializing the system.';
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - SCORE SUMMARY - ITERATION 2
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - ✓ Is the NPC dialogue system fully implemented?: 9.0/10
+2025-11-30 19:29:16 - INFO - ✓ Is the quest/task system functional?: 9.0/10
+2025-11-30 19:29:16 - INFO - ✓ Is the NPC state management implemented?: 8.0/10
+2025-11-30 19:29:16 - INFO - ✓ Is there a clue/information system that affects gameplay?: 9.0/10
+2025-11-30 19:29:16 - INFO - ✓ Is the code robust?: 8.0/10
+2025-11-30 19:29:16 - INFO - ✗ Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:29:16 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 19:29:16 - INFO - ✓ Does the code have engineering quality?: 8.0/10
+2025-11-30 19:29:16 - INFO - ✓ Does the interface vision meet professional design standards?: 9.0/10
+2025-11-30 19:29:16 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 9.0/10
+2025-11-30 19:29:16 - INFO - 
+⚠ Found 1 area(s) needing improvement:
+2025-11-30 19:29:16 - INFO -   - Are there any innovative features that are eye-catching?: 6.0/10
+2025-11-30 19:29:16 - INFO - 
+⚠ Reached maximum iterations (2). Stopping.
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - FINAL EVALUATION (Using Iteration 2 Results)
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - All iterations completed. Using iteration 2 evaluation as final.
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - FINAL EVALUATION RESULTS
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - Individual Scores (JSON):
+{
+  "Is the NPC dialogue system fully implemented?": 9.0,
+  "Is the quest/task system functional?": 9.0,
+  "Is the NPC state management implemented?": 8.0,
+  "Is there a clue/information system that affects gameplay?": 9.0,
+  "Is the code robust?": 8.0,
+  "Are there any innovative features that are eye-catching?": 6.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-11-30 19:29:16 - INFO - Final Calculated Sum: 85.0
+2025-11-30 19:29:16 - INFO - Final Overall Score: 83.0
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - ```json
+{
+  "Is the NPC dialogue system fully implemented?": "9",
+  "Is the quest/task system functional?": "9",
+  "Is the NPC state management implemented?": "8",
+  "Is there a clue/information system that affects gameplay?": "9",
+  "Is the code robust?": "8",
+  "Are there any innovative features that are eye-catching?": "6",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "9",
+  "Overall Score": "83"
+}
+```
+
+Reason:
+
+1. **Is the NPC dialogue system fully implemented? (9/10)**  
+   The system supports multiple NPCs, branching dialogue paths, and contextual responses based on quest states. Dialogue nodes include choices that lead to different branches, and actions can trigger quest acceptance, completion, or clue acquisition. However, the dialogue system does not appear to support deeply nested or highly complex branching beyond the quest-related states, and there is no explicit memory of past dialogue choices beyond quest states. Hence, near full marks but not perfect.
+
+2. **Is the quest/task system functional? (9/10)**  
+   The quest system allows NPCs to offer quests, track quest progress (not accepted, active, completed), and provide rewards (clues). Quest states are tracked in the player state and reflected in dialogue changes. Quest persistence is in-memory only (no localStorage or backend persistence), which is acceptable for demonstration but deducts a point. Quest failure states are not implemented, which is a minor omission.
+
+3. **Is the NPC state management implemented? (8/10)**  
+   NPCs adjust dialogue based on quest states, reflecting player progress. The system remembers quest acceptance and completion, influencing dialogue nodes. However, NPC behavior beyond quest-related dialogue changes is static (e.g., no time-of-day or mood changes). Also, state persistence is only in-memory, so state is lost on page reload. This limits the score slightly.
+
+4. **Is there a clue/information system that affects gameplay? (9/10)**  
+   Clues are tracked and displayed in the player status panel. Clues are given as rewards and can be obtained multiple times with feedback preventing duplicates. The clues influence player knowledge but do not appear to directly affect dialogue branching or quest outcomes beyond being collectible items. The system is well implemented but could be more varied or impactful.
+
+5. **Is the code robust? (8/10)**  
+   The code includes error handling for invalid NPC or choice selections, missing quest IDs, and unknown actions, with user feedback messages. It uses try-catch blocks in critical areas and prevents crashes. However, robustness is limited to basic input validation and does not cover persistence failures or concurrency issues (not expected here). Overall, robustness is good for a demo.
+
+6. **Are there any innovative features that are eye-catching? (6/10)**  
+   The system includes:  
+   - Quest and clue integration with dialogue.  
+   - Inline feedback messages for user actions.  
+   - Keyboard accessibility for NPC selection.  
+   However, it lacks advanced innovations such as NPC mood systems, voice acting, dynamic facial expressions, or animations. The feedback message and accessibility features are positive but not groundbreaking.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean with no redundant dialogue systems or unrelated modules. The inventory system is minimal and connected to forging weapons, which is relevant. No unnecessary animations or performance-harming effects are present. No redundancy detected.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modular with clear separation of data (NPCs), state (playerState), and UI rendering functions. Functions are well named and scoped. Comments are present and helpful. There is no global state pollution beyond a single playerState object, which is acceptable here. Some minor improvements could be made by further separating concerns or using classes/modules, but overall quality is good.
+
+9. **Does the interface vision meet professional design standards? (9/10)**  
+   The UI uses harmonious dark color schemes with good contrast and consistent spacing following 8px multiples. Font sizes are professional (≥14px) with good line height. Layout is clear and uncluttered with distinct panels for NPCs, dialogue, and player status. Minor improvements could be made in button sizing or responsiveness, but the design is very solid.
+
+10. **Is the dynamic interaction smooth and seamless? (9/10)**  
+    Interaction feedback is immediate with no noticeable delay. Transitions are simple but smooth with subtle hover effects and feedback message fade-ins. Dialogue options are clearly indicated as buttons with keyboard support. Navigation through conversation trees is intuitive. No jarring transitions or confusing navigation detected. Minor enhancements could include animated transitions or loading indicators.
+
+**Summary:**  
+This is a well-executed, professional, and clean implementation of an interactive NPC system with branching dialogue, quest management, and clue tracking. It demonstrates strong engineering practices, accessibility, and user experience design. Minor deductions are due to lack of persistence beyond session, limited NPC state complexity, and absence of advanced innovative features. Overall, it is a high-quality demonstration suitable for further extension in a game project.
+
+Final overall score: 83/100.
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - FINAL HTML CODE
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive NPC System</title>
+<style>
+  /* Basic reset and styling */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar for NPC list */
+  #npc-list {
+    width: 220px;
+    background: #2c2c44;
+    border-right: 2px solid #444466;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #npc-list h2 {
+    margin: 1rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  .npc-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #444466;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  .npc-item:hover, .npc-item.active {
+    background-color: #4a4a7a;
+  }
+
+  /* Main content area */
+  #npc-dialogue {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #282843;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  #npc-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #a0c4ff;
+  }
+
+  #dialogue-text {
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+  }
+
+  #choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  button.choice-btn {
+    background: #4a4a7a;
+    border: none;
+    color: #eee;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+
+  button.choice-btn:hover:not(:disabled) {
+    background-color: #6a6ab0;
+  }
+
+  button.choice-btn:disabled {
+    background-color: #2a2a4a;
+    cursor: default;
+  }
+
+  /* Inline feedback message */
+  #feedback-message {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    background: #b23a3a;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  #feedback-message.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Player status panel */
+  #player-status {
+    width: 280px;
+    background: #2c2c44;
+    border-left: 2px solid #444466;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #player-status h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #555577;
+    padding-bottom: 0.5rem;
+  }
+
+  #quest-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+  }
+
+  .quest-item {
+    background: #3a3a6a;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.95rem;
+  }
+
+  .quest-item.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  #clues-list {
+    margin-top: 1rem;
+  }
+
+  .clue-item {
+    background: #3a3a6a;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  /* Scrollbar styling */
+  #quest-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  #quest-list::-webkit-scrollbar-thumb {
+    background: #555577;
+    border-radius: 4px;
+  }
+  #quest-list::-webkit-scrollbar-track {
+    background: #2c2c44;
+  }
+</style>
+</head>
+<body>
+  <!-- NPC List Sidebar -->
+  <nav id="npc-list" aria-label="NPC List">
+    <h2>NPCs</h2>
+    <!-- NPC items inserted dynamically -->
+  </nav>
+
+  <!-- Dialogue and interaction area -->
+  <main id="npc-dialogue" role="main" aria-live="polite" aria-atomic="true">
+    <div id="npc-name" aria-label="NPC Name"></div>
+    <div id="dialogue-text" aria-label="Dialogue Text"></div>
+    <div id="choices" role="list" aria-label="Dialogue Choices"></div>
+    <div id="feedback-message" role="alert" aria-live="assertive" aria-atomic="true"></div>
+  </main>
+
+  <!-- Player status panel -->
+  <aside id="player-status" aria-label="Player Status">
+    <h2>Quests</h2>
+    <div id="quest-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+    <h2>Clues</h2>
+    <div id="clues-list" tabindex="0" aria-live="polite" aria-atomic="true"></div>
+  </aside>
+
+<script>
+/**
+ * Interactive NPC System
+ * 
+ * This system allows players to select NPCs, converse with them,
+ * accept quests, and obtain clues. Player progression is tracked
+ * and dialogue changes based on quest states.
+ * 
+ * Author: Code Expert
+ * Date: 2024
+ */
+
+// Define NPC data with dialogues, quests, and clues
+const npcs = [
+  {
+    id: 'elder_mira',
+    name: 'Elder Mira',
+    dialogues: {
+      start: {
+        text: "Greetings, traveler. Our village is in peril. Will you help us?",
+        choices: [
+          { text: "Tell me more about the danger.", next: 'danger_info' },
+          { text: "I'm not interested.", next: 'decline' }
+        ]
+      },
+      danger_info: {
+        text: "A dark shadow looms in the forest. Strange creatures have been seen. Will you investigate?",
+        choices: [
+          { text: "I will investigate the forest.", action: 'acceptQuest', questId: 'forest_shadow', next: 'quest_accepted' },
+          { text: "Sounds too dangerous.", next: 'decline' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you, brave one. Return when you have news.",
+        choices: [
+          { text: "I will be back.", next: 'end' }
+        ]
+      },
+      decline: {
+        text: "I see. May fortune favor you elsewhere.",
+        choices: [
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Have you discovered the source of the shadow?",
+        choices: [
+          { text: "Yes, the forest is safe now.", action: 'completeQuest', questId: 'forest_shadow', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "You have our eternal gratitude. Please take this amulet as a token.",
+        choices: [
+          { text: "Thank you.", action: 'giveClue', clue: 'Amulet of Light', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Farewell.",
+        choices: []
+      }
+    },
+    // Quests this NPC can give
+    quests: [
+      {
+        id: 'forest_shadow',
+        title: 'Investigate the Forest Shadow',
+        description: 'Explore the forest and find the source of the dark shadow threatening the village.',
+        status: 'not accepted' // can be 'not accepted', 'active', 'completed'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'merchant_lyra',
+    name: 'Merchant Lyra',
+    dialogues: {
+      start: {
+        text: "Welcome! Looking for something special? I might have some rare items.",
+        choices: [
+          { text: "Do you have any quests?", next: 'quest_offer' },
+          { text: "Any rumors or clues?", next: 'clues' },
+          { text: "Just browsing, thanks.", next: 'end' }
+        ]
+      },
+      quest_offer: {
+        text: "Actually, yes. I lost a precious gem in the caves nearby. Can you retrieve it?",
+        choices: [
+          { text: "I will find your gem.", action: 'acceptQuest', questId: 'find_gem', next: 'quest_accepted' },
+          { text: "Not right now.", next: 'end' }
+        ]
+      },
+      quest_accepted: {
+        text: "Thank you! The gem is valuable to me. Please hurry.",
+        choices: [
+          { text: "On my way.", next: 'end' }
+        ]
+      },
+      clues: {
+        text: "I heard the blacksmith saw strange lights near the old ruins last night.",
+        choices: [
+          { text: "Thanks for the info.", next: 'end' }
+        ]
+      },
+      after_quest: {
+        text: "Did you find my gem?",
+        choices: [
+          { text: "Yes, here it is.", action: 'completeQuest', questId: 'find_gem', next: 'quest_completed' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      quest_completed: {
+        text: "Wonderful! Here's a discount coupon for your trouble.",
+        choices: [
+          { text: "Thanks!", action: 'giveClue', clue: 'Discount Coupon', next: 'end' }
+        ]
+      },
+      end: {
+        text: "Safe travels!",
+        choices: []
+      }
+    },
+    quests: [
+      {
+        id: 'find_gem',
+        title: 'Retrieve the Lost Gem',
+        description: 'Find and return the precious gem lost in the caves.',
+        status: 'not accepted'
+      }
+    ],
+    clues: []
+  },
+  {
+    id: 'blacksmith_tor',
+    name: 'Blacksmith Tor',
+    dialogues: {
+      start: {
+        text: "Hey there! If you need weapons or info, I'm your man.",
+        choices: [
+          { text: "Any news about the ruins?", next: 'ruins_info' },
+          { text: "Can you forge me a weapon?", next: 'forge_weapon' },
+          { text: "Goodbye.", next: 'end' }
+        ]
+      },
+      ruins_info: {
+        text: "Strange lights and noises come from the ruins at night. Some say it's haunted.",
+        choices: [
+          { text: "Thanks for the tip.", next: 'end' }
+        ]
+      },
+      forge_weapon: {
+        text: "I can forge a sword if you bring me 5 iron ores. Do you have them?",
+        choices: [
+          { text: "Yes, here they are.", action: 'forgeWeapon', next: 'weapon_forged' },
+          { text: "Not yet.", next: 'end' }
+        ]
+      },
+      weapon_forged: {
+        text: "Here's your new sword! Use it well.",
+        choices: [
+          { text: "Thank you!", next: 'end' }
+        ]
+      },
+      end: {
+        text: "Take care!",
+        choices: []
+      }
+    },
+    quests: [],
+    clues: []
+  }
+];
+
+// Player state to track quests, clues, inventory, and current NPC/dialogue
+const playerState = {
+  currentNpcId: null,
+  currentDialogueKey: 'start',
+  quests: {}, // questId -> status ('not accepted', 'active', 'completed')
+  clues: new Set(),
+  inventory: {
+    ironOre: 0
+  }
+};
+
+// Cache DOM elements for performance
+const npcListEl = document.getElementById('npc-list');
+const npcNameEl = document.getElementById('npc-name');
+const dialogueTextEl = document.getElementById('dialogue-text');
+const choicesEl = document.getElementById('choices');
+const questListEl = document.getElementById('quest-list');
+const cluesListEl = document.getElementById('clues-list');
+const feedbackMessageEl = document.getElementById('feedback-message');
+
+let feedbackTimeoutId = null;
+
+/**
+ * Show inline feedback message in the dialogue area.
+ * @param {string} message 
+ * @param {number} durationMs 
+ */
+function showFeedback(message, durationMs = 3000) {
+  if (!message) return;
+  clearTimeout(feedbackTimeoutId);
+  feedbackMessageEl.textContent = message;
+  feedbackMessageEl.classList.add('show');
+  feedbackTimeoutId = setTimeout(() => {
+    feedbackMessageEl.classList.remove('show');
+    feedbackMessageEl.textContent = '';
+  }, durationMs);
+}
+
+/**
+ * Initialize the NPC list sidebar with clickable NPCs.
+ */
+function initNpcList() {
+  npcs.forEach(npc => {
+    const npcItem = document.createElement('div');
+    npcItem.classList.add('npc-item');
+    npcItem.textContent = npc.name;
+    npcItem.setAttribute('tabindex', '0');
+    npcItem.setAttribute('role', 'button');
+    npcItem.setAttribute('aria-pressed', 'false');
+    npcItem.dataset.npcId = npc.id;
+
+    // Click and keyboard support
+    npcItem.addEventListener('click', () => selectNpc(npc.id));
+    npcItem.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNpc(npc.id);
+      }
+    });
+
+    npcListEl.appendChild(npcItem);
+  });
+}
+
+/**
+ * Select an NPC to start or continue conversation.
+ * @param {string} npcId 
+ */
+function selectNpc(npcId) {
+  if (!npcId || typeof npcId !== 'string') {
+    showFeedback('Invalid NPC selection.');
+    return;
+  }
+  if (playerState.currentNpcId === npcId) return; // Already selected
+
+  const npc = npcs.find(n => n.id === npcId);
+  if (!npc) {
+    showFeedback('NPC not found.');
+    return;
+  }
+
+  playerState.currentNpcId = npcId;
+
+  // Reset dialogue key to 'start' or to a special dialogue if quest active/completed
+  // Determine dialogue start point based on quest states
+  let dialogueKey = 'start';
+
+  try {
+    if (npc.quests && npc.quests.length > 0) {
+      for (const quest of npc.quests) {
+        const status = playerState.quests[quest.id] || 'not accepted';
+        if (status === 'active') {
+          dialogueKey = 'after_quest';
+          break;
+        } else if (status === 'completed') {
+          dialogueKey = 'quest_completed';
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error determining dialogue start:', e);
+    dialogueKey = 'start';
+  }
+
+  playerState.currentDialogueKey = dialogueKey;
+
+  updateNpcListActive();
+  renderDialogue();
+}
+
+/**
+ * Get the currently selected NPC object.
+ * @returns {object|null}
+ */
+function getCurrentNpc() {
+  if (!playerState.currentNpcId) return null;
+  return npcs.find(npc => npc.id === playerState.currentNpcId) || null;
+}
+
+/**
+ * Update the NPC list UI to highlight the selected NPC.
+ */
+function updateNpcListActive() {
+  const npcItems = npcListEl.querySelectorAll('.npc-item');
+  npcItems.forEach(item => {
+    if (item.dataset.npcId === playerState.currentNpcId) {
+      item.classList.add('active');
+      item.setAttribute('aria-pressed', 'true');
+      item.focus();
+    } else {
+      item.classList.remove('active');
+      item.setAttribute('aria-pressed', 'false');
+    }
+  });
+}
+
+/**
+ * Render the current dialogue text and choices for the selected NPC.
+ */
+function renderDialogue() {
+  const npc = getCurrentNpc();
+  if (!npc) {
+    npcNameEl.textContent = '';
+    dialogueTextEl.textContent = 'Select an NPC to start conversation.';
+    choicesEl.innerHTML = '';
+    return;
+  }
+
+  npcNameEl.textContent = npc.name;
+
+  // Get dialogue node by currentDialogueKey
+  let dialogueNode = null;
+  try {
+    dialogueNode = npc.dialogues[playerState.currentDialogueKey];
+  } catch (e) {
+    console.error('Error accessing dialogue node:', e);
+  }
+
+  // If dialogue node not found, fallback to 'start'
+  if (!dialogueNode) {
+    dialogueNode = npc.dialogues['start'];
+    playerState.currentDialogueKey = 'start';
+  }
+
+  dialogueTextEl.textContent = dialogueNode.text || '';
+
+  // Clear previous choices
+  choicesEl.innerHTML = '';
+
+  // If no choices, show a disabled button to close dialogue
+  if (!dialogueNode.choices || dialogueNode.choices.length === 0) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = 'Close';
+    btn.disabled = true;
+    choicesEl.appendChild(btn);
+    return;
+  }
+
+  // Create buttons for each choice
+  dialogueNode.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text || '...';
+    btn.setAttribute('role', 'listitem');
+    btn.addEventListener('click', () => handleChoice(choice));
+    choicesEl.appendChild(btn);
+  });
+}
+
+/**
+ * Handle a player's choice selection.
+ * @param {object} choice 
+ */
+function handleChoice(choice) {
+  if (!choice || typeof choice !== 'object') {
+    showFeedback('Invalid choice selected.');
+    return;
+  }
+
+  // Process any action associated with the choice
+  if (choice.action) {
+    try {
+      switch (choice.action) {
+        case 'acceptQuest':
+          if (typeof choice.questId === 'string') {
+            acceptQuest(choice.questId);
+          } else {
+            showFeedback('Quest ID missing or invalid.');
+          }
+          break;
+        case 'completeQuest':
+          if (typeof choice.questId === 'string') {
+            completeQuest(choice.questId);
+          } else {
+            showFeedback('Quest ID missing or invalid.');
+          }
+          break;
+        case 'giveClue':
+          if (typeof choice.clue === 'string') {
+            addClue(choice.clue);
+          } else {
+            showFeedback('Clue data missing or invalid.');
+          }
+          break;
+        case 'forgeWeapon':
+          forgeWeapon();
+          break;
+        default:
+          console.warn('Unknown action:', choice.action);
+          showFeedback(`Unknown action: ${choice.action}`);
+      }
+    } catch (e) {
+      console.error('Error handling action:', e);
+      showFeedback('An error occurred processing your choice.');
+    }
+  }
+
+  // Move to the next dialogue node if specified
+  if (choice.next) {
+    playerState.currentDialogueKey = choice.next;
+  } else {
+    // If no next, end conversation (reset dialogue)
+    playerState.currentDialogueKey = 'end';
+  }
+
+  renderDialogue();
+  renderPlayerStatus();
+}
+
+/**
+ * Accept a quest by questId.
+ * @param {string} questId 
+ */
+function acceptQuest(questId) {
+  if (!questId) {
+    showFeedback('Invalid quest ID.');
+    return;
+  }
+  // Mark quest as active in player state
+  playerState.quests[questId] = 'active';
+  showFeedback('Quest accepted!');
+}
+
+/**
+ * Complete a quest by questId.
+ * @param {string} questId 
+ */
+function completeQuest(questId) {
+  if (!questId) {
+    showFeedback('Invalid quest ID.');
+    return;
+  }
+  // Mark quest as completed in player state
+  if (playerState.quests[questId] === 'active') {
+    playerState.quests[questId] = 'completed';
+    showFeedback('Quest completed!');
+  } else {
+    showFeedback('You have not accepted this quest.');
+  }
+}
+
+/**
+ * Add a clue to the player's clue list.
+ * @param {string} clue 
+ */
+function addClue(clue) {
+  if (!clue) {
+    showFeedback('Invalid clue.');
+    return;
+  }
+  if (!playerState.clues.has(clue)) {
+    playerState.clues.add(clue);
+    showFeedback(`New clue obtained: ${clue}`);
+  } else {
+    showFeedback(`You already have the clue: ${clue}`);
+  }
+}
+
+/**
+ * Simulate forging a weapon if player has enough iron ore.
+ */
+function forgeWeapon() {
+  if (playerState.inventory.ironOre >= 5) {
+    playerState.inventory.ironOre -= 5;
+    showFeedback("Blacksmith Tor has forged a sword for you!");
+  } else {
+    showFeedback("You don't have enough iron ore. Collect 5 to forge a weapon.");
+    // Force dialogue back to start since forging failed
+    playerState.currentDialogueKey = 'start';
+  }
+}
+
+/**
+ * Render the player's current quests and clues in the status panel.
+ */
+function renderPlayerStatus() {
+  // Clear quest list
+  questListEl.innerHTML = '';
+
+  // Show quests with their status
+  const activeQuests = [];
+  const completedQuests = [];
+
+  // Collect quests from all NPCs and merge with player state
+  npcs.forEach(npc => {
+    if (!npc.quests) return;
+    npc.quests.forEach(quest => {
+      const status = playerState.quests[quest.id] || 'not accepted';
+      if (status === 'active') activeQuests.push({ ...quest, status });
+      else if (status === 'completed') completedQuests.push({ ...quest, status });
+    });
+  });
+
+  if (activeQuests.length === 0 && completedQuests.length === 0) {
+    const noQuest = document.createElement('div');
+    noQuest.textContent = 'No active quests.';
+    noQuest.style.opacity = '0.7';
+    questListEl.appendChild(noQuest);
+  } else {
+    activeQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item';
+      questEl.textContent = `🕒 ${quest.title}`;
+      questEl.title = quest.description || '';
+      questListEl.appendChild(questEl);
+    });
+    completedQuests.forEach(quest => {
+      const questEl = document.createElement('div');
+      questEl.className = 'quest-item completed';
+      questEl.textContent = `✔ ${quest.title}`;
+      questEl.title = quest.description || '';
+      questListEl.appendChild(questEl);
+    });
+  }
+
+  // Render clues
+  cluesListEl.innerHTML = '';
+  if (playerState.clues.size === 0) {
+    const noClue = document.createElement('div');
+    noClue.textContent = 'No clues obtained.';
+    noClue.style.opacity = '0.7';
+    cluesListEl.appendChild(noClue);
+  } else {
+    playerState.clues.forEach(clue => {
+      const clueEl = document.createElement('div');
+      clueEl.className = 'clue-item';
+      clueEl.textContent = `🔍 ${clue}`;
+      cluesListEl.appendChild(clueEl);
+    });
+  }
+}
+
+/**
+ * Initialize the entire system.
+ */
+function init() {
+  try {
+    initNpcList();
+    renderPlayerStatus();
+    // Select first NPC by default
+    if (npcs.length > 0) {
+      selectNpc(npcs[0].id);
+    } else {
+      dialogueTextEl.textContent = 'No NPCs available.';
+    }
+  } catch (e) {
+    console.error('Initialization error:', e);
+    dialogueTextEl.textContent = 'An error occurred initializing the system.';
+  }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - ✓ Final code saved to: artifacts_output/Game Development-Role-Playing/task_3/final.html
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - End Time: 2025-11-30 19:29:16
+2025-11-30 19:29:16 - INFO - Total Duration: 173.11 seconds (2.89 minutes)
+2025-11-30 19:29:16 - INFO - Total Iterations: 3
+2025-11-30 19:29:16 - INFO - Final Total Score: 85.0
+2025-11-30 19:29:16 - INFO - Log file saved to: artifacts_output/Game Development-Role-Playing/task_3/run_log.txt
+2025-11-30 19:29:16 - INFO - All files saved to: artifacts_output/Game Development-Role-Playing/task_3
+2025-11-30 19:29:16 - INFO - 
+================================================================================
+2025-11-30 19:29:16 - INFO - TOKEN USAGE SUMMARY
+2025-11-30 19:29:16 - INFO - ================================================================================
+2025-11-30 19:29:16 - INFO - Total Requests: 17
+2025-11-30 19:29:16 - INFO - Total Input Tokens: 149,651
+2025-11-30 19:29:16 - INFO - Total Output Tokens: 60,523
+2025-11-30 19:29:16 - INFO - Total Tokens: 210,174
+2025-11-30 19:29:16 - INFO - 
+Breakdown by Operation:
+2025-11-30 19:29:16 - INFO -   code_generation: 1 requests, 9,556 tokens
+2025-11-30 19:29:16 - INFO -   evaluation: 10 requests, 140,209 tokens
+2025-11-30 19:29:16 - INFO -   initial_code_generation: 3 requests, 18,282 tokens
+2025-11-30 19:29:16 - INFO -   code_improvement_iteration_1: 3 requests, 42,127 tokens
+2025-11-30 19:29:16 - INFO - 
+✓ Token usage saved to: artifacts_output/Game Development-Role-Playing/task_3/token_usage.json
+2025-11-30 19:29:16 - INFO - ✓ Task token usage saved to token_usage_iterative.json
+2025-11-30 19:29:16 - INFO - ================================================================================

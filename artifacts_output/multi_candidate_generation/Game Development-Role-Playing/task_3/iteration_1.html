@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive NPC System</title>
+<style>
+  /* Basic reset and styling */
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    background: #2c2c44;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    user-select: none;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    overflow: hidden;
+  }
+
+  /* NPC list panel */
+  #npc-list {
+    width: 220px;
+    background: #2c2c44;
+    border-radius: 8px;
+    overflow-y: auto;
+    box-shadow: 0 0 10px #0008 inset;
+  }
+
+  #npc-list h2 {
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #444;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  #npc-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #npc-list li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #npc-list li:hover,
+  #npc-list li.active {
+    background-color: #444466;
+  }
+
+  /* Mood indicator circles */
+  .mood-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 4px rgba(0,0,0,0.6);
+  }
+  .mood-happy {
+    background: #6ade6a;
+  }
+  .mood-neutral {
+    background: #cccc66;
+  }
+  .mood-angry {
+    background: #de6a6a;
+  }
+
+  /* Dialogue panel */
+  #dialogue-panel {
+    flex: 1;
+    background: #2a2a3d;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 15px #000a inset;
+    position: relative;
+  }
+
+  #npc-name {
+    background: #3a3a5a;
+    padding: 1rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* NPC face container */
+  #npc-face {
+    width: 48px;
+    height: 48px;
+    background: #555577;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 8px #8888cc;
+  }
+
+  /* Eyes */
+  #npc-face .eye {
+    position: absolute;
+    top: 14px;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  #npc-face .eye.left {
+    left: 10px;
+  }
+  #npc-face .eye.right {
+    right: 10px;
+  }
+  #npc-face .pupil {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 4px;
+    height: 4px;
+    background: black;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  /* Mouth */
+  #npc-face .mouth {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    width: 20px;
+    height: 8px;
+    border-bottom: 3px solid #222;
+    border-radius: 0 0 20px 20px;
+    transform: translateX(-50%);
+    transition: border-color 0.3s ease, border-bottom-width 0.3s ease;
+  }
+  /* Mouth expressions */
+  #npc-face.mood-happy .mouth {
+    border-color: #6ade6a;
+    border-bottom-width: 4px;
+  }
+  #npc-face.mood-neutral .mouth {
+    border-color: #cccc66;
+    border-bottom-width: 3px;
+  }
+  #npc-face.mood-angry .mouth {
+    border-color: #de6a6a;
+    border-bottom-width: 3px;
+    border-radius: 0;
+    border-top: 3px solid #de6a6a;
+    border-bottom: none;
+    height: 4px;
+    bottom: 16px;
+  }
+
+  #dialogue-text {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  #choices {
+    border-top: 1px solid #444;
+    background: #3a3a5a;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  #choices button {
+    background: #5a5a8a;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    color: #eee;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  #choices button:hover:not(:disabled) {
+    background: #7a7acb;
+  }
+
+  #choices button:disabled {
+    background: #444466;
+    cursor: default;
+  }
+
+  /* Player status panel */
+  #player-status {
+    background: #2c2c44;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+
+  #player-status h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  #player-status ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  #player-status li {
+    margin-bottom: 0.3rem;
+  }
+
+  /* Scrollbar styling */
+  #npc-list::-webkit-scrollbar,
+  #dialogue-text::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  #npc-list::-webkit-scrollbar-thumb,
+  #dialogue-text::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+  }
+
+  #npc-list::-webkit-scrollbar-track,
+  #dialogue-text::-webkit-scrollbar-track {
+    background-color: #2c2c44;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    main {
+      flex-direction: column;
+    }
+    #npc-list {
+      width: 100%;
+      max-height: 150px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      border-radius: 0 0 8px 8px;
+    }
+    #npc-list ul {
+      display: flex;
+    }
+    #npc-list li {
+      border-bottom: none;
+      border-right: 1px solid #444;
+      padding: 0.75rem 1.5rem;
+      flex: 0 0 auto;
+    }
+    #dialogue-panel {
+      flex: 1 1 auto;
+      border-radius: 8px 8px 0 0;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Interactive NPC System</header>
+<main>
+  <!-- NPC List Panel -->
+  <nav id="npc-list" aria-label="NPC List">
+    <h2>NPCs</h2>
+    <ul role="list" tabindex="0" aria-live="polite" aria-relevant="additions removals">
+      <!-- NPC items inserted by JS -->
+    </ul>
+  </nav>
+
+  <!-- Dialogue Panel -->
+  <section id="dialogue-panel" aria-live="polite" aria-atomic="true" aria-label="Dialogue Panel">
+    <div id="npc-name" aria-live="polite" aria-atomic="true">
+      <div id="npc-face" aria-hidden="true">
+        <div class="eye left"><div class="pupil"></div></div>
+        <div class="eye right"><div class="pupil"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <span id="npc-name-text"></span>
+    </div>
+    <div id="dialogue-text" tabindex="0"></div>
+    <div id="choices" role="group" aria-label="Dialogue Choices">
+      <!-- Choice buttons inserted by JS -->
+    </div>
+  </section>
+</main>
+
+<!-- Player Status Panel -->
+<aside id="player-status" aria-label="Player Status">
+  <h3>Player Status</h3>
+  <div><strong>Active Quests:</strong></div>
+  <ul id="quest-list" aria-live="polite" aria-relevant="additions removals">
+    <!-- Quests inserted by JS -->
+  </ul>
+  <div><strong>Clues Obtained:</strong></div>
+  <ul id="clue-list" aria-live="polite" aria-relevant="additions removals">
+    <!-- Clues inserted by JS -->
+  </ul>
+</aside>
+
+<script>
+/**
+ * Interactive NPC System with NPC Mood and Facial Expressions
+ * 
+ * This system allows players to select NPCs, converse with them,
+ * accept quests, and obtain clues. The game progression is adjusted
+ * based on player choices.
+ * 
+ * New innovative features added:
+ * - NPC mood system that changes based on player interactions.
+ * - Dynamic facial expressions (eyes and mouth) reflecting NPC mood.
+ * - NPC mood indicators in the NPC list for quick visual feedback.
+ * 
+ * Implementation details:
+ * - NPCs have dialogue trees with branching choices.
+ * - Player state tracks active quests and clues.
+ * - Dialogue and choices update dynamically.
+ * - Accessible and responsive UI.
+ * - NPC mood updates on quest acceptance, completion, and clue acquisition.
+ */
+
+// Player state object to track quests and clues
+const playerState = {
+  quests: {}, // questId: { title, status: 'active'|'completed' }
+  clues: new Set(), // clue strings
+};
+
+// Define NPCs with dialogue trees, quests/clues, and mood state
+const npcs = [
+  {
+    id: 'elder_mira',
+    name: 'Elder Mira',
+    mood: 'neutral', // 'happy', 'neutral', 'angry'
+    dialogueTree: {
+      start: {
+        text: "Greetings, traveler. Our village is in peril. Will you help us?",
+        choices: [
+          { text: "Tell me more about the danger.", next: 'danger' },
+          { text: "I'm not interested.", next: 'decline' },
+        ],
+      },
+      danger: {
+        text: "A dark beast lurks in the forest. We need someone brave to hunt it down.",
+        choices: [
+          { text: "I accept the quest.", action: 'acceptQuest', questId: 'hunt_beast', next: 'questAccepted' },
+          { text: "Sounds too dangerous.", next: 'decline' },
+        ],
+      },
+      decline: {
+        text: "I understand. May fortune favor you elsewhere.",
+        choices: [
+          { text: "Goodbye.", next: null },
+        ],
+      },
+      questAccepted: {
+        text: "Thank you! Return when the beast is defeated.",
+        choices: [
+          { text: "I will be back.", next: null },
+        ],
+      },
+      questComplete: {
+        text: "You have returned victorious! The village is in your debt.",
+        choices: [
+          { text: "Glad to help.", action: 'completeQuest', questId: 'hunt_beast', next: null },
+        ],
+      },
+    },
+    quests: {
+      hunt_beast: {
+        title: "Hunt the Dark Beast",
+        description: "Defeat the dark beast threatening the village.",
+        completed: false,
+      },
+    },
+    clues: [
+      "The beast is vulnerable to fire.",
+    ],
+  },
+  {
+    id: 'merchant_lyra',
+    name: 'Merchant Lyra',
+    mood: 'neutral',
+    dialogueTree: {
+      start: {
+        text: "Welcome! Looking for something special?",
+        choices: [
+          { text: "Any rumors around?", next: 'rumors' },
+          { text: "Show me your wares.", next: 'wares' },
+          { text: "Goodbye.", next: null },
+        ],
+      },
+      rumors: {
+        text: "I heard the old ruins hide a secret treasure, but beware the traps.",
+        choices: [
+          { text: "Thanks for the clue.", action: 'addClue', clue: "Old ruins hide secret treasure." , next: 'start' },
+          { text: "Sounds dangerous, I'll pass.", next: 'start' },
+        ],
+      },
+      wares: {
+        text: "I have potions and trinkets. But I only trade for gold.",
+        choices: [
+          { text: "Thanks, maybe later.", next: 'start' },
+        ],
+      },
+    },
+    quests: {},
+    clues: [],
+  },
+  {
+    id: 'guard_thorn',
+    name: 'Guard Thorn',
+    mood: 'neutral',
+    dialogueTree: {
+      start: {
+        text: "Halt! State your business.",
+        choices: [
+          { text: "I'm here to help with the beast.", next: 'beastHelp' },
+          { text: "Just passing through.", next: 'passing' },
+        ],
+      },
+      beastHelp: {
+        text: "If you want to help, bring me proof of the beast's defeat.",
+        choices: [
+          { text: "Will do.", next: null },
+        ],
+      },
+      passing: {
+        text: "Stay out of trouble.",
+        choices: [
+          { text: "Understood.", next: null },
+        ],
+      },
+    },
+    quests: {},
+    clues: [],
+  },
+];
+
+// Current NPC and dialogue node state
+let currentNpc = null;
+let currentNodeKey = null;
+
+// DOM references
+const npcListEl = document.querySelector('#npc-list ul');
+const npcNameEl = document.getElementById('npc-name');
+const npcNameTextEl = document.getElementById('npc-name-text');
+const npcFaceEl = document.getElementById('npc-face');
+const dialogueTextEl = document.getElementById('dialogue-text');
+const choicesEl = document.getElementById('choices');
+const questListEl = document.getElementById('quest-list');
+const clueListEl = document.getElementById('clue-list');
+
+/**
+ * Initialize the NPC list UI with mood indicators.
+ */
+function initNpcList() {
+  npcListEl.innerHTML = '';
+  npcs.forEach((npc) => {
+    const li = document.createElement('li');
+    li.setAttribute('role', 'button');
+    li.setAttribute('tabindex', '0');
+    li.dataset.npcId = npc.id;
+
+    // Mood indicator circle
+    const moodIndicator = document.createElement('span');
+    moodIndicator.classList.add('mood-indicator');
+    updateMoodIndicator(moodIndicator, npc.mood);
+    li.appendChild(moodIndicator);
+
+    // NPC name text
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = npc.name;
+    li.appendChild(nameSpan);
+
+    li.addEventListener('click', () => selectNpc(npc.id));
+    li.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNpc(npc.id);
+      }
+    });
+    npcListEl.appendChild(li);
+  });
+}
+
+/**
+ * Update the mood indicator circle color based on mood.
+ * @param {HTMLElement} element 
+ * @param {string} mood 
+ */
+function updateMoodIndicator(element, mood) {
+  element.classList.remove('mood-happy', 'mood-neutral', 'mood-angry');
+  switch (mood) {
+    case 'happy':
+      element.classList.add('mood-happy');
+      element.setAttribute('title', 'Happy');
+      break;
+    case 'angry':
+      element.classList.add('mood-angry');
+      element.setAttribute('title', 'Angry');
+      break;
+    default:
+      element.classList.add('mood-neutral');
+      element.setAttribute('title', 'Neutral');
+      break;
+  }
+}
+
+/**
+ * Update the NPC face expression based on mood.
+ * @param {string} mood 
+ */
+function updateNpcFace(mood) {
+  npcFaceEl.classList.remove('mood-happy', 'mood-neutral', 'mood-angry');
+  npcFaceEl.classList.add(`mood-${mood}`);
+
+  // Animate pupils to look around slightly based on mood
+  const pupils = npcFaceEl.querySelectorAll('.pupil');
+  let offsetX = 0, offsetY = 0;
+  switch (mood) {
+    case 'happy':
+      offsetX = 1;
+      offsetY = 0;
+      break;
+    case 'angry':
+      offsetX = -1;
+      offsetY = 1;
+      break;
+    default:
+      offsetX = 0;
+      offsetY = 0;
+      break;
+  }
+  pupils.forEach(pupil => {
+    pupil.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  });
+}
+
+/**
+ * Select an NPC by id and start dialogue.
+ * @param {string} npcId 
+ */
+function selectNpc(npcId) {
+  if (currentNpc && currentNpc.id === npcId) return; // Already selected
+
+  currentNpc = npcs.find(n => n.id === npcId);
+  currentNodeKey = 'start';
+
+  // Highlight selected NPC in list
+  Array.from(npcListEl.children).forEach(li => {
+    li.classList.toggle('active', li.dataset.npcId === npcId);
+  });
+
+  renderDialogue();
+}
+
+/**
+ * Render the current dialogue node for the selected NPC.
+ */
+function renderDialogue() {
+  if (!currentNpc || !currentNodeKey) {
+    npcNameTextEl.textContent = '';
+    dialogueTextEl.textContent = 'Select an NPC to start conversation.';
+    choicesEl.innerHTML = '';
+    updateNpcFace('neutral');
+    return;
+  }
+
+  const node = currentNpc.dialogueTree[currentNodeKey];
+  if (!node) {
+    dialogueTextEl.textContent = '...';
+    choicesEl.innerHTML = '';
+    updateNpcFace(currentNpc.mood || 'neutral');
+    return;
+  }
+
+  // Update NPC name text
+  npcNameTextEl.textContent = currentNpc.name;
+
+  // Update NPC face expression based on current mood
+  updateNpcFace(currentNpc.mood || 'neutral');
+
+  // Special handling for quest completion dialogue
+  if (currentNodeKey === 'start' && currentNpc.quests) {
+    // Check if any quest is active and completed by player
+    for (const questId in currentNpc.quests) {
+      const quest = currentNpc.quests[questId];
+      if (playerState.quests[questId]?.status === 'active' && quest.completed) {
+        // Switch dialogue to questComplete if defined
+        if (currentNpc.dialogueTree['questComplete']) {
+          currentNodeKey = 'questComplete';
+          renderDialogue();
+          return;
+        }
+      }
+    }
+  }
+
+  // Show dialogue text
+  dialogueTextEl.textContent = node.text;
+
+  // Clear previous choices
+  choicesEl.innerHTML = '';
+
+  // Create buttons for choices
+  node.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice.text;
+    btn.type = 'button';
+    btn.setAttribute('aria-label', `Choice: ${choice.text}`);
+    btn.addEventListener('click', () => handleChoice(choice));
+    choicesEl.appendChild(btn);
+  });
+
+  // Focus first choice button for accessibility
+  if (choicesEl.firstChild) {
+    choicesEl.firstChild.focus();
+  }
+}
+
+/**
+ * Handle a player's choice selection.
+ * @param {object} choice 
+ */
+function handleChoice(choice) {
+  // Handle special actions
+  if (choice.action) {
+    switch (choice.action) {
+      case 'acceptQuest':
+        acceptQuest(choice.questId);
+        break;
+      case 'completeQuest':
+        completeQuest(choice.questId);
+        break;
+      case 'addClue':
+        addClue(choice.clue);
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Move to next dialogue node or end conversation
+  if (choice.next) {
+    currentNodeKey = choice.next;
+    renderDialogue();
+  } else {
+    // End conversation: clear dialogue and choices
+    npcNameTextEl.textContent = currentNpc.name;
+    dialogueTextEl.textContent = "Conversation ended. Select another NPC or start again.";
+    choicesEl.innerHTML = '';
+  }
+}
+
+/**
+ * Accept a quest and add it to player state.
+ * Also updates NPC mood positively.
+ * @param {string} questId 
+ */
+function acceptQuest(questId) {
+  if (!currentNpc.quests[questId]) return;
+  if (playerState.quests[questId]) return; // Already accepted
+
+  playerState.quests[questId] = {
+    title: currentNpc.quests[questId].title,
+    status: 'active',
+  };
+  updatePlayerStatus();
+
+  // Improve NPC mood on quest acceptance
+  changeNpcMood(currentNpc, 'happy');
+}
+
+/**
+ * Complete a quest and update player state.
+ * Also updates NPC mood positively.
+ * @param {string} questId 
+ */
+function completeQuest(questId) {
+  if (!playerState.quests[questId]) return;
+  if (playerState.quests[questId].status === 'completed') return;
+
+  playerState.quests[questId].status = 'completed';
+
+  // Mark quest as completed in NPC data (simulate game progression)
+  if (currentNpc.quests[questId]) {
+    currentNpc.quests[questId].completed = true;
+  }
+
+  updatePlayerStatus();
+
+  // Improve NPC mood on quest completion
+  changeNpcMood(currentNpc, 'happy');
+}
+
+/**
+ * Add a clue to player state.
+ * Also updates NPC mood slightly positively.
+ * @param {string} clue 
+ */
+function addClue(clue) {
+  if (!clue) return;
+  if (playerState.clues.has(clue)) return; // Avoid duplicates
+  playerState.clues.add(clue);
+  updatePlayerStatus();
+
+  // Slightly improve NPC mood on clue given
+  changeNpcMood(currentNpc, 'happy');
+}
+
+/**
+ * Change NPC mood and update UI accordingly.
+ * @param {object} npc 
+ * @param {string} newMood - 'happy', 'neutral', 'angry'
+ */
+function changeNpcMood(npc, newMood) {
+  if (!npc) return;
+  const oldMood = npc.mood || 'neutral';
+  if (oldMood === newMood) return;
+
+  npc.mood = newMood;
+
+  // Update NPC list mood indicator if visible
+  const npcListItems = Array.from(npcListEl.children);
+  const npcItem = npcListItems.find(li => li.dataset.npcId === npc.id);
+  if (npcItem) {
+    const moodIndicator = npcItem.querySelector('.mood-indicator');
+    if (moodIndicator) {
+      updateMoodIndicator(moodIndicator, newMood);
+    }
+  }
+
+  // If current NPC is this NPC, update face expression
+  if (currentNpc && currentNpc.id === npc.id) {
+    updateNpcFace(newMood);
+  }
+}
+
+/**
+ * Update the player status panel UI.
+ */
+function updatePlayerStatus() {
+  // Update quests list
+  questListEl.innerHTML = '';
+  const quests = Object.entries(playerState.quests);
+  if (quests.length === 0) {
+    const li = document.createElement('li');
+    li.textContent = 'No active quests.';
+    questListEl.appendChild(li);
+  } else {
+    quests.forEach(([id, quest]) => {
+      const li = document.createElement('li');
+      li.textContent = `${quest.title} [${quest.status}]`;
+      questListEl.appendChild(li);
+    });
+  }
+
+  // Update clues list
+  clueListEl.innerHTML = '';
+  if (playerState.clues.size === 0) {
+    const li = document.createElement('li');
+    li.textContent = 'No clues obtained.';
+    clueListEl.appendChild(li);
+  } else {
+    playerState.clues.forEach(clue => {
+      const li = document.createElement('li');
+      li.textContent = clue;
+      clueListEl.appendChild(li);
+    });
+  }
+}
+
+/**
+ * Simulate quest progression for demonstration.
+ * This function can be triggered to mark the beast quest as completed.
+ * Also updates NPC mood accordingly.
+ */
+function simulateQuestProgression() {
+  // If player has accepted the hunt_beast quest and it's active, mark it completed
+  if (playerState.quests['hunt_beast'] && playerState.quests['hunt_beast'].status === 'active') {
+    currentNpc = npcs.find(n => n.id === 'elder_mira');
+    currentNodeKey = 'questComplete';
+    currentNpc.quests['hunt_beast'].completed = true;
+    changeNpcMood(currentNpc, 'happy');
+    renderDialogue();
+    updatePlayerStatus();
+  }
+}
+
+// Initialize UI on page load
+initNpcList();
+updatePlayerStatus();
+
+// Select first NPC by default for convenience
+if (npcs.length > 0) {
+  selectNpc(npcs[0].id);
+}
+
+// For demonstration: add a keyboard shortcut to simulate quest completion
+window.addEventListener('keydown', e => {
+  if (e.key === 'F5') {
+    e.preventDefault();
+    simulateQuestProgression();
+    alert('Simulated quest completion for "Hunt the Dark Beast". Talk to Elder Mira again.');
+  }
+});
+</script>
+</body>
+</html>

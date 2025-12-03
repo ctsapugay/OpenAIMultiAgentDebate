@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cleaning Up a Mess with Wet Mop - SVG Animation</title>
+<style>
+  body {
+    margin: 0;
+    background: #e0f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  svg {
+    width: 400px;
+    height: 400px;
+    overflow: visible;
+  }
+  .mop-handle {
+    fill: #8b5e3c;
+    stroke: #5a3e23;
+    stroke-width: 2;
+    transform-origin: 50% 90%;
+    transition: transform 0.3s ease;
+  }
+  .mop-head {
+    fill: #cce6ff;
+    stroke: #99ccff;
+    stroke-width: 1.5;
+  }
+  .liquid {
+    fill: #4fc3f7;
+    filter: url(#blur);
+    opacity: 0.8;
+  }
+  .liquid.wiped {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .wipe-stroke {
+    fill: none;
+    stroke: #4fc3f7;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.6;
+  }
+  .wipe-stroke.wiped {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .mop-handle.moving {
+    animation: mop-swipe 1.2s ease-in-out infinite;
+  }
+  @keyframes mop-swipe {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-25deg); }
+    100% { transform: rotate(0deg); }
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 200 200" aria-label="Cleaning up a mess with a wet mop" role="img" >
+  <defs>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" />
+    </filter>
+  </defs>
+
+  <!-- Floor -->
+  <rect width="200" height="200" fill="#f0f0f0" />
+
+  <!-- Mess: irregular blue liquid puddle -->
+  <path id="liquid" class="liquid" d="
+    M 50 130
+    Q 60 120 70 130
+    T 90 125
+    Q 100 140 110 130
+    T 130 135
+    Q 140 140 150 130
+    Q 145 150 130 150
+    Q 110 160 90 150
+    Q 70 160 60 150
+    Q 50 145 50 130
+    Z
+  " />
+
+  <!-- Mop handle -->
+  <rect id="mop-handle" class="mop-handle" x="95" y="40" width="10" height="80" rx="3" ry="3" />
+
+  <!-- Mop head -->
+  <g id="mop-head" transform="translate(100,120)">
+    <ellipse class="mop-head" cx="0" cy="0" rx="25" ry="10" />
+    <path class="mop-head" d="M -20 0 Q 0 20 20 0" fill="#b3d9ff" />
+    <line x1="-15" y1="0" x2="-15" y2="10" stroke="#99ccff" stroke-width="2" />
+    <line x1="-7" y1="0" x2="-7" y2="10" stroke="#99ccff" stroke-width="2" />
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#99ccff" stroke-width="2" />
+    <line x1="7" y1="0" x2="7" y2="10" stroke="#99ccff" stroke-width="2" />
+    <line x1="15" y1="0" x2="15" y2="10" stroke="#99ccff" stroke-width="2" />
+  </g>
+
+  <!-- Wipe strokes to simulate wiping -->
+  <path id="wipe1" class="wipe-stroke" d="M 60 140 Q 90 120 120 140" />
+  <path id="wipe2" class="wipe-stroke" d="M 65 145 Q 95 125 125 145" />
+  <path id="wipe3" class="wipe-stroke" d="M 70 150 Q 100 130 130 150" />
+</svg>
+
+<script>
+  const mopHandle = document.getElementById('mop-handle');
+  const mopHead = document.getElementById('mop-head');
+  const liquid = document.getElementById('liquid');
+  const wipeStrokes = [
+    document.getElementById('wipe1'),
+    document.getElementById('wipe2'),
+    document.getElementById('wipe3'),
+  ];
+
+  // Animate mop swiping and liquid disappearing
+  // Timeline:
+  // 0-4s: mop swipes over liquid repeatedly, liquid fades out gradually
+  // 4-6s: mop wipes remaining liquid with wipe strokes fading out
+  // Loop the entire animation
+
+  function animateCleaning() {
+    // Reset states
+    liquid.style.opacity = 0.8;
+    liquid.classList.remove('wiped');
+    wipeStrokes.forEach(w => {
+      w.style.opacity = 0.6;
+      w.classList.remove('wiped');
+    });
+    mopHandle.classList.add('moving');
+
+    // Animate liquid fade out over 4 seconds
+    let start = null;
+    function fadeLiquid(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const duration = 4000;
+      const progress = Math.min(elapsed / duration, 1);
+      liquid.style.opacity = 0.8 * (1 - progress);
+      if (progress < 1) {
+        requestAnimationFrame(fadeLiquid);
+      } else {
+        liquid.style.opacity = 0;
+        liquid.classList.add('wiped');
+        mopHandle.classList.remove('moving');
+        wipeRemaining();
+      }
+    }
+    requestAnimationFrame(fadeLiquid);
+  }
+
+  function wipeRemaining() {
+    // Show wipe strokes and fade them out over 2 seconds
+    let start = null;
+    function fadeWipes(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const duration = 2000;
+      const progress = Math.min(elapsed / duration, 1);
+      wipeStrokes.forEach(w => {
+        w.style.opacity = 0.6 * (1 - progress);
+      });
+      if (progress < 1) {
+        requestAnimationFrame(fadeWipes);
+      } else {
+        wipeStrokes.forEach(w => {
+          w.style.opacity = 0;
+          w.classList.add('wiped');
+        });
+        setTimeout(() => {
+          animateCleaning();
+        }, 1000);
+      }
+    }
+    requestAnimationFrame(fadeWipes);
+  }
+
+  animateCleaning();
+</script>
+</body>
+</html>

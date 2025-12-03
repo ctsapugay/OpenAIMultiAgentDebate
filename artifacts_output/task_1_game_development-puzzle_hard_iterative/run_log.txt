@@ -1,0 +1,4358 @@
+2025-11-30 17:59:29 - INFO - 
+================================================================================
+2025-11-30 17:59:29 - INFO - ITERATIVE IMPROVEMENT PROCESS STARTED
+2025-11-30 17:59:29 - INFO - ================================================================================
+2025-11-30 17:59:29 - INFO - Task ID: 1
+2025-11-30 17:59:29 - INFO - Task Category: game_development-puzzle
+2025-11-30 17:59:29 - INFO - Task Difficulty: hard
+2025-11-30 17:59:29 - INFO - Improvement Threshold: 7.0
+2025-11-30 17:59:29 - INFO - Max Iterations: 3
+2025-11-30 17:59:29 - INFO - Start Time: 2025-11-30 17:59:29
+2025-11-30 17:59:29 - INFO - Model: gpt-4.1-mini
+2025-11-30 17:59:29 - INFO - Screenshots Enabled: True
+2025-11-30 17:59:29 - INFO - Use Screenshots in Evaluation: True
+2025-11-30 17:59:29 - INFO - ================================================================================
+2025-11-30 17:59:29 - INFO - 
+================================================================================
+2025-11-30 17:59:29 - INFO - STEP 1: GENERATING INITIAL CODE
+2025-11-30 17:59:29 - INFO - ================================================================================
+2025-11-30 17:59:29 - INFO - 
+================================================================================
+2025-11-30 17:59:29 - INFO - GENERATING INITIAL CODE...
+2025-11-30 17:59:29 - INFO - ================================================================================
+2025-11-30 17:59:29 - INFO - Model: gpt-4.1-mini
+2025-11-30 17:59:29 - INFO - Temperature: 0.0
+2025-11-30 17:59:29 - INFO - Task Question (first 200 chars): You are a code expert. Please use your professional knowledge to generate accurate and professional responses. Gameplay
+- **Drag and Rotate**: Manipulate blocks to form paths that guide Cub to the des...
+2025-11-30 18:01:37 - INFO - ✓ Initial code generated (took 127.63 seconds)
+2025-11-30 18:01:37 - INFO - Generated code length: 27020 characters
+2025-11-30 18:01:37 - INFO - Response length: 27020 characters
+2025-11-30 18:01:37 - INFO - 
+================================================================================
+2025-11-30 18:01:37 - INFO - INITIAL HTML CODE
+2025-11-30 18:01:37 - INFO - ================================================================================
+2025-11-30 18:01:37 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    overflow: hidden;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    min-height: calc(100vh - 60px);
+  }
+  #board {
+    position: relative;
+    background: #2a2a44;
+    border: 3px solid #444466;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #000a;
+    user-select: none;
+  }
+  #board svg {
+    display: block;
+    background: #1e1e2f;
+    border-radius: 12px;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #bbb;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f0f0f0;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  button {
+    background: #444466;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #5a5a8a;
+  }
+  button:disabled {
+    background: #2a2a44;
+    cursor: default;
+    color: #666;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7cdb7c;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotation */
+  #tooltip {
+    position: absolute;
+    background: #444466cc;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+  }
+  /* Cursor for draggable blocks */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px #7cdb7caa);
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup Puzzle Game">
+  <div id="board" role="grid" aria-live="polite" aria-label="Puzzle board"></div>
+  <div id="info-panel" aria-live="polite" aria-atomic="true">
+    <div id="level-info"></div>
+    <div id="message" aria-live="assertive"></div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Previous Level">← Prev</button>
+      <button id="btn-rotate" aria-label="Rotate Selected Block">Rotate</button>
+      <button id="btn-next" aria-label="Next Level">Next →</button>
+      <button id="btn-reset" aria-label="Reset Level">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="tooltip" role="tooltip" aria-hidden="true"></div>
+<script>
+(() => {
+  'use strict';
+
+  // Constants
+  const GRID_SIZE = 6; // 6x6 grid
+  const CELL_SIZE = 80; // px
+  const BOARD_SIZE = GRID_SIZE * CELL_SIZE;
+  const ROTATION_ANGLE = 90; // degrees per rotation step
+
+  // Directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+
+  // Opposite directions helper
+  function oppositeDir(dir) {
+    return (dir + 2) % 4;
+  }
+
+  // Block types and their connection patterns (relative to rotation)
+  // Connections are arrays of directions the block connects to
+  // For example, a straight pipe connects UP and DOWN
+  // Rotation rotates the directions clockwise by 90 degrees per step
+  const BLOCK_TYPES = {
+    empty: {
+      name: 'Empty',
+      connections: [],
+      svg: (size) => '',
+      rotatable: false,
+    },
+    straight: {
+      name: 'Straight Pipe',
+      connections: [DIRS.UP, DIRS.DOWN],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    corner: {
+      name: 'Corner Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.3;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h*2}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${h*2}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h*2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - h/4}" width="${h*2}" height="${h/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    tpipe: {
+      name: 'T Pipe',
+      connections: [DIRS.UP, DIRS.LEFT, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - w/4}" width="${w/2}" height="${w/2}" fill="#2f4f2f" rx="2" ry="2" />
+        `;
+      },
+    },
+    cross: {
+      name: 'Cross Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+      rotatable: false,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    start: {
+      name: 'Start (Cub)',
+      connections: [DIRS.RIGHT],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <circle cx="${cx}" cy="${cy}" r="${size*0.35}" fill="#f0a040" stroke="#d07a00" stroke-width="3" />
+          <path fill="#fff" stroke="#a05a00" stroke-width="1.5" d="M${cx-15},${cy+5} q10 -20 30 0 q-10 10 -30 0z" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="2" fill="#000" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="2" fill="#000" />
+          <ellipse cx="${cx}" cy="${cy+15}" rx="12" ry="6" fill="#d07a00" />
+        `;
+      },
+    },
+    end: {
+      name: 'Destination (Star)',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size * 0.35;
+        // Star shape path
+        const starPath = `
+          M${cx},${cy - r}
+          L${cx + r * 0.2245},${cy - r * 0.309}
+          L${cx + r},${cy - r * 0.309}
+          L${cx + r * 0.3633},${cy + r * 0.118}
+          L${cx + r * 0.5878},${cy + r * 0.809}
+          L${cx},${cy + r * 0.382}
+          L${cx - r * 0.5878},${cy + r * 0.809}
+          L${cx - r * 0.3633},${cy + r * 0.118}
+          L${cx - r},${cy - r * 0.309}
+          L${cx - r * 0.2245},${cy - r * 0.309}
+          Z
+        `;
+        return `
+          <path d="${starPath}" fill="#f0e84a" stroke="#d0c800" stroke-width="2" />
+          <circle cx="${cx}" cy="${cy}" r="${r*0.15}" fill="#fff" />
+        `;
+      },
+    },
+  };
+
+  // Levels definition
+  // Each level is a 2D array of block objects:
+  // { type: string, rotation: 0-3 }
+  // Start and end positions are marked by special blocks
+  // Blocks can be dragged and rotated (if rotatable)
+  // The player must connect the start to the end through connected pipes
+  const LEVELS = [
+    {
+      name: 'Level 1 - Simple Path',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'straight', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+      // rotations array is partial, will be expanded in code
+    },
+    {
+      name: 'Level 2 - Corner Challenge',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'corner', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 3 - T Pipe Puzzle',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'tpipe', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 4 - Crossroads',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'cross', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+  ];
+
+  // Expand rotations to full grid size (fill empty with 0)
+  function expandRotations(level) {
+    const rot = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      rot[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (level.rotations[r] && typeof level.rotations[r][c] === 'number') {
+          rot[r][c] = level.rotations[r][c];
+        } else {
+          rot[r][c] = 0;
+        }
+      }
+    }
+    return rot;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let boardEl;
+  let svgEl;
+  let blocks = []; // 2D array of block objects with type, rotation, position, and DOM element
+  let selectedBlock = null;
+  let dragData = null;
+  let messageEl;
+  let levelInfoEl;
+  let tooltipEl;
+
+  // Accessibility: announce messages
+  function announce(msg) {
+    if (messageEl) {
+      messageEl.textContent = msg;
+    }
+  }
+
+  // Create SVG element with namespace
+  function createSVGElement(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  }
+
+  // Create a block SVG group element
+  function createBlockSVG(blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('block-svg');
+    g.setAttribute('transform', `rotate(${rotation * ROTATION_ANGLE} 40 40)`);
+
+    // Create block shape
+    const size = CELL_SIZE;
+    const innerSVG = BLOCK_TYPES[blockType].svg(size);
+    if (innerSVG) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${innerSVG}</svg>`;
+      const svgChild = wrapper.firstElementChild;
+      g.appendChild(svgChild);
+    }
+    return g;
+  }
+
+  // Create a single cell group with background and block
+  function createCell(r, c, blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('cell');
+    g.setAttribute('data-row', r);
+    g.setAttribute('data-col', c);
+    g.setAttribute('tabindex', '-1');
+    g.setAttribute('role', 'gridcell');
+    g.setAttribute('aria-label', `Row ${r + 1} Column ${c + 1}, ${BLOCK_TYPES[blockType].name}`);
+
+    // Background rect
+    const rect = createSVGElement('rect');
+    rect.setAttribute('x', c * CELL_SIZE);
+    rect.setAttribute('y', r * CELL_SIZE);
+    rect.setAttribute('width', CELL_SIZE);
+    rect.setAttribute('height', CELL_SIZE);
+    rect.setAttribute('fill', '#22223b');
+    rect.setAttribute('stroke', '#444466');
+    rect.setAttribute('stroke-width', '1');
+    g.appendChild(rect);
+
+    // Block group
+    const blockGroup = createBlockSVG(blockType, rotation);
+    blockGroup.setAttribute('transform-origin', `${c * CELL_SIZE + CELL_SIZE/2}px ${r * CELL_SIZE + CELL_SIZE/2}px`);
+    blockGroup.setAttribute('transform', `translate(${c * CELL_SIZE},${r * CELL_SIZE}) rotate(${rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+    blockGroup.classList.add('draggable');
+    blockGroup.style.touchAction = 'none';
+    g.appendChild(blockGroup);
+
+    return g;
+  }
+
+  // Initialize the board for a level
+  function initLevel(levelIndex) {
+    currentLevelIndex = levelIndex;
+    const level = LEVELS[levelIndex];
+    if (!level) return;
+
+    blocks = [];
+    boardEl.innerHTML = '';
+    svgEl = createSVGElement('svg');
+    svgEl.setAttribute('width', BOARD_SIZE);
+    svgEl.setAttribute('height', BOARD_SIZE);
+    svgEl.setAttribute('role', 'presentation');
+    svgEl.style.touchAction = 'none';
+    boardEl.appendChild(svgEl);
+
+    const rotations = expandRotations(level);
+
+    // Build blocks array and SVG cells
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const type = level.grid[r] && level.grid[r][c] ? level.grid[r][c] : 'empty';
+        const rot = rotations[r][c] || 0;
+        blocks[r][c] = {
+          type,
+          rotation: rot % 4,
+          r,
+          c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, type, rot);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+
+    selectedBlock = null;
+    announce(`Loaded ${level.name}. Drag and rotate blocks to connect Cub to the Star.`);
+    levelInfoEl.textContent = level.name;
+    messageEl.textContent = '';
+  }
+
+  // Rotate a block clockwise by 90 degrees
+  function rotateBlock(block) {
+    if (!block || !BLOCK_TYPES[block.type].rotatable) return;
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+  }
+
+  // Update block SVG rotation transform
+  function updateBlockVisual(block) {
+    if (!block.el) return;
+    const blockGroup = block.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    const x = block.c * CELL_SIZE;
+    const y = block.r * CELL_SIZE;
+    blockGroup.setAttribute('transform', `translate(${x},${y}) rotate(${block.rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+  }
+
+  // Find start and end positions
+  function findStartEnd() {
+    let start = null;
+    let end = null;
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (blocks[r][c].type === 'start') start = blocks[r][c];
+        if (blocks[r][c].type === 'end') end = blocks[r][c];
+      }
+    }
+    return { start, end };
+  }
+
+  // Check if two blocks connect in a given direction
+  function blocksConnect(blockA, dir, blockB) {
+    if (!blockA || !blockB) return false;
+    const typeA = BLOCK_TYPES[blockA.type];
+    const typeB = BLOCK_TYPES[blockB.type];
+    if (!typeA || !typeB) return false;
+    const rotA = blockA.rotation;
+    const rotB = blockB.rotation;
+
+    // Calculate actual connection directions for blockA
+    const connsA = typeA.connections.map(d => (d + rotA) % 4);
+    // Calculate actual connection directions for blockB
+    const connsB = typeB.connections.map(d => (d + rotB) % 4);
+
+    // blockA must have connection in dir
+    if (!connsA.includes(dir)) return false;
+    // blockB must have connection in opposite direction
+    if (!connsB.includes(oppositeDir(dir))) return false;
+
+    return true;
+  }
+
+  // Check if the path from start to end is connected
+  function checkPath() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) return false;
+
+    // BFS from start to find end through connected pipes
+    const visited = new Set();
+    const queue = [];
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) return true;
+
+      // Check neighbors in all directions
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+        }
+      }
+    }
+    return false;
+  }
+
+  // Drag and drop handlers
+  function onPointerDown(e) {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+    const target = e.target;
+    if (!target) return;
+    const cellGroup = target.closest('g.cell');
+    if (!cellGroup) return;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') return; // no drag for these
+
+    e.preventDefault();
+    selectedBlock = block;
+    dragData = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origR: r,
+      origC: c,
+      dragging: false,
+      pointerId: e.pointerId,
+    };
+    // Set pointer capture for smooth dragging
+    e.target.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const dx = e.clientX - dragData.startX;
+    const dy = e.clientY - dragData.startY;
+    if (!dragData.dragging) {
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        dragData.dragging = true;
+        selectedBlock.el.classList.add('dragging');
+      } else {
+        return;
+      }
+    }
+    // Move the block SVG group visually with pointer
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.transition = 'none';
+    blockGroup.style.position = 'relative';
+    blockGroup.style.zIndex = 1000;
+    blockGroup.style.left = dx + 'px';
+    blockGroup.style.top = dy + 'px';
+  }
+
+  function onPointerUp(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (blockGroup) {
+      blockGroup.style.transition = '';
+      blockGroup.style.position = '';
+      blockGroup.style.zIndex = '';
+      blockGroup.style.left = '';
+      blockGroup.style.top = '';
+    }
+    if (dragData.dragging) {
+      // Calculate new cell based on pointer position relative to board
+      const boardRect = boardEl.getBoundingClientRect();
+      const x = e.clientX - boardRect.left;
+      const y = e.clientY - boardRect.top;
+      const newC = Math.floor(x / CELL_SIZE);
+      const newR = Math.floor(y / CELL_SIZE);
+      if (
+        newR >= 0 && newR < GRID_SIZE &&
+        newC >= 0 && newC < GRID_SIZE &&
+        blocks[newR][newC].type === 'empty'
+      ) {
+        // Move block to new position
+        moveBlock(selectedBlock.r, selectedBlock.c, newR, newC);
+        announce(`Moved block to row ${newR + 1}, column ${newC + 1}.`);
+      } else {
+        announce('Invalid move. Block returned to original position.');
+      }
+    } else {
+      // No drag, treat as click: rotate block
+      rotateBlock(selectedBlock);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    }
+    dragData = null;
+    selectedBlock.el.classList.remove('dragging');
+    selectedBlock = null;
+    checkWinCondition();
+  }
+
+  // Move block from (r1,c1) to (r2,c2)
+  function moveBlock(r1, c1, r2, c2) {
+    if (r1 === r2 && c1 === c2) return;
+    const block = blocks[r1][c1];
+    if (!block) return;
+    if (blocks[r2][c2].type !== 'empty') return;
+
+    // Swap blocks in data
+    blocks[r2][c2] = {
+      ...block,
+      r: r2,
+      c: c2,
+    };
+    blocks[r1][c1] = {
+      type: 'empty',
+      rotation: 0,
+      r: r1,
+      c: c1,
+      el: null,
+    };
+
+    // Update DOM elements
+    // Remove old cell groups
+    svgEl.removeChild(blocks[r2][c2].el);
+    svgEl.removeChild(blocks[r1][c1].el);
+
+    // Create new cells for both positions
+    const newCell1 = createCell(r1, c1, 'empty', 0);
+    const newCell2 = createCell(r2, c2, block.type, block.rotation);
+    svgEl.appendChild(newCell1);
+    svgEl.appendChild(newCell2);
+
+    blocks[r1][c1].el = newCell1;
+    blocks[r2][c2].el = newCell2;
+
+    // Update block reference for moved block
+    blocks[r2][c2].el = newCell2;
+    blocks[r2][c2].r = r2;
+    blocks[r2][c2].c = c2;
+
+    // Re-attach event listeners for new cells
+    attachCellListeners(newCell1);
+    attachCellListeners(newCell2);
+  }
+
+  // Attach pointer event listeners to a cell group
+  function attachCellListeners(cellGroup) {
+    const blockGroup = cellGroup.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.touchAction = 'none';
+    blockGroup.addEventListener('pointerdown', onPointerDown);
+    blockGroup.addEventListener('pointermove', onPointerMove);
+    blockGroup.addEventListener('pointerup', onPointerUp);
+    blockGroup.addEventListener('pointercancel', onPointerUp);
+    blockGroup.addEventListener('lostpointercapture', onPointerUp);
+  }
+
+  // Attach listeners to all blocks
+  function attachAllListeners() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (!block || !block.el) continue;
+        attachCellListeners(block.el);
+      }
+    }
+  }
+
+  // Check win condition and announce
+  function checkWinCondition() {
+    if (checkPath()) {
+      announce('Congratulations! Cub reached the Star! 🎉');
+    } else {
+      announce('Keep trying to connect Cub to the Star.');
+    }
+  }
+
+  // Rotate selected block button handler
+  function onRotateButton() {
+    if (!selectedBlock) {
+      announce('Select a block by clicking or dragging it first.');
+      return;
+    }
+    rotateBlock(selectedBlock);
+    announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    checkWinCondition();
+  }
+
+  // Select block by click on cell
+  function onCellClick(e) {
+    if (dragData) return; // ignore if dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') {
+      announce('This block cannot be rotated or moved.');
+      return;
+    }
+    selectedBlock = block;
+    announce(`Selected block at row ${r + 1}, column ${c + 1}. Use rotate button or drag to move.`);
+  }
+
+  // Setup controls buttons
+  function setupControls() {
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnReset = document.getElementById('btn-reset');
+
+    btnPrev.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex - 1 + LEVELS.length) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnNext.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex + 1) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnRotate.addEventListener('click', () => {
+      if (!selectedBlock) {
+        announce('Select a block first by clicking or dragging it.');
+        return;
+      }
+      rotateBlock(selectedBlock);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      checkWinCondition();
+    });
+    btnReset.addEventListener('click', () => {
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+  }
+
+  // Tooltip for rotate button
+  function setupTooltip() {
+    tooltipEl = document.getElementById('tooltip');
+    const btnRotate = document.getElementById('btn-rotate');
+    btnRotate.addEventListener('mouseenter', (e) => {
+      tooltipEl.textContent = 'Rotate the selected block by 90° clockwise';
+      const rect = btnRotate.getBoundingClientRect();
+      tooltipEl.style.left = rect.left + rect.width / 2 + 'px';
+      tooltipEl.style.top = rect.top - 30 + 'px';
+      tooltipEl.style.opacity = '1';
+      tooltipEl.setAttribute('aria-hidden', 'false');
+    });
+    btnRotate.addEventListener('mouseleave', () => {
+      tooltipEl.style.opacity = '0';
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  // Initialize game
+  function init() {
+    boardEl = document.getElementById('board');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    setupControls();
+    setupTooltip();
+    initLevel(currentLevelIndex);
+    attachAllListeners();
+  }
+
+  // Start game on DOM ready
+  window.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
+2025-11-30 18:01:37 - INFO - ================================================================================
+2025-11-30 18:01:37 - INFO - 
+✓ Initial code saved to: artifacts_output/task_1_game_development-puzzle_hard_iterative/iteration_0_initial.html
+2025-11-30 18:01:37 - INFO - 
+================================================================================
+2025-11-30 18:01:37 - INFO - STEP 2: ITERATIVE IMPROVEMENT LOOP
+2025-11-30 18:01:37 - INFO - ================================================================================
+2025-11-30 18:01:37 - INFO - 
+================================================================================
+2025-11-30 18:01:37 - INFO - ITERATION 1
+2025-11-30 18:01:37 - INFO - ================================================================================
+2025-11-30 18:01:37 - INFO - Iteration Start Time: 2025-11-30 18:01:37
+2025-11-30 18:01:37 - INFO - 
+Generating screenshots for iteration 0...
+2025-11-30 18:01:46 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 18:01:46 - INFO - 
+Evaluating code for iteration 0...
+2025-11-30 18:02:06 - INFO - Evaluation completed in 19.98 seconds
+2025-11-30 18:02:06 - INFO - 
+================================================================================
+2025-11-30 18:02:06 - INFO - EVALUATION RESULTS - ITERATION 0
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - Individual Scores (JSON):
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": 9.0,
+  "Is the level navigation and progression system implemented?": 7.0,
+  "Are the path-finding and goal validation mechanics properly implemented?": 9.0,
+  "Is the block manipulation system intuitive and responsive?": 8.0,
+  "Is the code robust?": 6.0,
+  "Are there any innovative features that are eye-catching?": 3.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 7.0,
+  "Does the interface vision meet professional game design standards?": 8.0,
+  "Is the dynamic interaction smooth and seamless?": 7.0
+}
+2025-11-30 18:02:06 - INFO - Calculated Sum: 74.0
+2025-11-30 18:02:06 - INFO - Overall Score (from LLM): 74.0
+2025-11-30 18:02:06 - INFO - 
+================================================================================
+2025-11-30 18:02:06 - INFO - FULL EVALUATION FEEDBACK - ITERATION 0
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - ```json
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": "9",
+  "Is the level navigation and progression system implemented?": "7",
+  "Are the path-finding and goal validation mechanics properly implemented?": "9",
+  "Is the block manipulation system intuitive and responsive?": "8",
+  "Is the code robust?": "6",
+  "Are there any innovative features that are eye-catching?": "3",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "7",
+  "Does the interface vision meet professional game design standards?": "8",
+  "Is the dynamic interaction smooth and seamless?": "7",
+  "Overall Score": "74"
+}
+```
+
+Reason:
+
+1. **Core puzzle gameplay mechanic (9/10)**  
+   The code implements both dragging and rotation of blocks, with proper SVG rendering and rotation transforms. Dragging is restricted to movable blocks and only onto empty cells, which is correct. Rotation is done in 90-degree increments with visual updates. The path validation logic is integrated and called after moves. However, the drag implementation uses relative positioning and manual style changes rather than a more robust drag-and-drop system, which may cause minor edge issues. Also, rotation on click and rotate button is supported, but no keyboard rotation shortcuts. Overall, the core mechanic is well done and nearly complete.
+
+2. **Level navigation and progression system (7/10)**  
+   There is a level selection system with Prev/Next buttons cycling through predefined levels. Reset is supported. However, there is no persistence of progress between sessions (no localStorage or backend). Also, no UI indication of level completion or locked/unlocked levels. The system is functional but basic.
+
+3. **Path-finding and goal validation mechanics (9/10)**  
+   The BFS path check from start to end through connected pipes is correctly implemented, considering block rotations and connection directions. It properly handles obstacles and empty cells. The logic is sound and covers edge cases well. Minor deduction because no visual path preview or step-by-step animation of the path is provided.
+
+4. **Block manipulation system intuitive and responsive (8/10)**  
+   Dragging uses pointer events with visual feedback (cursor changes, opacity). Rotation is clear with a rotate button and click-to-rotate. Snap-to-grid is implicit by snapping on drop. However, no ghost preview or snap highlight during drag, and rotation pivot is fixed but no visual rotation guide or animation. Dragging is responsive but could be smoother with CSS transitions or better pointer capture handling.
+
+5. **Code robustness (6/10)**  
+   The code handles pointer capture and cancels, prevents dragging of start/end/empty blocks, and restricts moves to valid cells. However, it lacks explicit error handling for rapid clicks, window resizing, or multi-touch edge cases. No debounce/throttle on events. No fallback or recovery UI for unexpected states. The code is stable but could be improved for robustness.
+
+6. **Innovative features (3/10)**  
+   The tooltip on the rotate button is a nice touch. However, no undo/redo, no hint system, no visual path preview on hover, or other advanced features. Only one minor innovation present.
+
+7. **Redundant features (10/10)**  
+   The code is clean with no redundant or unrelated features. No social media feeds or heavy visual effects. No duplicated drag systems. The code is focused and minimal.
+
+8. **Engineering quality (7/10)**  
+   The code is modular with clear separation of constants, data, and functions. Uses IIFE to avoid global pollution. However, some global variables remain (e.g., blocks, selectedBlock). No unit tests or build automation mentioned. Some code duplication in event handlers and DOM updates. Overall good but not industrial-grade.
+
+9. **Interface vision (8/10)**  
+   The UI uses harmonious dark theme colors with green highlights, consistent fonts, and spacing. The grid is clearly visible with subtle borders. Buttons have hover states and are well spaced. The game state is mostly clear, but no explicit visual indication of selected block except announcements. The color palette is professional and pleasant.
+
+10. **Dynamic interaction smoothness (7/10)**  
+    Dragging and rotation respond quickly with cursor changes and opacity. However, drag movement is immediate but lacks easing or smooth animation. No audio feedback is implemented. Win/lose feedback is textual only. Level transitions are instant without animation. Overall interaction is functional but could be enhanced with subtle animations and sounds.
+
+**Summary:**  
+This is a well-implemented puzzle game demo with solid core mechanics, clear UI, and functional level progression. The path validation is robust and correct. The drag and rotate controls are intuitive but could be improved with better visual feedback and smoother animations. The code is clean and focused but lacks advanced engineering practices like testing and persistence. Innovative features are minimal but the tooltip is a nice addition. The interface is visually appealing and professional. Overall, a strong demo with room for polish and feature expansion.
+
+Final overall score: 74/100.
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - 
+================================================================================
+2025-11-30 18:02:06 - INFO - HTML CODE - ITERATION 0
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    overflow: hidden;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    min-height: calc(100vh - 60px);
+  }
+  #board {
+    position: relative;
+    background: #2a2a44;
+    border: 3px solid #444466;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #000a;
+    user-select: none;
+  }
+  #board svg {
+    display: block;
+    background: #1e1e2f;
+    border-radius: 12px;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #bbb;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f0f0f0;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  button {
+    background: #444466;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #5a5a8a;
+  }
+  button:disabled {
+    background: #2a2a44;
+    cursor: default;
+    color: #666;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7cdb7c;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotation */
+  #tooltip {
+    position: absolute;
+    background: #444466cc;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+  }
+  /* Cursor for draggable blocks */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px #7cdb7caa);
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup Puzzle Game">
+  <div id="board" role="grid" aria-live="polite" aria-label="Puzzle board"></div>
+  <div id="info-panel" aria-live="polite" aria-atomic="true">
+    <div id="level-info"></div>
+    <div id="message" aria-live="assertive"></div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Previous Level">← Prev</button>
+      <button id="btn-rotate" aria-label="Rotate Selected Block">Rotate</button>
+      <button id="btn-next" aria-label="Next Level">Next →</button>
+      <button id="btn-reset" aria-label="Reset Level">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="tooltip" role="tooltip" aria-hidden="true"></div>
+<script>
+(() => {
+  'use strict';
+
+  // Constants
+  const GRID_SIZE = 6; // 6x6 grid
+  const CELL_SIZE = 80; // px
+  const BOARD_SIZE = GRID_SIZE * CELL_SIZE;
+  const ROTATION_ANGLE = 90; // degrees per rotation step
+
+  // Directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+
+  // Opposite directions helper
+  function oppositeDir(dir) {
+    return (dir + 2) % 4;
+  }
+
+  // Block types and their connection patterns (relative to rotation)
+  // Connections are arrays of directions the block connects to
+  // For example, a straight pipe connects UP and DOWN
+  // Rotation rotates the directions clockwise by 90 degrees per step
+  const BLOCK_TYPES = {
+    empty: {
+      name: 'Empty',
+      connections: [],
+      svg: (size) => '',
+      rotatable: false,
+    },
+    straight: {
+      name: 'Straight Pipe',
+      connections: [DIRS.UP, DIRS.DOWN],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    corner: {
+      name: 'Corner Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.3;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h*2}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${h*2}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h*2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - h/4}" width="${h*2}" height="${h/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    tpipe: {
+      name: 'T Pipe',
+      connections: [DIRS.UP, DIRS.LEFT, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - w/4}" width="${w/2}" height="${w/2}" fill="#2f4f2f" rx="2" ry="2" />
+        `;
+      },
+    },
+    cross: {
+      name: 'Cross Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+      rotatable: false,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    start: {
+      name: 'Start (Cub)',
+      connections: [DIRS.RIGHT],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <circle cx="${cx}" cy="${cy}" r="${size*0.35}" fill="#f0a040" stroke="#d07a00" stroke-width="3" />
+          <path fill="#fff" stroke="#a05a00" stroke-width="1.5" d="M${cx-15},${cy+5} q10 -20 30 0 q-10 10 -30 0z" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="2" fill="#000" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="2" fill="#000" />
+          <ellipse cx="${cx}" cy="${cy+15}" rx="12" ry="6" fill="#d07a00" />
+        `;
+      },
+    },
+    end: {
+      name: 'Destination (Star)',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size * 0.35;
+        // Star shape path
+        const starPath = `
+          M${cx},${cy - r}
+          L${cx + r * 0.2245},${cy - r * 0.309}
+          L${cx + r},${cy - r * 0.309}
+          L${cx + r * 0.3633},${cy + r * 0.118}
+          L${cx + r * 0.5878},${cy + r * 0.809}
+          L${cx},${cy + r * 0.382}
+          L${cx - r * 0.5878},${cy + r * 0.809}
+          L${cx - r * 0.3633},${cy + r * 0.118}
+          L${cx - r},${cy - r * 0.309}
+          L${cx - r * 0.2245},${cy - r * 0.309}
+          Z
+        `;
+        return `
+          <path d="${starPath}" fill="#f0e84a" stroke="#d0c800" stroke-width="2" />
+          <circle cx="${cx}" cy="${cy}" r="${r*0.15}" fill="#fff" />
+        `;
+      },
+    },
+  };
+
+  // Levels definition
+  // Each level is a 2D array of block objects:
+  // { type: string, rotation: 0-3 }
+  // Start and end positions are marked by special blocks
+  // Blocks can be dragged and rotated (if rotatable)
+  // The player must connect the start to the end through connected pipes
+  const LEVELS = [
+    {
+      name: 'Level 1 - Simple Path',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'straight', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+      // rotations array is partial, will be expanded in code
+    },
+    {
+      name: 'Level 2 - Corner Challenge',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'corner', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 3 - T Pipe Puzzle',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'tpipe', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 4 - Crossroads',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'cross', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+  ];
+
+  // Expand rotations to full grid size (fill empty with 0)
+  function expandRotations(level) {
+    const rot = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      rot[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (level.rotations[r] && typeof level.rotations[r][c] === 'number') {
+          rot[r][c] = level.rotations[r][c];
+        } else {
+          rot[r][c] = 0;
+        }
+      }
+    }
+    return rot;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let boardEl;
+  let svgEl;
+  let blocks = []; // 2D array of block objects with type, rotation, position, and DOM element
+  let selectedBlock = null;
+  let dragData = null;
+  let messageEl;
+  let levelInfoEl;
+  let tooltipEl;
+
+  // Accessibility: announce messages
+  function announce(msg) {
+    if (messageEl) {
+      messageEl.textContent = msg;
+    }
+  }
+
+  // Create SVG element with namespace
+  function createSVGElement(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  }
+
+  // Create a block SVG group element
+  function createBlockSVG(blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('block-svg');
+    g.setAttribute('transform', `rotate(${rotation * ROTATION_ANGLE} 40 40)`);
+
+    // Create block shape
+    const size = CELL_SIZE;
+    const innerSVG = BLOCK_TYPES[blockType].svg(size);
+    if (innerSVG) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${innerSVG}</svg>`;
+      const svgChild = wrapper.firstElementChild;
+      g.appendChild(svgChild);
+    }
+    return g;
+  }
+
+  // Create a single cell group with background and block
+  function createCell(r, c, blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('cell');
+    g.setAttribute('data-row', r);
+    g.setAttribute('data-col', c);
+    g.setAttribute('tabindex', '-1');
+    g.setAttribute('role', 'gridcell');
+    g.setAttribute('aria-label', `Row ${r + 1} Column ${c + 1}, ${BLOCK_TYPES[blockType].name}`);
+
+    // Background rect
+    const rect = createSVGElement('rect');
+    rect.setAttribute('x', c * CELL_SIZE);
+    rect.setAttribute('y', r * CELL_SIZE);
+    rect.setAttribute('width', CELL_SIZE);
+    rect.setAttribute('height', CELL_SIZE);
+    rect.setAttribute('fill', '#22223b');
+    rect.setAttribute('stroke', '#444466');
+    rect.setAttribute('stroke-width', '1');
+    g.appendChild(rect);
+
+    // Block group
+    const blockGroup = createBlockSVG(blockType, rotation);
+    blockGroup.setAttribute('transform-origin', `${c * CELL_SIZE + CELL_SIZE/2}px ${r * CELL_SIZE + CELL_SIZE/2}px`);
+    blockGroup.setAttribute('transform', `translate(${c * CELL_SIZE},${r * CELL_SIZE}) rotate(${rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+    blockGroup.classList.add('draggable');
+    blockGroup.style.touchAction = 'none';
+    g.appendChild(blockGroup);
+
+    return g;
+  }
+
+  // Initialize the board for a level
+  function initLevel(levelIndex) {
+    currentLevelIndex = levelIndex;
+    const level = LEVELS[levelIndex];
+    if (!level) return;
+
+    blocks = [];
+    boardEl.innerHTML = '';
+    svgEl = createSVGElement('svg');
+    svgEl.setAttribute('width', BOARD_SIZE);
+    svgEl.setAttribute('height', BOARD_SIZE);
+    svgEl.setAttribute('role', 'presentation');
+    svgEl.style.touchAction = 'none';
+    boardEl.appendChild(svgEl);
+
+    const rotations = expandRotations(level);
+
+    // Build blocks array and SVG cells
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const type = level.grid[r] && level.grid[r][c] ? level.grid[r][c] : 'empty';
+        const rot = rotations[r][c] || 0;
+        blocks[r][c] = {
+          type,
+          rotation: rot % 4,
+          r,
+          c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, type, rot);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+
+    selectedBlock = null;
+    announce(`Loaded ${level.name}. Drag and rotate blocks to connect Cub to the Star.`);
+    levelInfoEl.textContent = level.name;
+    messageEl.textContent = '';
+  }
+
+  // Rotate a block clockwise by 90 degrees
+  function rotateBlock(block) {
+    if (!block || !BLOCK_TYPES[block.type].rotatable) return;
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+  }
+
+  // Update block SVG rotation transform
+  function updateBlockVisual(block) {
+    if (!block.el) return;
+    const blockGroup = block.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    const x = block.c * CELL_SIZE;
+    const y = block.r * CELL_SIZE;
+    blockGroup.setAttribute('transform', `translate(${x},${y}) rotate(${block.rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+  }
+
+  // Find start and end positions
+  function findStartEnd() {
+    let start = null;
+    let end = null;
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (blocks[r][c].type === 'start') start = blocks[r][c];
+        if (blocks[r][c].type === 'end') end = blocks[r][c];
+      }
+    }
+    return { start, end };
+  }
+
+  // Check if two blocks connect in a given direction
+  function blocksConnect(blockA, dir, blockB) {
+    if (!blockA || !blockB) return false;
+    const typeA = BLOCK_TYPES[blockA.type];
+    const typeB = BLOCK_TYPES[blockB.type];
+    if (!typeA || !typeB) return false;
+    const rotA = blockA.rotation;
+    const rotB = blockB.rotation;
+
+    // Calculate actual connection directions for blockA
+    const connsA = typeA.connections.map(d => (d + rotA) % 4);
+    // Calculate actual connection directions for blockB
+    const connsB = typeB.connections.map(d => (d + rotB) % 4);
+
+    // blockA must have connection in dir
+    if (!connsA.includes(dir)) return false;
+    // blockB must have connection in opposite direction
+    if (!connsB.includes(oppositeDir(dir))) return false;
+
+    return true;
+  }
+
+  // Check if the path from start to end is connected
+  function checkPath() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) return false;
+
+    // BFS from start to find end through connected pipes
+    const visited = new Set();
+    const queue = [];
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) return true;
+
+      // Check neighbors in all directions
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+        }
+      }
+    }
+    return false;
+  }
+
+  // Drag and drop handlers
+  function onPointerDown(e) {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+    const target = e.target;
+    if (!target) return;
+    const cellGroup = target.closest('g.cell');
+    if (!cellGroup) return;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') return; // no drag for these
+
+    e.preventDefault();
+    selectedBlock = block;
+    dragData = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origR: r,
+      origC: c,
+      dragging: false,
+      pointerId: e.pointerId,
+    };
+    // Set pointer capture for smooth dragging
+    e.target.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const dx = e.clientX - dragData.startX;
+    const dy = e.clientY - dragData.startY;
+    if (!dragData.dragging) {
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        dragData.dragging = true;
+        selectedBlock.el.classList.add('dragging');
+      } else {
+        return;
+      }
+    }
+    // Move the block SVG group visually with pointer
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.transition = 'none';
+    blockGroup.style.position = 'relative';
+    blockGroup.style.zIndex = 1000;
+    blockGroup.style.left = dx + 'px';
+    blockGroup.style.top = dy + 'px';
+  }
+
+  function onPointerUp(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (blockGroup) {
+      blockGroup.style.transition = '';
+      blockGroup.style.position = '';
+      blockGroup.style.zIndex = '';
+      blockGroup.style.left = '';
+      blockGroup.style.top = '';
+    }
+    if (dragData.dragging) {
+      // Calculate new cell based on pointer position relative to board
+      const boardRect = boardEl.getBoundingClientRect();
+      const x = e.clientX - boardRect.left;
+      const y = e.clientY - boardRect.top;
+      const newC = Math.floor(x / CELL_SIZE);
+      const newR = Math.floor(y / CELL_SIZE);
+      if (
+        newR >= 0 && newR < GRID_SIZE &&
+        newC >= 0 && newC < GRID_SIZE &&
+        blocks[newR][newC].type === 'empty'
+      ) {
+        // Move block to new position
+        moveBlock(selectedBlock.r, selectedBlock.c, newR, newC);
+        announce(`Moved block to row ${newR + 1}, column ${newC + 1}.`);
+      } else {
+        announce('Invalid move. Block returned to original position.');
+      }
+    } else {
+      // No drag, treat as click: rotate block
+      rotateBlock(selectedBlock);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    }
+    dragData = null;
+    selectedBlock.el.classList.remove('dragging');
+    selectedBlock = null;
+    checkWinCondition();
+  }
+
+  // Move block from (r1,c1) to (r2,c2)
+  function moveBlock(r1, c1, r2, c2) {
+    if (r1 === r2 && c1 === c2) return;
+    const block = blocks[r1][c1];
+    if (!block) return;
+    if (blocks[r2][c2].type !== 'empty') return;
+
+    // Swap blocks in data
+    blocks[r2][c2] = {
+      ...block,
+      r: r2,
+      c: c2,
+    };
+    blocks[r1][c1] = {
+      type: 'empty',
+      rotation: 0,
+      r: r1,
+      c: c1,
+      el: null,
+    };
+
+    // Update DOM elements
+    // Remove old cell groups
+    svgEl.removeChild(blocks[r2][c2].el);
+    svgEl.removeChild(blocks[r1][c1].el);
+
+    // Create new cells for both positions
+    const newCell1 = createCell(r1, c1, 'empty', 0);
+    const newCell2 = createCell(r2, c2, block.type, block.rotation);
+    svgEl.appendChild(newCell1);
+    svgEl.appendChild(newCell2);
+
+    blocks[r1][c1].el = newCell1;
+    blocks[r2][c2].el = newCell2;
+
+    // Update block reference for moved block
+    blocks[r2][c2].el = newCell2;
+    blocks[r2][c2].r = r2;
+    blocks[r2][c2].c = c2;
+
+    // Re-attach event listeners for new cells
+    attachCellListeners(newCell1);
+    attachCellListeners(newCell2);
+  }
+
+  // Attach pointer event listeners to a cell group
+  function attachCellListeners(cellGroup) {
+    const blockGroup = cellGroup.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.touchAction = 'none';
+    blockGroup.addEventListener('pointerdown', onPointerDown);
+    blockGroup.addEventListener('pointermove', onPointerMove);
+    blockGroup.addEventListener('pointerup', onPointerUp);
+    blockGroup.addEventListener('pointercancel', onPointerUp);
+    blockGroup.addEventListener('lostpointercapture', onPointerUp);
+  }
+
+  // Attach listeners to all blocks
+  function attachAllListeners() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (!block || !block.el) continue;
+        attachCellListeners(block.el);
+      }
+    }
+  }
+
+  // Check win condition and announce
+  function checkWinCondition() {
+    if (checkPath()) {
+      announce('Congratulations! Cub reached the Star! 🎉');
+    } else {
+      announce('Keep trying to connect Cub to the Star.');
+    }
+  }
+
+  // Rotate selected block button handler
+  function onRotateButton() {
+    if (!selectedBlock) {
+      announce('Select a block by clicking or dragging it first.');
+      return;
+    }
+    rotateBlock(selectedBlock);
+    announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    checkWinCondition();
+  }
+
+  // Select block by click on cell
+  function onCellClick(e) {
+    if (dragData) return; // ignore if dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') {
+      announce('This block cannot be rotated or moved.');
+      return;
+    }
+    selectedBlock = block;
+    announce(`Selected block at row ${r + 1}, column ${c + 1}. Use rotate button or drag to move.`);
+  }
+
+  // Setup controls buttons
+  function setupControls() {
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnReset = document.getElementById('btn-reset');
+
+    btnPrev.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex - 1 + LEVELS.length) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnNext.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex + 1) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnRotate.addEventListener('click', () => {
+      if (!selectedBlock) {
+        announce('Select a block first by clicking or dragging it.');
+        return;
+      }
+      rotateBlock(selectedBlock);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      checkWinCondition();
+    });
+    btnReset.addEventListener('click', () => {
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+  }
+
+  // Tooltip for rotate button
+  function setupTooltip() {
+    tooltipEl = document.getElementById('tooltip');
+    const btnRotate = document.getElementById('btn-rotate');
+    btnRotate.addEventListener('mouseenter', (e) => {
+      tooltipEl.textContent = 'Rotate the selected block by 90° clockwise';
+      const rect = btnRotate.getBoundingClientRect();
+      tooltipEl.style.left = rect.left + rect.width / 2 + 'px';
+      tooltipEl.style.top = rect.top - 30 + 'px';
+      tooltipEl.style.opacity = '1';
+      tooltipEl.setAttribute('aria-hidden', 'false');
+    });
+    btnRotate.addEventListener('mouseleave', () => {
+      tooltipEl.style.opacity = '0';
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  // Initialize game
+  function init() {
+    boardEl = document.getElementById('board');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    setupControls();
+    setupTooltip();
+    initLevel(currentLevelIndex);
+    attachAllListeners();
+  }
+
+  // Start game on DOM ready
+  window.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - 
+================================================================================
+2025-11-30 18:02:06 - INFO - SCORE SUMMARY - ITERATION 0
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - ✓ Is the core puzzle gameplay mechanic fully implemented?: 9.0/10
+2025-11-30 18:02:06 - INFO - ✓ Is the level navigation and progression system implemented?: 7.0/10
+2025-11-30 18:02:06 - INFO - ✓ Are the path-finding and goal validation mechanics properly implemented?: 9.0/10
+2025-11-30 18:02:06 - INFO - ✓ Is the block manipulation system intuitive and responsive?: 8.0/10
+2025-11-30 18:02:06 - INFO - ✗ Is the code robust?: 6.0/10
+2025-11-30 18:02:06 - INFO - ✗ Are there any innovative features that are eye-catching?: 3.0/10
+2025-11-30 18:02:06 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 18:02:06 - INFO - ✓ Does the code have engineering quality?: 7.0/10
+2025-11-30 18:02:06 - INFO - ✓ Does the interface vision meet professional game design standards?: 8.0/10
+2025-11-30 18:02:06 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 7.0/10
+2025-11-30 18:02:06 - INFO - 
+⚠ Found 2 area(s) needing improvement:
+2025-11-30 18:02:06 - INFO -   - Are there any innovative features that are eye-catching?: 3.0/10
+2025-11-30 18:02:06 - INFO -   - Is the code robust?: 6.0/10
+2025-11-30 18:02:06 - INFO - 
+Creating improvement prompt for 2 weak area(s)...
+2025-11-30 18:02:06 - INFO - Improvement prompt created (length: 30952 characters)
+2025-11-30 18:02:06 - INFO - 
+================================================================================
+2025-11-30 18:02:06 - INFO - IMPROVEMENT ROUND 1
+2025-11-30 18:02:06 - INFO - ================================================================================
+2025-11-30 18:02:06 - INFO - Model: gpt-4.1-mini
+2025-11-30 18:02:06 - INFO - Temperature: 0.0
+2025-11-30 18:02:06 - INFO - Improvement Prompt Length: 30952 characters
+2025-11-30 18:02:06 - INFO - Improvement Prompt Preview:
+You are an expert web front-end developer. Your task is to improve existing code based on specific feedback.
+
+ORIGINAL TASK:
+You are a code expert. Please use your professional knowledge to generate accurate and professional responses. Gameplay
+- **Drag and Rotate**: Manipulate blocks to form paths that guide Cub to the destination.
+- **Solve Puzzles**: Each level is designed with specific challenges and obstacles.
+
+# Game Features
+- **Intuitive Controls**: Control the game through simple drag a...
+2025-11-30 18:05:09 - INFO - ✓ Improved code generated for iteration 1 (took 182.35 seconds)
+2025-11-30 18:05:09 - INFO - Improved code length: 36111 characters
+2025-11-30 18:05:09 - INFO - ✓ Improved code saved to: artifacts_output/task_1_game_development-puzzle_hard_iterative/iteration_1.html
+2025-11-30 18:05:09 - INFO - Iteration 1 completed in 211.83 seconds
+2025-11-30 18:05:09 - INFO - 
+================================================================================
+2025-11-30 18:05:09 - INFO - ITERATION 2
+2025-11-30 18:05:09 - INFO - ================================================================================
+2025-11-30 18:05:09 - INFO - Iteration Start Time: 2025-11-30 18:05:09
+2025-11-30 18:05:09 - INFO - 
+Generating screenshots for iteration 1...
+2025-11-30 18:05:18 - INFO - Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 18:05:18 - INFO - 
+Evaluating code for iteration 1...
+2025-11-30 18:05:34 - INFO - Evaluation completed in 15.20 seconds
+2025-11-30 18:05:34 - INFO - 
+================================================================================
+2025-11-30 18:05:34 - INFO - EVALUATION RESULTS - ITERATION 1
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - Individual Scores (JSON):
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": 10.0,
+  "Is the level navigation and progression system implemented?": 10.0,
+  "Are the path-finding and goal validation mechanics properly implemented?": 10.0,
+  "Is the block manipulation system intuitive and responsive?": 8.0,
+  "Is the code robust?": 8.0,
+  "Are there any innovative features that are eye-catching?": 9.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional game design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 9.0
+}
+2025-11-30 18:05:34 - INFO - Calculated Sum: 91.0
+2025-11-30 18:05:34 - INFO - Overall Score (from LLM): 91.0
+2025-11-30 18:05:34 - INFO - 
+================================================================================
+2025-11-30 18:05:34 - INFO - FULL EVALUATION FEEDBACK - ITERATION 1
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - ```json
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": "10",
+  "Is the level navigation and progression system implemented?": "10",
+  "Are the path-finding and goal validation mechanics properly implemented?": "10",
+  "Is the block manipulation system intuitive and responsive?": "8",
+  "Is the code robust?": "8",
+  "Are there any innovative features that are eye-catching?": "9",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional game design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "9",
+  "Overall Score": "91"
+}
+```
+
+Reason:
+
+1. **Core puzzle gameplay mechanic (10/10):**  
+   The code fully implements the core gameplay: blocks can be dragged and rotated. The drag-and-drop logic is well handled with pointer events, and rotation is implemented both via click and a rotate button. The path validation uses BFS to check connectivity between start and end blocks considering block rotations and connections. Collision detection is enforced by only allowing moves to empty cells. This meets the highest standard.
+
+2. **Level navigation and progression system (10/10):**  
+   The game includes multiple levels with a level selection interface via Prev/Next buttons. Level completion is validated by path checking. Progression loops through levels. Undo/redo and reset are implemented. Although no explicit persistence across sessions is present, the problem statement does not require it explicitly, so full marks are given.
+
+3. **Path-finding and goal validation (10/10):**  
+   The BFS pathfinding correctly checks connections between blocks considering their rotation and connection directions. It handles obstacles (empty blocks) and ensures continuous path connections. The validation is comprehensive and not simplistic.
+
+4. **Block manipulation system intuitive and responsive (8/10):**  
+   Dragging and rotation controls are natural and use pointer events with visual feedback (cursor changes, opacity). Snap-to-grid is implicit by restricting moves to grid cells. Rotation pivot points are correctly centered. However, the drag movement uses relative positioning with some manual style changes which might cause minor visual glitches or lag on some devices. Rotation visual guidance is present but could be enhanced with clearer rotation previews or ghost blocks. Hence a slight deduction.
+
+5. **Code robustness (8/10):**  
+   The code handles abnormal situations like dragging outside boundaries, rapid clicks, and window resizing (which cancels drag). Pointer capture is used for smooth dragging. Undo/redo stacks have limits. However, no explicit error prompts for unexpected exceptions or corrupted states are present. Overall robustness is good but not perfect.
+
+6. **Innovative features (9/10):**  
+   The code includes multiple advanced features: undo/redo functionality, a hint system that highlights blocks to rotate or the path, and path preview on hover with simulated rotation. These features significantly enhance user experience. The maximum is 10 points, and 3 points per feature is given, but since the hint and preview are related, a slight deduction is applied.
+
+7. **Redundant features (10/10):**  
+   No redundant or unrelated features are found. The code is focused on the puzzle game. No duplicate dragging systems or unrelated modules exist. No fancy effects that degrade performance are present.
+
+8. **Engineering quality (8/10):**  
+   The code is modular with separation of concerns: block definitions, level data, UI rendering, event handling, and game logic are reasonably separated. Global state pollution is minimal and contained within an IIFE. However, no unit tests or build automation are included. Some code duplication exists in snapshot handling but is not excessive. Overall good engineering quality with room for improvement.
+
+9. **Interface vision (9/10):**  
+   The UI uses harmonious dark theme colors with green highlights for pipes and yellow for the star. Layout spacing is consistent with a clear grid. UI elements are professional with clear affordances and accessible ARIA attributes. Minor deductions for some color contrast issues (e.g., disabled buttons) and tooltip positioning that could be improved.
+
+10. **Dynamic interaction smoothness (9/10):**  
+    Block manipulation response is immediate with cursor changes and opacity feedback. Animations for block movement and rotation are smooth with no noticeable lag. Path animation is not explicitly animated but path highlighting is clear. Audio feedback is missing, which could enhance feedback on success/failure. Slight deduction for missing audio and no animation on level transitions.
+
+**Summary:**  
+This is a very well-implemented puzzle game demo with complete core mechanics, level progression, path validation, and advanced features like undo/redo and hints. The UI is professional and interactions are smooth. Minor improvements could be made in drag visual polish, robustness, and adding audio feedback. Overall, the code and design meet high professional standards with a total score of 91/100.
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - 
+================================================================================
+2025-11-30 18:05:34 - INFO - HTML CODE - ITERATION 1
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    overflow: hidden;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    min-height: calc(100vh - 60px);
+  }
+  #board {
+    position: relative;
+    background: #2a2a44;
+    border: 3px solid #444466;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #000a;
+    user-select: none;
+  }
+  #board svg {
+    display: block;
+    background: #1e1e2f;
+    border-radius: 12px;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #bbb;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f0f0f0;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  button {
+    background: #444466;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #5a5a8a;
+  }
+  button:disabled {
+    background: #2a2a44;
+    cursor: default;
+    color: #666;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7cdb7c;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotation */
+  #tooltip {
+    position: absolute;
+    background: #444466cc;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+  }
+  /* Cursor for draggable blocks */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px #7cdb7caa);
+  }
+  /* Highlight for path preview */
+  .path-preview rect {
+    stroke: #7cdb7c;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 6px #7cdb7caa);
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup Puzzle Game">
+  <div id="board" role="grid" aria-live="polite" aria-label="Puzzle board"></div>
+  <div id="info-panel" aria-live="polite" aria-atomic="true">
+    <div id="level-info"></div>
+    <div id="message" aria-live="assertive"></div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Previous Level">← Prev</button>
+      <button id="btn-rotate" aria-label="Rotate Selected Block">Rotate</button>
+      <button id="btn-undo" aria-label="Undo Last Move" disabled>Undo</button>
+      <button id="btn-redo" aria-label="Redo Last Move" disabled>Redo</button>
+      <button id="btn-hint" aria-label="Show Hint">Hint</button>
+      <button id="btn-next" aria-label="Next Level">Next →</button>
+      <button id="btn-reset" aria-label="Reset Level">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="tooltip" role="tooltip" aria-hidden="true"></div>
+<script>
+(() => {
+  'use strict';
+
+  // Constants
+  const GRID_SIZE = 6; // 6x6 grid
+  const CELL_SIZE = 80; // px
+  const BOARD_SIZE = GRID_SIZE * CELL_SIZE;
+  const ROTATION_ANGLE = 90; // degrees per rotation step
+
+  // Directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+
+  // Opposite directions helper
+  function oppositeDir(dir) {
+    return (dir + 2) % 4;
+  }
+
+  // Block types and their connection patterns (relative to rotation)
+  // Connections are arrays of directions the block connects to
+  // For example, a straight pipe connects UP and DOWN
+  // Rotation rotates the directions clockwise by 90 degrees per step
+  const BLOCK_TYPES = {
+    empty: {
+      name: 'Empty',
+      connections: [],
+      svg: (size) => '',
+      rotatable: false,
+    },
+    straight: {
+      name: 'Straight Pipe',
+      connections: [DIRS.UP, DIRS.DOWN],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    corner: {
+      name: 'Corner Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.3;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h*2}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${h*2}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h*2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - h/4}" width="${h*2}" height="${h/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    tpipe: {
+      name: 'T Pipe',
+      connections: [DIRS.UP, DIRS.LEFT, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - w/4}" width="${w/2}" height="${w/2}" fill="#2f4f2f" rx="2" ry="2" />
+        `;
+      },
+    },
+    cross: {
+      name: 'Cross Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+      rotatable: false,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    start: {
+      name: 'Start (Cub)',
+      connections: [DIRS.RIGHT],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <circle cx="${cx}" cy="${cy}" r="${size*0.35}" fill="#f0a040" stroke="#d07a00" stroke-width="3" />
+          <path fill="#fff" stroke="#a05a00" stroke-width="1.5" d="M${cx-15},${cy+5} q10 -20 30 0 q-10 10 -30 0z" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="2" fill="#000" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="2" fill="#000" />
+          <ellipse cx="${cx}" cy="${cy+15}" rx="12" ry="6" fill="#d07a00" />
+        `;
+      },
+    },
+    end: {
+      name: 'Destination (Star)',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size * 0.35;
+        // Star shape path
+        const starPath = `
+          M${cx},${cy - r}
+          L${cx + r * 0.2245},${cy - r * 0.309}
+          L${cx + r},${cy - r * 0.309}
+          L${cx + r * 0.3633},${cy + r * 0.118}
+          L${cx + r * 0.5878},${cy + r * 0.809}
+          L${cx},${cy + r * 0.382}
+          L${cx - r * 0.5878},${cy + r * 0.809}
+          L${cx - r * 0.3633},${cy + r * 0.118}
+          L${cx - r},${cy - r * 0.309}
+          L${cx - r * 0.2245},${cy - r * 0.309}
+          Z
+        `;
+        return `
+          <path d="${starPath}" fill="#f0e84a" stroke="#d0c800" stroke-width="2" />
+          <circle cx="${cx}" cy="${cy}" r="${r*0.15}" fill="#fff" />
+        `;
+      },
+    },
+  };
+
+  // Levels definition
+  // Each level is a 2D array of block objects:
+  // { type: string, rotation: 0-3 }
+  // Start and end positions are marked by special blocks
+  // Blocks can be dragged and rotated (if rotatable)
+  // The player must connect the start to the end through connected pipes
+  const LEVELS = [
+    {
+      name: 'Level 1 - Simple Path',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'straight', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+      // rotations array is partial, will be expanded in code
+    },
+    {
+      name: 'Level 2 - Corner Challenge',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'corner', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 3 - T Pipe Puzzle',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'tpipe', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 4 - Crossroads',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'cross', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+  ];
+
+  // Expand rotations to full grid size (fill empty with 0)
+  function expandRotations(level) {
+    const rot = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      rot[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (level.rotations[r] && typeof level.rotations[r][c] === 'number') {
+          rot[r][c] = level.rotations[r][c];
+        } else {
+          rot[r][c] = 0;
+        }
+      }
+    }
+    return rot;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let boardEl;
+  let svgEl;
+  let blocks = []; // 2D array of block objects with type, rotation, position, and DOM element
+  let selectedBlock = null;
+  let dragData = null;
+  let messageEl;
+  let levelInfoEl;
+  let tooltipEl;
+
+  // Undo/Redo stacks
+  let undoStack = [];
+  let redoStack = [];
+
+  // Accessibility: announce messages
+  function announce(msg) {
+    if (messageEl) {
+      messageEl.textContent = msg;
+    }
+  }
+
+  // Create SVG element with namespace
+  function createSVGElement(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  }
+
+  // Create a block SVG group element
+  function createBlockSVG(blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('block-svg');
+    g.setAttribute('transform', `rotate(${rotation * ROTATION_ANGLE} 40 40)`);
+
+    // Create block shape
+    const size = CELL_SIZE;
+    const innerSVG = BLOCK_TYPES[blockType].svg(size);
+    if (innerSVG) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${innerSVG}</svg>`;
+      const svgChild = wrapper.firstElementChild;
+      g.appendChild(svgChild);
+    }
+    return g;
+  }
+
+  // Create a single cell group with background and block
+  function createCell(r, c, blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('cell');
+    g.setAttribute('data-row', r);
+    g.setAttribute('data-col', c);
+    g.setAttribute('tabindex', '-1');
+    g.setAttribute('role', 'gridcell');
+    g.setAttribute('aria-label', `Row ${r + 1} Column ${c + 1}, ${BLOCK_TYPES[blockType].name}`);
+
+    // Background rect
+    const rect = createSVGElement('rect');
+    rect.setAttribute('x', c * CELL_SIZE);
+    rect.setAttribute('y', r * CELL_SIZE);
+    rect.setAttribute('width', CELL_SIZE);
+    rect.setAttribute('height', CELL_SIZE);
+    rect.setAttribute('fill', '#22223b');
+    rect.setAttribute('stroke', '#444466');
+    rect.setAttribute('stroke-width', '1');
+    g.appendChild(rect);
+
+    // Block group
+    const blockGroup = createBlockSVG(blockType, rotation);
+    blockGroup.setAttribute('transform-origin', `${c * CELL_SIZE + CELL_SIZE/2}px ${r * CELL_SIZE + CELL_SIZE/2}px`);
+    blockGroup.setAttribute('transform', `translate(${c * CELL_SIZE},${r * CELL_SIZE}) rotate(${rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+    blockGroup.classList.add('draggable');
+    blockGroup.style.touchAction = 'none';
+    g.appendChild(blockGroup);
+
+    return g;
+  }
+
+  // Initialize the board for a level
+  function initLevel(levelIndex) {
+    currentLevelIndex = levelIndex;
+    const level = LEVELS[levelIndex];
+    if (!level) return;
+
+    blocks = [];
+    boardEl.innerHTML = '';
+    svgEl = createSVGElement('svg');
+    svgEl.setAttribute('width', BOARD_SIZE);
+    svgEl.setAttribute('height', BOARD_SIZE);
+    svgEl.setAttribute('role', 'presentation');
+    svgEl.style.touchAction = 'none';
+    boardEl.appendChild(svgEl);
+
+    const rotations = expandRotations(level);
+
+    // Build blocks array and SVG cells
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const type = level.grid[r] && level.grid[r][c] ? level.grid[r][c] : 'empty';
+        const rot = rotations[r][c] || 0;
+        blocks[r][c] = {
+          type,
+          rotation: rot % 4,
+          r,
+          c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, type, rot);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+
+    selectedBlock = null;
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoButtons();
+
+    announce(`Loaded ${level.name}. Drag and rotate blocks to connect Cub to the Star.`);
+    levelInfoEl.textContent = level.name;
+    messageEl.textContent = '';
+  }
+
+  // Rotate a block clockwise by 90 degrees
+  function rotateBlock(block, record = true) {
+    if (!block || !BLOCK_TYPES[block.type].rotatable) return;
+    if (record) pushUndo();
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+  }
+
+  // Update block SVG rotation transform
+  function updateBlockVisual(block) {
+    if (!block.el) return;
+    const blockGroup = block.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    const x = block.c * CELL_SIZE;
+    const y = block.r * CELL_SIZE;
+    blockGroup.setAttribute('transform', `translate(${x},${y}) rotate(${block.rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+  }
+
+  // Find start and end positions
+  function findStartEnd() {
+    let start = null;
+    let end = null;
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (blocks[r][c].type === 'start') start = blocks[r][c];
+        if (blocks[r][c].type === 'end') end = blocks[r][c];
+      }
+    }
+    return { start, end };
+  }
+
+  // Check if two blocks connect in a given direction
+  function blocksConnect(blockA, dir, blockB) {
+    if (!blockA || !blockB) return false;
+    const typeA = BLOCK_TYPES[blockA.type];
+    const typeB = BLOCK_TYPES[blockB.type];
+    if (!typeA || !typeB) return false;
+    const rotA = blockA.rotation;
+    const rotB = blockB.rotation;
+
+    // Calculate actual connection directions for blockA
+    const connsA = typeA.connections.map(d => (d + rotA) % 4);
+    // Calculate actual connection directions for blockB
+    const connsB = typeB.connections.map(d => (d + rotB) % 4);
+
+    // blockA must have connection in dir
+    if (!connsA.includes(dir)) return false;
+    // blockB must have connection in opposite direction
+    if (!connsB.includes(oppositeDir(dir))) return false;
+
+    return true;
+  }
+
+  // Check if the path from start to end is connected
+  function checkPath() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) return false;
+
+    // BFS from start to find end through connected pipes
+    const visited = new Set();
+    const queue = [];
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) return true;
+
+      // Check neighbors in all directions
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+        }
+      }
+    }
+    return false;
+  }
+
+  // Drag and drop handlers
+  function onPointerDown(e) {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+    const target = e.target;
+    if (!target) return;
+    const cellGroup = target.closest('g.cell');
+    if (!cellGroup) return;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') return; // no drag for these
+
+    e.preventDefault();
+    selectedBlock = block;
+    dragData = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origR: r,
+      origC: c,
+      dragging: false,
+      pointerId: e.pointerId,
+    };
+    // Set pointer capture for smooth dragging
+    e.target.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const dx = e.clientX - dragData.startX;
+    const dy = e.clientY - dragData.startY;
+    if (!dragData.dragging) {
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        dragData.dragging = true;
+        selectedBlock.el.classList.add('dragging');
+      } else {
+        return;
+      }
+    }
+    // Move the block SVG group visually with pointer
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.transition = 'none';
+    blockGroup.style.position = 'relative';
+    blockGroup.style.zIndex = 1000;
+    blockGroup.style.left = dx + 'px';
+    blockGroup.style.top = dy + 'px';
+  }
+
+  function onPointerUp(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (blockGroup) {
+      blockGroup.style.transition = '';
+      blockGroup.style.position = '';
+      blockGroup.style.zIndex = '';
+      blockGroup.style.left = '';
+      blockGroup.style.top = '';
+    }
+    if (dragData.dragging) {
+      // Calculate new cell based on pointer position relative to board
+      const boardRect = boardEl.getBoundingClientRect();
+      const x = e.clientX - boardRect.left;
+      const y = e.clientY - boardRect.top;
+      const newC = Math.floor(x / CELL_SIZE);
+      const newR = Math.floor(y / CELL_SIZE);
+      if (
+        newR >= 0 && newR < GRID_SIZE &&
+        newC >= 0 && newC < GRID_SIZE &&
+        blocks[newR][newC].type === 'empty'
+      ) {
+        // Move block to new position
+        pushUndo();
+        moveBlock(selectedBlock.r, selectedBlock.c, newR, newC);
+        announce(`Moved block to row ${newR + 1}, column ${newC + 1}.`);
+        redoStack = [];
+        updateUndoRedoButtons();
+      } else {
+        announce('Invalid move. Block returned to original position.');
+      }
+    } else {
+      // No drag, treat as click: rotate block
+      pushUndo();
+      rotateBlock(selectedBlock, false);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      redoStack = [];
+      updateUndoRedoButtons();
+    }
+    dragData = null;
+    selectedBlock.el.classList.remove('dragging');
+    selectedBlock = null;
+    checkWinCondition();
+  }
+
+  // Move block from (r1,c1) to (r2,c2)
+  function moveBlock(r1, c1, r2, c2) {
+    if (r1 === r2 && c1 === c2) return;
+    const block = blocks[r1][c1];
+    if (!block) return;
+    if (blocks[r2][c2].type !== 'empty') return;
+
+    // Swap blocks in data
+    blocks[r2][c2] = {
+      ...block,
+      r: r2,
+      c: c2,
+    };
+    blocks[r1][c1] = {
+      type: 'empty',
+      rotation: 0,
+      r: r1,
+      c: c1,
+      el: null,
+    };
+
+    // Update DOM elements
+    // Remove old cell groups
+    if (blocks[r2][c2].el) svgEl.removeChild(blocks[r2][c2].el);
+    if (blocks[r1][c1].el) svgEl.removeChild(blocks[r1][c1].el);
+
+    // Create new cells for both positions
+    const newCell1 = createCell(r1, c1, 'empty', 0);
+    const newCell2 = createCell(r2, c2, block.type, block.rotation);
+    svgEl.appendChild(newCell1);
+    svgEl.appendChild(newCell2);
+
+    blocks[r1][c1].el = newCell1;
+    blocks[r2][c2].el = newCell2;
+
+    // Update block reference for moved block
+    blocks[r2][c2].r = r2;
+    blocks[r2][c2].c = c2;
+
+    // Re-attach event listeners for new cells
+    attachCellListeners(newCell1);
+    attachCellListeners(newCell2);
+  }
+
+  // Attach pointer event listeners to a cell group
+  function attachCellListeners(cellGroup) {
+    const blockGroup = cellGroup.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.touchAction = 'none';
+    blockGroup.addEventListener('pointerdown', onPointerDown);
+    blockGroup.addEventListener('pointermove', onPointerMove);
+    blockGroup.addEventListener('pointerup', onPointerUp);
+    blockGroup.addEventListener('pointercancel', onPointerUp);
+    blockGroup.addEventListener('lostpointercapture', onPointerUp);
+    // Add hover listeners for path preview
+    cellGroup.addEventListener('mouseenter', onCellMouseEnter);
+    cellGroup.addEventListener('mouseleave', onCellMouseLeave);
+  }
+
+  // Attach listeners to all blocks
+  function attachAllListeners() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (!block || !block.el) continue;
+        attachCellListeners(block.el);
+      }
+    }
+  }
+
+  // Check win condition and announce
+  function checkWinCondition() {
+    if (checkPath()) {
+      announce('Congratulations! Cub reached the Star! 🎉');
+    } else {
+      announce('Keep trying to connect Cub to the Star.');
+    }
+  }
+
+  // Rotate selected block button handler
+  function onRotateButton() {
+    if (!selectedBlock) {
+      announce('Select a block by clicking or dragging it first.');
+      return;
+    }
+    pushUndo();
+    rotateBlock(selectedBlock, false);
+    announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    redoStack = [];
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  // Select block by click on cell
+  function onCellClick(e) {
+    if (dragData) return; // ignore if dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') {
+      announce('This block cannot be rotated or moved.');
+      return;
+    }
+    selectedBlock = block;
+    announce(`Selected block at row ${r + 1}, column ${c + 1}. Use rotate button or drag to move.`);
+  }
+
+  // Undo/Redo functionality
+  function pushUndo() {
+    const snapshot = blocks.map(row => row.map(b => ({
+      type: b.type,
+      rotation: b.rotation,
+      r: b.r,
+      c: b.c,
+    })));
+    undoStack.push(snapshot);
+    if (undoStack.length > 50) undoStack.shift(); // limit stack size
+  }
+
+  function pushRedo() {
+    const snapshot = blocks.map(row => row.map(b => ({
+      type: b.type,
+      rotation: b.rotation,
+      r: b.r,
+      c: b.c,
+    })));
+    redoStack.push(snapshot);
+    if (redoStack.length > 50) redoStack.shift();
+  }
+
+  function restoreSnapshot(snapshot) {
+    if (!snapshot) return;
+    blocks = [];
+    svgEl.innerHTML = '';
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const b = snapshot[r][c];
+        blocks[r][c] = {
+          type: b.type,
+          rotation: b.rotation,
+          r: r,
+          c: c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, b.type, b.rotation);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+    attachAllListeners();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) {
+      announce('Nothing to undo.');
+      return;
+    }
+    pushRedo();
+    const snapshot = undoStack.pop();
+    restoreSnapshot(snapshot);
+    announce('Undo performed.');
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  function redo() {
+    if (redoStack.length === 0) {
+      announce('Nothing to redo.');
+      return;
+    }
+    pushUndo();
+    const snapshot = redoStack.pop();
+    restoreSnapshot(snapshot);
+    announce('Redo performed.');
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  function updateUndoRedoButtons() {
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    btnUndo.disabled = undoStack.length === 0;
+    btnRedo.disabled = redoStack.length === 0;
+  }
+
+  // Hint system: find shortest path and highlight next block to rotate or move
+  function showHint() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) {
+      announce('No start or end block found.');
+      return;
+    }
+
+    // BFS to find shortest path with current connections
+    const visited = new Set();
+    const queue = [];
+    const parentMap = new Map();
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) break;
+
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+          parentMap.set(neighbor, current);
+        }
+      }
+    }
+
+    if (!visited.has(`${end.r},${end.c}`)) {
+      // No path found, suggest a block to rotate or move
+      // Find blocks adjacent to path or start that can be rotated or moved to connect
+      // For simplicity, highlight first rotatable block not connected properly
+
+      // Clear previous preview
+      clearPathPreview();
+
+      // Find first rotatable block that is not connected properly
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const block = blocks[r][c];
+          if (!block || !BLOCK_TYPES[block.type].rotatable) continue;
+          // Check if block has any connection that does not connect to neighbor
+          const conns = BLOCK_TYPES[block.type].connections.map(d => (d + block.rotation) % 4);
+          let needsRotation = false;
+          for (const dir of conns) {
+            const nr = r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+            const nc = c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+            if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) {
+              needsRotation = true;
+              break;
+            }
+            const neighbor = blocks[nr][nc];
+            if (!neighbor || neighbor.type === 'empty') {
+              needsRotation = true;
+              break;
+            }
+            if (!blocksConnect(block, dir, neighbor)) {
+              needsRotation = true;
+              break;
+            }
+          }
+          if (needsRotation) {
+            highlightBlock(block);
+            announce(`Hint: Try rotating the block at row ${r + 1}, column ${c + 1}.`);
+            return;
+          }
+        }
+      }
+      announce('No hints available. Try different moves.');
+      return;
+    }
+
+    // Path found, highlight the path
+    const path = [];
+    let current = end;
+    while (current !== start) {
+      path.push(current);
+      current = parentMap.get(current);
+      if (!current) break;
+    }
+    path.push(start);
+    path.reverse();
+
+    clearPathPreview();
+    for (const block of path) {
+      highlightBlock(block);
+    }
+    announce('Hint: Follow the highlighted path.');
+  }
+
+  // Highlight a block for hint or preview
+  function highlightBlock(block) {
+    if (!block || !block.el) return;
+    block.el.classList.add('path-preview');
+  }
+
+  // Clear all path previews
+  function clearPathPreview() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (block && block.el) {
+          block.el.classList.remove('path-preview');
+        }
+      }
+    }
+  }
+
+  // Path preview on hover: show path if block is rotated or moved
+  function onCellMouseEnter(e) {
+    if (dragData) return; // don't show preview while dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'empty' || block.type === 'start' || block.type === 'end') return;
+
+    // Temporarily simulate rotation and show path preview
+    clearPathPreview();
+
+    // Save current rotation
+    const originalRotation = block.rotation;
+    // Simulate rotation
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+
+    // Check path with simulated rotation
+    const pathExists = checkPath();
+
+    if (pathExists) {
+      // Highlight path
+      showHint();
+    } else {
+      // No path, just highlight this block
+      highlightBlock(block);
+    }
+
+    // Revert rotation
+    block.rotation = originalRotation;
+    updateBlockVisual(block);
+  }
+
+  function onCellMouseLeave(e) {
+    clearPathPreview();
+  }
+
+  // Setup controls buttons
+  function setupControls() {
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnReset = document.getElementById('btn-reset');
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnHint = document.getElementById('btn-hint');
+
+    btnPrev.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex - 1 + LEVELS.length) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnNext.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex + 1) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnRotate.addEventListener('click', () => {
+      if (!selectedBlock) {
+        announce('Select a block first by clicking or dragging it.');
+        return;
+      }
+      pushUndo();
+      rotateBlock(selectedBlock, false);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      redoStack = [];
+      updateUndoRedoButtons();
+      checkWinCondition();
+    });
+    btnReset.addEventListener('click', () => {
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnUndo.addEventListener('click', () => {
+      undo();
+    });
+    btnRedo.addEventListener('click', () => {
+      redo();
+    });
+    btnHint.addEventListener('click', () => {
+      clearPathPreview();
+      showHint();
+    });
+  }
+
+  // Tooltip for rotate button
+  function setupTooltip() {
+    tooltipEl = document.getElementById('tooltip');
+    const btnRotate = document.getElementById('btn-rotate');
+    btnRotate.addEventListener('mouseenter', (e) => {
+      tooltipEl.textContent = 'Rotate the selected block by 90° clockwise';
+      const rect = btnRotate.getBoundingClientRect();
+      tooltipEl.style.left = rect.left + rect.width / 2 + 'px';
+      tooltipEl.style.top = rect.top - 30 + 'px';
+      tooltipEl.style.opacity = '1';
+      tooltipEl.setAttribute('aria-hidden', 'false');
+    });
+    btnRotate.addEventListener('mouseleave', () => {
+      tooltipEl.style.opacity = '0';
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  // Handle window resize to clear any drag or preview states
+  function onWindowResize() {
+    if (dragData && selectedBlock) {
+      const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+      if (blockGroup) {
+        blockGroup.style.transition = '';
+        blockGroup.style.position = '';
+        blockGroup.style.zIndex = '';
+        blockGroup.style.left = '';
+        blockGroup.style.top = '';
+      }
+      dragData = null;
+      if (selectedBlock) selectedBlock.el.classList.remove('dragging');
+      selectedBlock = null;
+      announce('Window resized. Drag operation cancelled.');
+    }
+    clearPathPreview();
+  }
+
+  // Initialize game
+  function init() {
+    boardEl = document.getElementById('board');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    setupControls();
+    setupTooltip();
+    initLevel(currentLevelIndex);
+    attachAllListeners();
+    window.addEventListener('resize', onWindowResize);
+  }
+
+  // Start game on DOM ready
+  window.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - 
+================================================================================
+2025-11-30 18:05:34 - INFO - SCORE SUMMARY - ITERATION 1
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - ✓ Is the core puzzle gameplay mechanic fully implemented?: 10.0/10
+2025-11-30 18:05:34 - INFO - ✓ Is the level navigation and progression system implemented?: 10.0/10
+2025-11-30 18:05:34 - INFO - ✓ Are the path-finding and goal validation mechanics properly implemented?: 10.0/10
+2025-11-30 18:05:34 - INFO - ✓ Is the block manipulation system intuitive and responsive?: 8.0/10
+2025-11-30 18:05:34 - INFO - ✓ Is the code robust?: 8.0/10
+2025-11-30 18:05:34 - INFO - ✓ Are there any innovative features that are eye-catching?: 9.0/10
+2025-11-30 18:05:34 - INFO - ✓ Are there any redundant features?: 10.0/10
+2025-11-30 18:05:34 - INFO - ✓ Does the code have engineering quality?: 8.0/10
+2025-11-30 18:05:34 - INFO - ✓ Does the interface vision meet professional game design standards?: 9.0/10
+2025-11-30 18:05:34 - INFO - ✓ Is the dynamic interaction smooth and seamless?: 9.0/10
+2025-11-30 18:05:34 - INFO - 
+✓ All checklist items meet the threshold (7.0)!
+2025-11-30 18:05:34 - INFO - Improvement process complete.
+2025-11-30 18:05:34 - INFO - 
+================================================================================
+2025-11-30 18:05:34 - INFO - FINAL EVALUATION
+2025-11-30 18:05:34 - INFO - ================================================================================
+2025-11-30 18:05:34 - INFO - Generating final screenshots...
+2025-11-30 18:05:43 - INFO - Final Canvas Check: {
+  "canvas_count": 0,
+  "canvases_with_content": 0,
+  "blank_canvases": 0,
+  "canvas_details": []
+}
+2025-11-30 18:05:43 - INFO - Running final evaluation...
+2025-11-30 18:06:02 - INFO - Final evaluation completed in 19.05 seconds
+2025-11-30 18:06:02 - INFO - 
+================================================================================
+2025-11-30 18:06:02 - INFO - FINAL EVALUATION RESULTS
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - Individual Scores (JSON):
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": 10.0,
+  "Is the level navigation and progression system implemented?": 10.0,
+  "Are the path-finding and goal validation mechanics properly implemented?": 10.0,
+  "Is the block manipulation system intuitive and responsive?": 8.0,
+  "Is the code robust?": 8.0,
+  "Are there any innovative features that are eye-catching?": 9.0,
+  "Are there any redundant features?": 10.0,
+  "Does the code have engineering quality?": 8.0,
+  "Does the interface vision meet professional game design standards?": 9.0,
+  "Is the dynamic interaction smooth and seamless?": 8.0
+}
+2025-11-30 18:06:02 - INFO - Final Calculated Sum: 90.0
+2025-11-30 18:06:02 - INFO - Final Overall Score: 90.0
+2025-11-30 18:06:02 - INFO - 
+================================================================================
+2025-11-30 18:06:02 - INFO - FINAL EVALUATION FEEDBACK (Full Reasoning)
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - ```json
+{
+  "Is the core puzzle gameplay mechanic fully implemented?": "10",
+  "Is the level navigation and progression system implemented?": "10",
+  "Are the path-finding and goal validation mechanics properly implemented?": "10",
+  "Is the block manipulation system intuitive and responsive?": "8",
+  "Is the code robust?": "8",
+  "Are there any innovative features that are eye-catching?": "9",
+  "Are there any redundant features?": "10",
+  "Does the code have engineering quality?": "8",
+  "Does the interface vision meet professional game design standards?": "9",
+  "Is the dynamic interaction smooth and seamless?": "8",
+  "Overall Score": "90"
+}
+```
+
+Reason:
+
+1. **Is the core puzzle gameplay mechanic fully implemented? (10/10)**  
+   The code fully implements the core gameplay: blocks can be dragged and rotated, with proper restrictions (start/end/empty blocks are not draggable). The rotation is by 90 degrees increments, and the drag-and-drop logic includes collision checks (only empty cells can accept moved blocks). The path validation uses BFS to check connectivity between start and end blocks considering block rotations and connections. This is a complete and correct implementation of the core mechanic.
+
+2. **Is the level navigation and progression system implemented? (10/10)**  
+   The game includes multiple levels with unique layouts and rotations. Navigation buttons for previous and next levels are implemented, and the current level is displayed. The level resets properly. Undo/redo stacks are maintained per level session. Although state persistence between browser sessions is not implemented (e.g., localStorage), the problem statement does not explicitly require it, so full points are awarded.
+
+3. **Are the path-finding and goal validation mechanics properly implemented? (10/10)**  
+   The path validation uses a BFS traversal from the start block to the end block, checking connections in all four directions with rotation-aware connection logic. It correctly handles obstacles (empty blocks) and ensures continuous path connections. The validation is thorough and accounts for edge cases.
+
+4. **Is the block manipulation system intuitive and responsive? (8/10)**  
+   Dragging and rotation controls are natural: drag to move, click to rotate, and a rotate button is provided. Visual feedback includes cursor changes and opacity during dragging. However, the drag movement uses relative positioning with manual style changes rather than a snap-to-grid drag preview, which could cause slight visual jumpiness. Rotation pivot points are correctly centered. There is no ghost preview of potential placements during drag, which would improve intuitiveness. Hence, a slight deduction.
+
+5. **Is the code robust? (8/10)**  
+   The code handles pointer events carefully, including pointer capture and cancellation. It prevents dragging of non-draggable blocks and cancels drag on window resize. Undo/redo stacks have size limits. However, there is no explicit error handling for rapid clicks or unexpected input sequences beyond basic guards. Also, no explicit boundary checks for rapid pointer movements outside the board are visible, though the logic prevents invalid moves. Overall robustness is good but not perfect.
+
+6. **Are there any innovative features that are eye-catching? (9/10)**  
+   The code includes several advanced features:  
+   - Undo/redo functionality with stack limits.  
+   - A hint system that analyzes the current path and suggests blocks to rotate or highlights the path.  
+   - Path preview on hover that simulates rotation and shows potential path improvements.  
+   - Tooltip for the rotate button.  
+   These features significantly enhance user experience. The only minor missing innovation is a visual ghost preview during drag or rotation, but the existing features justify a high score.
+
+7. **Are there any redundant features? (10/10)**  
+   The code is clean with no redundant or conflicting implementations. There is no unrelated functionality or heavy visual effects that degrade performance. The code focuses strictly on the puzzle game features.
+
+8. **Does the code have engineering quality? (8/10)**  
+   The code is modular with clear separation of concerns: block definitions, level data, UI rendering, event handling, and game logic are well organized. The use of constants and helper functions is good. However, there is some global state (e.g., `blocks`, `selectedBlock`) managed in closure scope rather than fully encapsulated classes or modules. No unit tests or build automation are included, which is typical for a demo but deducts points. Code duplication is low. Overall, good engineering quality for a demo.
+
+9. **Does the interface vision meet professional game design standards? (9/10)**  
+   The UI uses a harmonious dark theme with consistent green and yellow highlights. The grid is clearly visible with subtle borders and spacing. UI elements (buttons, tooltips) have clear affordances and consistent styling. The layout is centered and balanced. The only minor issue is that the block SVGs could have slightly more contrast or animation to enhance clarity, but overall it is professional and visually appealing.
+
+10. **Is the dynamic interaction smooth and seamless? (8/10)**  
+    The drag and rotation interactions respond quickly with cursor changes and visual feedback. Animations for block movement are immediate but lack smooth transition animations (e.g., easing or snapping). The path animation is not explicitly animated but the hint highlights blocks clearly. Feedback messages are timely and informative. The undo/redo and level transitions are instantaneous without noticeable delay. Some minor jerks in drag movement and lack of audio feedback cause a slight deduction.
+
+**Summary:**  
+This answer provides a comprehensive, well-structured, and visually polished implementation of the Cub n Pup puzzle game demo. It covers all core gameplay mechanics, level progression, path validation, and includes advanced features like undo/redo and hints. The code is robust and engineered with good modularity, and the UI meets professional standards. Minor improvements could be made in drag preview, animation smoothness, and persistence, but overall this is an excellent and complete solution deserving a high score of 90/100.
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - 
+================================================================================
+2025-11-30 18:06:02 - INFO - FINAL HTML CODE
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    overflow: hidden;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    min-height: calc(100vh - 60px);
+  }
+  #board {
+    position: relative;
+    background: #2a2a44;
+    border: 3px solid #444466;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #000a;
+    user-select: none;
+  }
+  #board svg {
+    display: block;
+    background: #1e1e2f;
+    border-radius: 12px;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #bbb;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f0f0f0;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  button {
+    background: #444466;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #5a5a8a;
+  }
+  button:disabled {
+    background: #2a2a44;
+    cursor: default;
+    color: #666;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7cdb7c;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotation */
+  #tooltip {
+    position: absolute;
+    background: #444466cc;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+  }
+  /* Cursor for draggable blocks */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px #7cdb7caa);
+  }
+  /* Highlight for path preview */
+  .path-preview rect {
+    stroke: #7cdb7c;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 6px #7cdb7caa);
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup Puzzle Game">
+  <div id="board" role="grid" aria-live="polite" aria-label="Puzzle board"></div>
+  <div id="info-panel" aria-live="polite" aria-atomic="true">
+    <div id="level-info"></div>
+    <div id="message" aria-live="assertive"></div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Previous Level">← Prev</button>
+      <button id="btn-rotate" aria-label="Rotate Selected Block">Rotate</button>
+      <button id="btn-undo" aria-label="Undo Last Move" disabled>Undo</button>
+      <button id="btn-redo" aria-label="Redo Last Move" disabled>Redo</button>
+      <button id="btn-hint" aria-label="Show Hint">Hint</button>
+      <button id="btn-next" aria-label="Next Level">Next →</button>
+      <button id="btn-reset" aria-label="Reset Level">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="tooltip" role="tooltip" aria-hidden="true"></div>
+<script>
+(() => {
+  'use strict';
+
+  // Constants
+  const GRID_SIZE = 6; // 6x6 grid
+  const CELL_SIZE = 80; // px
+  const BOARD_SIZE = GRID_SIZE * CELL_SIZE;
+  const ROTATION_ANGLE = 90; // degrees per rotation step
+
+  // Directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+
+  // Opposite directions helper
+  function oppositeDir(dir) {
+    return (dir + 2) % 4;
+  }
+
+  // Block types and their connection patterns (relative to rotation)
+  // Connections are arrays of directions the block connects to
+  // For example, a straight pipe connects UP and DOWN
+  // Rotation rotates the directions clockwise by 90 degrees per step
+  const BLOCK_TYPES = {
+    empty: {
+      name: 'Empty',
+      connections: [],
+      svg: (size) => '',
+      rotatable: false,
+    },
+    straight: {
+      name: 'Straight Pipe',
+      connections: [DIRS.UP, DIRS.DOWN],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    corner: {
+      name: 'Corner Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.3;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h*2}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${h*2}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h*2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - h/4}" width="${h*2}" height="${h/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    tpipe: {
+      name: 'T Pipe',
+      connections: [DIRS.UP, DIRS.LEFT, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - w/2}" y="${cy - w/4}" width="${w/2}" height="${w/2}" fill="#2f4f2f" rx="2" ry="2" />
+        `;
+      },
+    },
+    cross: {
+      name: 'Cross Pipe',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+      rotatable: false,
+      svg: (size) => {
+        const w = size * 0.3;
+        const h = size * 0.9;
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <rect x="${cx - w/2}" y="${cy - h/2}" width="${w}" height="${h}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - h/2}" y="${cy - w/2}" width="${h}" height="${w}" fill="#7cdb7c" rx="6" ry="6" />
+          <rect x="${cx - w/4}" y="${cy - h/2}" width="${w/2}" height="${h}" fill="#4a7a4a" rx="3" ry="3" />
+          <rect x="${cx - h/2}" y="${cy - w/4}" width="${h}" height="${w/2}" fill="#4a7a4a" rx="3" ry="3" />
+        `;
+      },
+    },
+    start: {
+      name: 'Start (Cub)',
+      connections: [DIRS.RIGHT],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        return `
+          <circle cx="${cx}" cy="${cy}" r="${size*0.35}" fill="#f0a040" stroke="#d07a00" stroke-width="3" />
+          <path fill="#fff" stroke="#a05a00" stroke-width="1.5" d="M${cx-15},${cy+5} q10 -20 30 0 q-10 10 -30 0z" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx-8}" cy="${cy-5}" r="2" fill="#000" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="5" fill="#fff" />
+          <circle cx="${cx+8}" cy="${cy-5}" r="2" fill="#000" />
+          <ellipse cx="${cx}" cy="${cy+15}" rx="12" ry="6" fill="#d07a00" />
+        `;
+      },
+    },
+    end: {
+      name: 'Destination (Star)',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size * 0.35;
+        // Star shape path
+        const starPath = `
+          M${cx},${cy - r}
+          L${cx + r * 0.2245},${cy - r * 0.309}
+          L${cx + r},${cy - r * 0.309}
+          L${cx + r * 0.3633},${cy + r * 0.118}
+          L${cx + r * 0.5878},${cy + r * 0.809}
+          L${cx},${cy + r * 0.382}
+          L${cx - r * 0.5878},${cy + r * 0.809}
+          L${cx - r * 0.3633},${cy + r * 0.118}
+          L${cx - r},${cy - r * 0.309}
+          L${cx - r * 0.2245},${cy - r * 0.309}
+          Z
+        `;
+        return `
+          <path d="${starPath}" fill="#f0e84a" stroke="#d0c800" stroke-width="2" />
+          <circle cx="${cx}" cy="${cy}" r="${r*0.15}" fill="#fff" />
+        `;
+      },
+    },
+  };
+
+  // Levels definition
+  // Each level is a 2D array of block objects:
+  // { type: string, rotation: 0-3 }
+  // Start and end positions are marked by special blocks
+  // Blocks can be dragged and rotated (if rotatable)
+  // The player must connect the start to the end through connected pipes
+  const LEVELS = [
+    {
+      name: 'Level 1 - Simple Path',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'straight', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+      // rotations array is partial, will be expanded in code
+    },
+    {
+      name: 'Level 2 - Corner Challenge',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'corner', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 1, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 3 - T Pipe Puzzle',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'tpipe', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+    {
+      name: 'Level 4 - Crossroads',
+      grid: [
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'start', 'cross', 'straight', 'corner', 'end'],
+        ['empty', 'empty', 'empty', 'empty', 'straight', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+        ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
+      ],
+      rotations: [
+        [0, 0, 0, 1, 2, 0],
+        [0, 0, 0, 0, 1, 0],
+      ],
+    },
+  ];
+
+  // Expand rotations to full grid size (fill empty with 0)
+  function expandRotations(level) {
+    const rot = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      rot[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (level.rotations[r] && typeof level.rotations[r][c] === 'number') {
+          rot[r][c] = level.rotations[r][c];
+        } else {
+          rot[r][c] = 0;
+        }
+      }
+    }
+    return rot;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let boardEl;
+  let svgEl;
+  let blocks = []; // 2D array of block objects with type, rotation, position, and DOM element
+  let selectedBlock = null;
+  let dragData = null;
+  let messageEl;
+  let levelInfoEl;
+  let tooltipEl;
+
+  // Undo/Redo stacks
+  let undoStack = [];
+  let redoStack = [];
+
+  // Accessibility: announce messages
+  function announce(msg) {
+    if (messageEl) {
+      messageEl.textContent = msg;
+    }
+  }
+
+  // Create SVG element with namespace
+  function createSVGElement(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  }
+
+  // Create a block SVG group element
+  function createBlockSVG(blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('block-svg');
+    g.setAttribute('transform', `rotate(${rotation * ROTATION_ANGLE} 40 40)`);
+
+    // Create block shape
+    const size = CELL_SIZE;
+    const innerSVG = BLOCK_TYPES[blockType].svg(size);
+    if (innerSVG) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${innerSVG}</svg>`;
+      const svgChild = wrapper.firstElementChild;
+      g.appendChild(svgChild);
+    }
+    return g;
+  }
+
+  // Create a single cell group with background and block
+  function createCell(r, c, blockType, rotation) {
+    const g = createSVGElement('g');
+    g.classList.add('cell');
+    g.setAttribute('data-row', r);
+    g.setAttribute('data-col', c);
+    g.setAttribute('tabindex', '-1');
+    g.setAttribute('role', 'gridcell');
+    g.setAttribute('aria-label', `Row ${r + 1} Column ${c + 1}, ${BLOCK_TYPES[blockType].name}`);
+
+    // Background rect
+    const rect = createSVGElement('rect');
+    rect.setAttribute('x', c * CELL_SIZE);
+    rect.setAttribute('y', r * CELL_SIZE);
+    rect.setAttribute('width', CELL_SIZE);
+    rect.setAttribute('height', CELL_SIZE);
+    rect.setAttribute('fill', '#22223b');
+    rect.setAttribute('stroke', '#444466');
+    rect.setAttribute('stroke-width', '1');
+    g.appendChild(rect);
+
+    // Block group
+    const blockGroup = createBlockSVG(blockType, rotation);
+    blockGroup.setAttribute('transform-origin', `${c * CELL_SIZE + CELL_SIZE/2}px ${r * CELL_SIZE + CELL_SIZE/2}px`);
+    blockGroup.setAttribute('transform', `translate(${c * CELL_SIZE},${r * CELL_SIZE}) rotate(${rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+    blockGroup.classList.add('draggable');
+    blockGroup.style.touchAction = 'none';
+    g.appendChild(blockGroup);
+
+    return g;
+  }
+
+  // Initialize the board for a level
+  function initLevel(levelIndex) {
+    currentLevelIndex = levelIndex;
+    const level = LEVELS[levelIndex];
+    if (!level) return;
+
+    blocks = [];
+    boardEl.innerHTML = '';
+    svgEl = createSVGElement('svg');
+    svgEl.setAttribute('width', BOARD_SIZE);
+    svgEl.setAttribute('height', BOARD_SIZE);
+    svgEl.setAttribute('role', 'presentation');
+    svgEl.style.touchAction = 'none';
+    boardEl.appendChild(svgEl);
+
+    const rotations = expandRotations(level);
+
+    // Build blocks array and SVG cells
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const type = level.grid[r] && level.grid[r][c] ? level.grid[r][c] : 'empty';
+        const rot = rotations[r][c] || 0;
+        blocks[r][c] = {
+          type,
+          rotation: rot % 4,
+          r,
+          c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, type, rot);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+
+    selectedBlock = null;
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoButtons();
+
+    announce(`Loaded ${level.name}. Drag and rotate blocks to connect Cub to the Star.`);
+    levelInfoEl.textContent = level.name;
+    messageEl.textContent = '';
+  }
+
+  // Rotate a block clockwise by 90 degrees
+  function rotateBlock(block, record = true) {
+    if (!block || !BLOCK_TYPES[block.type].rotatable) return;
+    if (record) pushUndo();
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+  }
+
+  // Update block SVG rotation transform
+  function updateBlockVisual(block) {
+    if (!block.el) return;
+    const blockGroup = block.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    const x = block.c * CELL_SIZE;
+    const y = block.r * CELL_SIZE;
+    blockGroup.setAttribute('transform', `translate(${x},${y}) rotate(${block.rotation * ROTATION_ANGLE} ${CELL_SIZE/2} ${CELL_SIZE/2})`);
+  }
+
+  // Find start and end positions
+  function findStartEnd() {
+    let start = null;
+    let end = null;
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (blocks[r][c].type === 'start') start = blocks[r][c];
+        if (blocks[r][c].type === 'end') end = blocks[r][c];
+      }
+    }
+    return { start, end };
+  }
+
+  // Check if two blocks connect in a given direction
+  function blocksConnect(blockA, dir, blockB) {
+    if (!blockA || !blockB) return false;
+    const typeA = BLOCK_TYPES[blockA.type];
+    const typeB = BLOCK_TYPES[blockB.type];
+    if (!typeA || !typeB) return false;
+    const rotA = blockA.rotation;
+    const rotB = blockB.rotation;
+
+    // Calculate actual connection directions for blockA
+    const connsA = typeA.connections.map(d => (d + rotA) % 4);
+    // Calculate actual connection directions for blockB
+    const connsB = typeB.connections.map(d => (d + rotB) % 4);
+
+    // blockA must have connection in dir
+    if (!connsA.includes(dir)) return false;
+    // blockB must have connection in opposite direction
+    if (!connsB.includes(oppositeDir(dir))) return false;
+
+    return true;
+  }
+
+  // Check if the path from start to end is connected
+  function checkPath() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) return false;
+
+    // BFS from start to find end through connected pipes
+    const visited = new Set();
+    const queue = [];
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) return true;
+
+      // Check neighbors in all directions
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+        }
+      }
+    }
+    return false;
+  }
+
+  // Drag and drop handlers
+  function onPointerDown(e) {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
+    const target = e.target;
+    if (!target) return;
+    const cellGroup = target.closest('g.cell');
+    if (!cellGroup) return;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') return; // no drag for these
+
+    e.preventDefault();
+    selectedBlock = block;
+    dragData = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origR: r,
+      origC: c,
+      dragging: false,
+      pointerId: e.pointerId,
+    };
+    // Set pointer capture for smooth dragging
+    e.target.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const dx = e.clientX - dragData.startX;
+    const dy = e.clientY - dragData.startY;
+    if (!dragData.dragging) {
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        dragData.dragging = true;
+        selectedBlock.el.classList.add('dragging');
+      } else {
+        return;
+      }
+    }
+    // Move the block SVG group visually with pointer
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.transition = 'none';
+    blockGroup.style.position = 'relative';
+    blockGroup.style.zIndex = 1000;
+    blockGroup.style.left = dx + 'px';
+    blockGroup.style.top = dy + 'px';
+  }
+
+  function onPointerUp(e) {
+    if (!dragData || e.pointerId !== dragData.pointerId) return;
+    e.preventDefault();
+    const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+    if (blockGroup) {
+      blockGroup.style.transition = '';
+      blockGroup.style.position = '';
+      blockGroup.style.zIndex = '';
+      blockGroup.style.left = '';
+      blockGroup.style.top = '';
+    }
+    if (dragData.dragging) {
+      // Calculate new cell based on pointer position relative to board
+      const boardRect = boardEl.getBoundingClientRect();
+      const x = e.clientX - boardRect.left;
+      const y = e.clientY - boardRect.top;
+      const newC = Math.floor(x / CELL_SIZE);
+      const newR = Math.floor(y / CELL_SIZE);
+      if (
+        newR >= 0 && newR < GRID_SIZE &&
+        newC >= 0 && newC < GRID_SIZE &&
+        blocks[newR][newC].type === 'empty'
+      ) {
+        // Move block to new position
+        pushUndo();
+        moveBlock(selectedBlock.r, selectedBlock.c, newR, newC);
+        announce(`Moved block to row ${newR + 1}, column ${newC + 1}.`);
+        redoStack = [];
+        updateUndoRedoButtons();
+      } else {
+        announce('Invalid move. Block returned to original position.');
+      }
+    } else {
+      // No drag, treat as click: rotate block
+      pushUndo();
+      rotateBlock(selectedBlock, false);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      redoStack = [];
+      updateUndoRedoButtons();
+    }
+    dragData = null;
+    selectedBlock.el.classList.remove('dragging');
+    selectedBlock = null;
+    checkWinCondition();
+  }
+
+  // Move block from (r1,c1) to (r2,c2)
+  function moveBlock(r1, c1, r2, c2) {
+    if (r1 === r2 && c1 === c2) return;
+    const block = blocks[r1][c1];
+    if (!block) return;
+    if (blocks[r2][c2].type !== 'empty') return;
+
+    // Swap blocks in data
+    blocks[r2][c2] = {
+      ...block,
+      r: r2,
+      c: c2,
+    };
+    blocks[r1][c1] = {
+      type: 'empty',
+      rotation: 0,
+      r: r1,
+      c: c1,
+      el: null,
+    };
+
+    // Update DOM elements
+    // Remove old cell groups
+    if (blocks[r2][c2].el) svgEl.removeChild(blocks[r2][c2].el);
+    if (blocks[r1][c1].el) svgEl.removeChild(blocks[r1][c1].el);
+
+    // Create new cells for both positions
+    const newCell1 = createCell(r1, c1, 'empty', 0);
+    const newCell2 = createCell(r2, c2, block.type, block.rotation);
+    svgEl.appendChild(newCell1);
+    svgEl.appendChild(newCell2);
+
+    blocks[r1][c1].el = newCell1;
+    blocks[r2][c2].el = newCell2;
+
+    // Update block reference for moved block
+    blocks[r2][c2].r = r2;
+    blocks[r2][c2].c = c2;
+
+    // Re-attach event listeners for new cells
+    attachCellListeners(newCell1);
+    attachCellListeners(newCell2);
+  }
+
+  // Attach pointer event listeners to a cell group
+  function attachCellListeners(cellGroup) {
+    const blockGroup = cellGroup.querySelector('g.block-svg');
+    if (!blockGroup) return;
+    blockGroup.style.touchAction = 'none';
+    blockGroup.addEventListener('pointerdown', onPointerDown);
+    blockGroup.addEventListener('pointermove', onPointerMove);
+    blockGroup.addEventListener('pointerup', onPointerUp);
+    blockGroup.addEventListener('pointercancel', onPointerUp);
+    blockGroup.addEventListener('lostpointercapture', onPointerUp);
+    // Add hover listeners for path preview
+    cellGroup.addEventListener('mouseenter', onCellMouseEnter);
+    cellGroup.addEventListener('mouseleave', onCellMouseLeave);
+  }
+
+  // Attach listeners to all blocks
+  function attachAllListeners() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (!block || !block.el) continue;
+        attachCellListeners(block.el);
+      }
+    }
+  }
+
+  // Check win condition and announce
+  function checkWinCondition() {
+    if (checkPath()) {
+      announce('Congratulations! Cub reached the Star! 🎉');
+    } else {
+      announce('Keep trying to connect Cub to the Star.');
+    }
+  }
+
+  // Rotate selected block button handler
+  function onRotateButton() {
+    if (!selectedBlock) {
+      announce('Select a block by clicking or dragging it first.');
+      return;
+    }
+    pushUndo();
+    rotateBlock(selectedBlock, false);
+    announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+    redoStack = [];
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  // Select block by click on cell
+  function onCellClick(e) {
+    if (dragData) return; // ignore if dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'start' || block.type === 'end' || block.type === 'empty') {
+      announce('This block cannot be rotated or moved.');
+      return;
+    }
+    selectedBlock = block;
+    announce(`Selected block at row ${r + 1}, column ${c + 1}. Use rotate button or drag to move.`);
+  }
+
+  // Undo/Redo functionality
+  function pushUndo() {
+    const snapshot = blocks.map(row => row.map(b => ({
+      type: b.type,
+      rotation: b.rotation,
+      r: b.r,
+      c: b.c,
+    })));
+    undoStack.push(snapshot);
+    if (undoStack.length > 50) undoStack.shift(); // limit stack size
+  }
+
+  function pushRedo() {
+    const snapshot = blocks.map(row => row.map(b => ({
+      type: b.type,
+      rotation: b.rotation,
+      r: b.r,
+      c: b.c,
+    })));
+    redoStack.push(snapshot);
+    if (redoStack.length > 50) redoStack.shift();
+  }
+
+  function restoreSnapshot(snapshot) {
+    if (!snapshot) return;
+    blocks = [];
+    svgEl.innerHTML = '';
+    for (let r = 0; r < GRID_SIZE; r++) {
+      blocks[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const b = snapshot[r][c];
+        blocks[r][c] = {
+          type: b.type,
+          rotation: b.rotation,
+          r: r,
+          c: c,
+          el: null,
+        };
+        const cellGroup = createCell(r, c, b.type, b.rotation);
+        svgEl.appendChild(cellGroup);
+        blocks[r][c].el = cellGroup;
+      }
+    }
+    attachAllListeners();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) {
+      announce('Nothing to undo.');
+      return;
+    }
+    pushRedo();
+    const snapshot = undoStack.pop();
+    restoreSnapshot(snapshot);
+    announce('Undo performed.');
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  function redo() {
+    if (redoStack.length === 0) {
+      announce('Nothing to redo.');
+      return;
+    }
+    pushUndo();
+    const snapshot = redoStack.pop();
+    restoreSnapshot(snapshot);
+    announce('Redo performed.');
+    updateUndoRedoButtons();
+    checkWinCondition();
+  }
+
+  function updateUndoRedoButtons() {
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    btnUndo.disabled = undoStack.length === 0;
+    btnRedo.disabled = redoStack.length === 0;
+  }
+
+  // Hint system: find shortest path and highlight next block to rotate or move
+  function showHint() {
+    const { start, end } = findStartEnd();
+    if (!start || !end) {
+      announce('No start or end block found.');
+      return;
+    }
+
+    // BFS to find shortest path with current connections
+    const visited = new Set();
+    const queue = [];
+    const parentMap = new Map();
+    queue.push(start);
+    visited.add(`${start.r},${start.c}`);
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current === end) break;
+
+      for (let dir = 0; dir < 4; dir++) {
+        const nr = current.r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+        const nc = current.c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+        const neighbor = blocks[nr][nc];
+        if (!neighbor) continue;
+        if (neighbor.type === 'empty') continue;
+        if (visited.has(`${nr},${nc}`)) continue;
+        if (blocksConnect(current, dir, neighbor)) {
+          visited.add(`${nr},${nc}`);
+          queue.push(neighbor);
+          parentMap.set(neighbor, current);
+        }
+      }
+    }
+
+    if (!visited.has(`${end.r},${end.c}`)) {
+      // No path found, suggest a block to rotate or move
+      // Find blocks adjacent to path or start that can be rotated or moved to connect
+      // For simplicity, highlight first rotatable block not connected properly
+
+      // Clear previous preview
+      clearPathPreview();
+
+      // Find first rotatable block that is not connected properly
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const block = blocks[r][c];
+          if (!block || !BLOCK_TYPES[block.type].rotatable) continue;
+          // Check if block has any connection that does not connect to neighbor
+          const conns = BLOCK_TYPES[block.type].connections.map(d => (d + block.rotation) % 4);
+          let needsRotation = false;
+          for (const dir of conns) {
+            const nr = r + (dir === DIRS.DOWN ? 1 : dir === DIRS.UP ? -1 : 0);
+            const nc = c + (dir === DIRS.RIGHT ? 1 : dir === DIRS.LEFT ? -1 : 0);
+            if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) {
+              needsRotation = true;
+              break;
+            }
+            const neighbor = blocks[nr][nc];
+            if (!neighbor || neighbor.type === 'empty') {
+              needsRotation = true;
+              break;
+            }
+            if (!blocksConnect(block, dir, neighbor)) {
+              needsRotation = true;
+              break;
+            }
+          }
+          if (needsRotation) {
+            highlightBlock(block);
+            announce(`Hint: Try rotating the block at row ${r + 1}, column ${c + 1}.`);
+            return;
+          }
+        }
+      }
+      announce('No hints available. Try different moves.');
+      return;
+    }
+
+    // Path found, highlight the path
+    const path = [];
+    let current = end;
+    while (current !== start) {
+      path.push(current);
+      current = parentMap.get(current);
+      if (!current) break;
+    }
+    path.push(start);
+    path.reverse();
+
+    clearPathPreview();
+    for (const block of path) {
+      highlightBlock(block);
+    }
+    announce('Hint: Follow the highlighted path.');
+  }
+
+  // Highlight a block for hint or preview
+  function highlightBlock(block) {
+    if (!block || !block.el) return;
+    block.el.classList.add('path-preview');
+  }
+
+  // Clear all path previews
+  function clearPathPreview() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const block = blocks[r][c];
+        if (block && block.el) {
+          block.el.classList.remove('path-preview');
+        }
+      }
+    }
+  }
+
+  // Path preview on hover: show path if block is rotated or moved
+  function onCellMouseEnter(e) {
+    if (dragData) return; // don't show preview while dragging
+    const cellGroup = e.currentTarget;
+    const r = parseInt(cellGroup.getAttribute('data-row'), 10);
+    const c = parseInt(cellGroup.getAttribute('data-col'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+    const block = blocks[r][c];
+    if (!block) return;
+    if (block.type === 'empty' || block.type === 'start' || block.type === 'end') return;
+
+    // Temporarily simulate rotation and show path preview
+    clearPathPreview();
+
+    // Save current rotation
+    const originalRotation = block.rotation;
+    // Simulate rotation
+    block.rotation = (block.rotation + 1) % 4;
+    updateBlockVisual(block);
+
+    // Check path with simulated rotation
+    const pathExists = checkPath();
+
+    if (pathExists) {
+      // Highlight path
+      showHint();
+    } else {
+      // No path, just highlight this block
+      highlightBlock(block);
+    }
+
+    // Revert rotation
+    block.rotation = originalRotation;
+    updateBlockVisual(block);
+  }
+
+  function onCellMouseLeave(e) {
+    clearPathPreview();
+  }
+
+  // Setup controls buttons
+  function setupControls() {
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnReset = document.getElementById('btn-reset');
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnHint = document.getElementById('btn-hint');
+
+    btnPrev.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex - 1 + LEVELS.length) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnNext.addEventListener('click', () => {
+      currentLevelIndex = (currentLevelIndex + 1) % LEVELS.length;
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnRotate.addEventListener('click', () => {
+      if (!selectedBlock) {
+        announce('Select a block first by clicking or dragging it.');
+        return;
+      }
+      pushUndo();
+      rotateBlock(selectedBlock, false);
+      announce(`Rotated block at row ${selectedBlock.r + 1}, column ${selectedBlock.c + 1}.`);
+      redoStack = [];
+      updateUndoRedoButtons();
+      checkWinCondition();
+    });
+    btnReset.addEventListener('click', () => {
+      initLevel(currentLevelIndex);
+      attachAllListeners();
+    });
+    btnUndo.addEventListener('click', () => {
+      undo();
+    });
+    btnRedo.addEventListener('click', () => {
+      redo();
+    });
+    btnHint.addEventListener('click', () => {
+      clearPathPreview();
+      showHint();
+    });
+  }
+
+  // Tooltip for rotate button
+  function setupTooltip() {
+    tooltipEl = document.getElementById('tooltip');
+    const btnRotate = document.getElementById('btn-rotate');
+    btnRotate.addEventListener('mouseenter', (e) => {
+      tooltipEl.textContent = 'Rotate the selected block by 90° clockwise';
+      const rect = btnRotate.getBoundingClientRect();
+      tooltipEl.style.left = rect.left + rect.width / 2 + 'px';
+      tooltipEl.style.top = rect.top - 30 + 'px';
+      tooltipEl.style.opacity = '1';
+      tooltipEl.setAttribute('aria-hidden', 'false');
+    });
+    btnRotate.addEventListener('mouseleave', () => {
+      tooltipEl.style.opacity = '0';
+      tooltipEl.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  // Handle window resize to clear any drag or preview states
+  function onWindowResize() {
+    if (dragData && selectedBlock) {
+      const blockGroup = selectedBlock.el.querySelector('g.block-svg');
+      if (blockGroup) {
+        blockGroup.style.transition = '';
+        blockGroup.style.position = '';
+        blockGroup.style.zIndex = '';
+        blockGroup.style.left = '';
+        blockGroup.style.top = '';
+      }
+      dragData = null;
+      if (selectedBlock) selectedBlock.el.classList.remove('dragging');
+      selectedBlock = null;
+      announce('Window resized. Drag operation cancelled.');
+    }
+    clearPathPreview();
+  }
+
+  // Initialize game
+  function init() {
+    boardEl = document.getElementById('board');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    setupControls();
+    setupTooltip();
+    initLevel(currentLevelIndex);
+    attachAllListeners();
+    window.addEventListener('resize', onWindowResize);
+  }
+
+  // Start game on DOM ready
+  window.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - 
+================================================================================
+2025-11-30 18:06:02 - INFO - ITERATIVE IMPROVEMENT PROCESS COMPLETED
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - End Time: 2025-11-30 18:06:02
+2025-11-30 18:06:02 - INFO - Total Duration: 392.80 seconds (6.55 minutes)
+2025-11-30 18:06:02 - INFO - Total Iterations: 2
+2025-11-30 18:06:02 - INFO - Final Total Score: 90.0
+2025-11-30 18:06:02 - INFO - Log file saved to: artifacts_output/task_1_game_development-puzzle_hard_iterative/run_log.txt
+2025-11-30 18:06:02 - INFO - All files saved to: artifacts_output/task_1_game_development-puzzle_hard_iterative
+2025-11-30 18:06:02 - INFO - 
+================================================================================
+2025-11-30 18:06:02 - INFO - TOKEN USAGE SUMMARY
+2025-11-30 18:06:02 - INFO - ================================================================================
+2025-11-30 18:06:02 - INFO - Total Requests: 7
+2025-11-30 18:06:02 - INFO - Total Input Tokens: 71,979
+2025-11-30 18:06:02 - INFO - Total Output Tokens: 31,112
+2025-11-30 18:06:02 - INFO - Total Tokens: 103,091
+2025-11-30 18:06:02 - INFO - 
+Breakdown by Operation:
+2025-11-30 18:06:02 - INFO -   code_generation: 1 requests, 9,080 tokens
+2025-11-30 18:06:02 - INFO -   evaluation: 4 requests, 66,698 tokens
+2025-11-30 18:06:02 - INFO -   initial_code_generation: 1 requests, 8,303 tokens
+2025-11-30 18:06:02 - INFO -   code_improvement_iteration_1: 1 requests, 19,010 tokens
+2025-11-30 18:06:02 - INFO - 
+✓ Token usage saved to: artifacts_output/task_1_game_development-puzzle_hard_iterative/token_usage.json
+2025-11-30 18:06:02 - INFO - ✓ Experiment saved to token_usage_history.json
+2025-11-30 18:06:02 - INFO - ================================================================================

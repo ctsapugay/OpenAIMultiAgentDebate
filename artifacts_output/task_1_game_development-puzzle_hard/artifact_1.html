@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    overflow: hidden;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2rem;
+    height: calc(100vh - 60px);
+  }
+  #board {
+    position: relative;
+    background: #2a2a44;
+    border: 3px solid #444466;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #3a3a66aa inset;
+    touch-action: none;
+  }
+  #board svg {
+    display: block;
+    user-select: none;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #bbb;
+  }
+  #level-info {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f0f0f0;
+  }
+  #controls {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  button {
+    background: #444466;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    color: #eee;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #5a5a8a;
+  }
+  button:disabled {
+    background: #333355;
+    cursor: default;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #7fdb7f;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotation */
+  .rotate-hint {
+    position: absolute;
+    background: #444466cc;
+    color: #eee;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    z-index: 1000;
+  }
+  /* Cursor for draggable blocks */
+  .draggable {
+    cursor: grab;
+  }
+  .dragging {
+    cursor: grabbing !important;
+    opacity: 0.8;
+  }
+  /* Highlight path */
+  .path-highlight {
+    stroke: #7fdb7f;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px #7fdb7faa);
+  }
+  /* Block highlight on hover */
+  .block-hover {
+    filter: drop-shadow(0 0 6px #7fdb7fcc);
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" role="main" aria-label="Cub n Pup puzzle game">
+  <div id="board" aria-live="polite" aria-atomic="true" aria-relevant="additions"></div>
+  <div id="info-panel" aria-label="Game information and controls">
+    <div id="level-info"></div>
+    <div id="message" aria-live="polite" aria-atomic="true"></div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Previous level">← Prev</button>
+      <button id="btn-reset" aria-label="Reset level">Reset</button>
+      <button id="btn-next" aria-label="Next level">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // Constants for directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+  const DIR_VECTORS = [
+    {x: 0, y: -1}, // UP
+    {x: 1, y: 0},  // RIGHT
+    {x: 0, y: 1},  // DOWN
+    {x: -1, y: 0}, // LEFT
+  ];
+  // Opposite direction helper
+  function oppositeDir(d) {
+    return (d + 2) % 4;
+  }
+
+  // Block types and their connection patterns (relative to rotation)
+  // Each block type defines which directions it connects to at rotation=0
+  // Rotation rotates the connections clockwise by 90 degrees per step
+  // Connections are represented as array of directions (0=up,1=right,2=down,3=left)
+  const BLOCK_TYPES = {
+    empty: {
+      name: 'Empty',
+      connections: [],
+      svg: (size) => '',
+      rotatable: false,
+    },
+    straight: {
+      name: 'Straight',
+      connections: [DIRS.UP, DIRS.DOWN],
+      rotatable: true,
+      svg: (size) => {
+        // A straight pipe: vertical line
+        const w = size;
+        const h = size;
+        const stroke = '#7fdb7f';
+        const strokeWidth = 12;
+        return `
+          <line x1="${w/2}" y1="${strokeWidth/2}" x2="${w/2}" y2="${h - strokeWidth/2}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"/>
+        `;
+      }
+    },
+    corner: {
+      name: 'Corner',
+      connections: [DIRS.UP, DIRS.RIGHT],
+      rotatable: true,
+      svg: (size) => {
+        // A corner pipe: line from top center to right center
+        const w = size;
+        const h = size;
+        const stroke = '#7fdb7f';
+        const strokeWidth = 12;
+        return `
+          <path d="M${w/2} ${strokeWidth/2} L${w/2} ${h/2} L${w - strokeWidth/2} ${h/2}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+      }
+    },
+    tee: {
+      name: 'Tee',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.LEFT],
+      rotatable: true,
+      svg: (size) => {
+        // Tee pipe: line up, right, left
+        const w = size;
+        const h = size;
+        const stroke = '#7fdb7f';
+        const strokeWidth = 12;
+        return `
+          <path d="M${w/2} ${strokeWidth/2} L${w/2} ${h/2} M${strokeWidth/2} ${h/2} L${w - strokeWidth/2} ${h/2}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round"/>
+        `;
+      }
+    },
+    cross: {
+      name: 'Cross',
+      connections: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+      rotatable: false,
+      svg: (size) => {
+        // Cross pipe: vertical and horizontal lines crossing
+        const w = size;
+        const h = size;
+        const stroke = '#7fdb7f';
+        const strokeWidth = 12;
+        return `
+          <line x1="${w/2}" y1="${strokeWidth/2}" x2="${w/2}" y2="${h - strokeWidth/2}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"/>
+          <line x1="${strokeWidth/2}" y1="${h/2}" x2="${w - strokeWidth/2}" y2="${h/2}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"/>
+        `;
+      }
+    },
+    start: {
+      name: 'Start',
+      connections: [DIRS.RIGHT],
+      rotatable: false,
+      svg: (size) => {
+        // Puppy icon simplified: circle with ears and eyes
+        const w = size;
+        const h = size;
+        return `
+          <circle cx="${w/2}" cy="${h/2}" r="${w/3}" fill="#f4a261" stroke="#e76f51" stroke-width="3"/>
+          <circle cx="${w/2 - w/8}" cy="${h/2 - w/10}" r="${w/15}" fill="#fff"/>
+          <circle cx="${w/2 + w/8}" cy="${h/2 - w/10}" r="${w/15}" fill="#fff"/>
+          <circle cx="${w/2 - w/8}" cy="${h/2 - w/10}" r="${w/30}" fill="#000"/>
+          <circle cx="${w/2 + w/8}" cy="${h/2 - w/10}" r="${w/30}" fill="#000"/>
+          <path d="M${w/2 - w/10} ${h/2 + w/10} Q${w/2} ${h/2 + w/6} ${w/2 + w/10} ${h/2 + w/10}" stroke="#e76f51" stroke-width="2" fill="none" stroke-linecap="round"/>
+        `;
+      }
+    },
+    end: {
+      name: 'End',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        // Star icon for destination
+        const w = size;
+        const h = size;
+        const cx = w/2;
+        const cy = h/2;
+        const rOuter = w/3;
+        const rInner = rOuter * 0.5;
+        const points = [];
+        for(let i=0; i<10; i++) {
+          const angle = (Math.PI/5)*i - Math.PI/2;
+          const r = i%2 === 0 ? rOuter : rInner;
+          points.push(cx + r * Math.cos(angle));
+          points.push(cy + r * Math.sin(angle));
+        }
+        return `<polygon points="${points.join(',')}" fill="#f4e04d" stroke="#e6c84d" stroke-width="2"/>`;
+      }
+    },
+    obstacle: {
+      name: 'Obstacle',
+      connections: [],
+      rotatable: false,
+      svg: (size) => {
+        // A simple red X block
+        const w = size;
+        const h = size;
+        const stroke = '#e63946';
+        const strokeWidth = 10;
+        return `
+          <line x1="${strokeWidth/2}" y1="${strokeWidth/2}" x2="${w - strokeWidth/2}" y2="${h - strokeWidth/2}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"/>
+          <line x1="${w - strokeWidth/2}" y1="${strokeWidth/2}" x2="${strokeWidth/2}" y2="${h - strokeWidth/2}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"/>
+        `;
+      }
+    }
+  };
+
+  // Game configuration
+  const CELL_SIZE = 80;
+  const BOARD_PADDING = 10;
+
+  // Levels definition
+  // Each level defines:
+  // - width, height (grid size)
+  // - grid: 2D array of blocks, each block: {type, rotation}
+  // - start: {x,y}
+  // - end: {x,y}
+  // - obstacles: array of {x,y} (optional)
+  // Blocks can be rotated and dragged except start/end/obstacle
+  // The player must connect start to end by rotating and positioning blocks
+
+  // For drag & drop, blocks can be moved only within the grid cells.
+  // Blocks can be dragged to empty cells or swapped with other blocks (except start/end/obstacle).
+  // Start and end blocks are fixed.
+
+  // Levels are designed with unique challenges.
+
+  const LEVELS = [
+    {
+      name: 'Level 1 - Simple Path',
+      width: 5,
+      height: 5,
+      start: {x: 0, y: 2},
+      end: {x: 4, y: 2},
+      grid: [
+        // y=0
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=1
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 2},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=2
+        [
+          {type: 'start', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'end', rotation: 0},
+        ],
+        // y=3
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 0},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=4
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+      ],
+      obstacles: [],
+    },
+    {
+      name: 'Level 2 - Corner Challenge',
+      width: 6,
+      height: 6,
+      start: {x: 0, y: 5},
+      end: {x: 5, y: 0},
+      grid: [
+        // y=0
+        [
+          {type: 'end', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 2},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=1
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'corner', rotation: 2},
+          {type: 'straight', rotation: 1},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=2
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'straight', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=3
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=4
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'corner', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=5
+        [
+          {type: 'start', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'corner', rotation: 2},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+      ],
+      obstacles: [],
+    },
+    {
+      name: 'Level 3 - Obstacles and Swaps',
+      width: 7,
+      height: 7,
+      start: {x: 0, y: 3},
+      end: {x: 6, y: 3},
+      grid: [
+        // y=0
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 2},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=1
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'obstacle', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'empty', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'obstacle', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=2
+        [
+          {type: 'corner', rotation: 0},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 2},
+        ],
+        // y=3
+        [
+          {type: 'start', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'straight', rotation: 1},
+          {type: 'end', rotation: 0},
+        ],
+        // y=4
+        [
+          {type: 'corner', rotation: 1},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 2},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 0},
+        ],
+        // y=5
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'obstacle', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'empty', rotation: 0},
+          {type: 'straight', rotation: 1},
+          {type: 'obstacle', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+        // y=6
+        [
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+          {type: 'corner', rotation: 0},
+          {type: 'straight', rotation: 0},
+          {type: 'corner', rotation: 3},
+          {type: 'empty', rotation: 0},
+          {type: 'empty', rotation: 0},
+        ],
+      ],
+      obstacles: [
+        {x: 1, y: 1},
+        {x: 5, y: 1},
+        {x: 1, y: 5},
+        {x: 5, y: 5},
+      ],
+    },
+  ];
+
+  // Game state
+  let currentLevelIndex = 0;
+  let boardGrid = []; // 2D array of blocks (deep copy of level grid)
+  let draggingBlock = null;
+  let dragOffset = {x: 0, y: 0};
+  let dragStartCell = null;
+  let dragCurrentCell = null;
+  let boardRect = null;
+  let svgNS = "http://www.w3.org/2000/svg";
+
+  // DOM references
+  const boardEl = document.getElementById('board');
+  const levelInfoEl = document.getElementById('level-info');
+  const messageEl = document.getElementById('message');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnReset = document.getElementById('btn-reset');
+
+  // Tooltip for rotation hint
+  let rotateHintEl = null;
+
+  // Initialize game
+  function init() {
+    btnPrev.addEventListener('click', () => {
+      if(currentLevelIndex > 0) {
+        currentLevelIndex--;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnNext.addEventListener('click', () => {
+      if(currentLevelIndex < LEVELS.length - 1) {
+        currentLevelIndex++;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnReset.addEventListener('click', () => {
+      loadLevel(currentLevelIndex);
+    });
+
+    // Keyboard support for rotation: when a block is focused, press R to rotate
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'r' || e.key === 'R') {
+        if(document.activeElement && document.activeElement.classList.contains('block')) {
+          const cell = document.activeElement.dataset.cell.split(',').map(Number);
+          rotateBlock(cell[0], cell[1]);
+        }
+      }
+    });
+
+    loadLevel(currentLevelIndex);
+  }
+
+  // Deep copy level grid
+  function copyGrid(grid) {
+    return grid.map(row => row.map(cell => ({...cell})));
+  }
+
+  // Load a level by index
+  function loadLevel(index) {
+    const level = LEVELS[index];
+    boardGrid = copyGrid(level.grid);
+    boardEl.innerHTML = '';
+    boardEl.style.width = (level.width * CELL_SIZE + BOARD_PADDING*2) + 'px';
+    boardEl.style.height = (level.height * CELL_SIZE + BOARD_PADDING*2) + 'px';
+    boardEl.setAttribute('tabindex', '0');
+    boardEl.setAttribute('role', 'grid');
+    boardEl.setAttribute('aria-rowcount', level.height);
+    boardEl.setAttribute('aria-colcount', level.width);
+    levelInfoEl.textContent = level.name;
+    messageEl.textContent = '';
+    btnPrev.disabled = index === 0;
+    btnNext.disabled = index === LEVELS.length - 1;
+
+    // Create SVG board
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', level.width * CELL_SIZE);
+    svg.setAttribute('height', level.height * CELL_SIZE);
+    svg.setAttribute('aria-hidden', 'true');
+    boardEl.appendChild(svg);
+
+    // Create grid cells as groups
+    for(let y=0; y<level.height; y++) {
+      for(let x=0; x<level.width; x++) {
+        const cellGroup = document.createElementNS(svgNS, 'g');
+        cellGroup.setAttribute('transform', `translate(${x*CELL_SIZE},${y*CELL_SIZE})`);
+        cellGroup.classList.add('cell');
+        cellGroup.dataset.x = x;
+        cellGroup.dataset.y = y;
+        svg.appendChild(cellGroup);
+      }
+    }
+
+    // Render blocks
+    renderBlocks();
+
+    // Setup event listeners for drag and rotate
+    setupInteractions();
+
+    // Update board rect for drag calculations
+    boardRect = boardEl.getBoundingClientRect();
+
+    // Check initial path
+    checkPath();
+  }
+
+  // Render all blocks on the board
+  function renderBlocks() {
+    const svg = boardEl.querySelector('svg');
+    const cells = svg.querySelectorAll('g.cell');
+    cells.forEach(cellGroup => {
+      const x = +cellGroup.dataset.x;
+      const y = +cellGroup.dataset.y;
+      const block = boardGrid[y][x];
+      cellGroup.innerHTML = ''; // clear previous
+
+      // Background rect for cell
+      const bgRect = document.createElementNS(svgNS, 'rect');
+      bgRect.setAttribute('width', CELL_SIZE);
+      bgRect.setAttribute('height', CELL_SIZE);
+      bgRect.setAttribute('fill', '#222244');
+      bgRect.setAttribute('rx', 10);
+      bgRect.setAttribute('ry', 10);
+      cellGroup.appendChild(bgRect);
+
+      // If obstacle, fill red background
+      if(block.type === 'obstacle') {
+        bgRect.setAttribute('fill', '#5a1a1a');
+      }
+
+      // Create block group
+      if(block.type !== 'empty') {
+        const blockGroup = document.createElementNS(svgNS, 'g');
+        blockGroup.classList.add('block');
+        blockGroup.setAttribute('tabindex', block.type === 'start' || block.type === 'end' || block.type === 'obstacle' ? '-1' : '0');
+        blockGroup.dataset.x = x;
+        blockGroup.dataset.y = y;
+        blockGroup.dataset.cell = `${x},${y}`;
+        blockGroup.dataset.type = block.type;
+        blockGroup.dataset.rotation = block.rotation;
+        blockGroup.classList.add('draggable');
+        if(block.type === 'start' || block.type === 'end' || block.type === 'obstacle') {
+          blockGroup.classList.remove('draggable');
+        }
+        // Center block group inside cell
+        blockGroup.setAttribute('transform', `translate(${CELL_SIZE/2},${CELL_SIZE/2}) rotate(${block.rotation * 90}) translate(${-CELL_SIZE/2},${-CELL_SIZE/2})`);
+
+        // Add block SVG shape
+        const blockSvgStr = BLOCK_TYPES[block.type].svg(CELL_SIZE);
+        const tempContainer = document.createElementNS(svgNS, 'svg');
+        tempContainer.innerHTML = blockSvgStr;
+        // Append all children from tempContainer to blockGroup
+        Array.from(tempContainer.children).forEach(child => blockGroup.appendChild(child));
+
+        cellGroup.appendChild(blockGroup);
+      }
+    });
+  }
+
+  // Setup drag and rotate interactions
+  function setupInteractions() {
+    const svg = boardEl.querySelector('svg');
+    const blocks = svg.querySelectorAll('g.block.draggable');
+
+    blocks.forEach(block => {
+      block.style.touchAction = 'none';
+
+      // Drag variables
+      let isDragging = false;
+      let dragStartPos = null;
+      let dragStartMouse = null;
+
+      // Pointer events for drag
+      block.addEventListener('pointerdown', (e) => {
+        if(e.button !== 0) return; // left button only
+        e.preventDefault();
+        isDragging = true;
+        dragStartPos = {x: +block.dataset.x, y: +block.dataset.y};
+        dragStartMouse = {x: e.clientX, y: e.clientY};
+        draggingBlock = block;
+        dragOffset = {x: 0, y: 0};
+        dragStartCell = {x: +block.dataset.x, y: +block.dataset.y};
+        dragCurrentCell = {...dragStartCell};
+        block.classList.add('dragging');
+        boardEl.style.cursor = 'grabbing';
+        // Bring dragged block to front
+        block.parentNode.appendChild(block);
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if(!isDragging || draggingBlock !== block) return;
+        e.preventDefault();
+        dragOffset.x = e.clientX - dragStartMouse.x;
+        dragOffset.y = e.clientY - dragStartMouse.y;
+        // Move block visually
+        block.style.transition = 'none';
+        block.setAttribute('transform', `translate(${CELL_SIZE/2 + dragOffset.x},${CELL_SIZE/2 + dragOffset.y}) rotate(${+block.dataset.rotation * 90}) translate(${-CELL_SIZE/2},${-CELL_SIZE/2})`);
+
+        // Calculate which cell is hovered
+        const boardRect = boardEl.getBoundingClientRect();
+        const relX = e.clientX - boardRect.left - BOARD_PADDING;
+        const relY = e.clientY - boardRect.top - BOARD_PADDING;
+        const hoverX = Math.floor(relX / CELL_SIZE);
+        const hoverY = Math.floor(relY / CELL_SIZE);
+
+        if(hoverX >= 0 && hoverX < LEVELS[currentLevelIndex].width && hoverY >= 0 && hoverY < LEVELS[currentLevelIndex].height) {
+          if(hoverX !== dragCurrentCell.x || hoverY !== dragCurrentCell.y) {
+            // Remove highlight from old cell
+            highlightCell(dragCurrentCell.x, dragCurrentCell.y, false);
+            dragCurrentCell = {x: hoverX, y: hoverY};
+            highlightCell(dragCurrentCell.x, dragCurrentCell.y, true);
+          }
+        } else {
+          highlightCell(dragCurrentCell.x, dragCurrentCell.y, false);
+          dragCurrentCell = null;
+        }
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if(!isDragging || draggingBlock !== block) return;
+        e.preventDefault();
+        isDragging = false;
+        block.classList.remove('dragging');
+        boardEl.style.cursor = 'default';
+        highlightCell(dragCurrentCell?.x, dragCurrentCell?.y, false);
+
+        // If dropped outside grid or on same cell, reset position
+        if(!dragCurrentCell || (dragCurrentCell.x === dragStartCell.x && dragCurrentCell.y === dragStartCell.y)) {
+          // Reset transform
+          block.style.transition = 'transform 0.3s ease';
+          block.setAttribute('transform', `translate(${CELL_SIZE/2},${CELL_SIZE/2}) rotate(${+block.dataset.rotation * 90}) translate(${-CELL_SIZE/2},${-CELL_SIZE/2})`);
+          draggingBlock = null;
+          return;
+        }
+
+        // Check if target cell is movable (not start/end/obstacle)
+        const targetBlock = boardGrid[dragCurrentCell.y][dragCurrentCell.x];
+        if(targetBlock.type === 'start' || targetBlock.type === 'end' || targetBlock.type === 'obstacle') {
+          // Invalid move, reset position
+          block.style.transition = 'transform 0.3s ease';
+          block.setAttribute('transform', `translate(${CELL_SIZE/2},${CELL_SIZE/2}) rotate(${+block.dataset.rotation * 90}) translate(${-CELL_SIZE/2},${-CELL_SIZE/2})`);
+          draggingBlock = null;
+          return;
+        }
+
+        // Swap blocks in boardGrid
+        const dragBlockType = block.dataset.type;
+        const dragBlockRot = +block.dataset.rotation;
+        const dragX = dragStartCell.x;
+        const dragY = dragStartCell.y;
+        const targetX = dragCurrentCell.x;
+        const targetY = dragCurrentCell.y;
+
+        // Swap in boardGrid
+        const temp = {...boardGrid[targetY][targetX]};
+        boardGrid[targetY][targetX] = {...boardGrid[dragY][dragX]};
+        boardGrid[dragY][dragX] = temp;
+
+        // Re-render blocks
+        renderBlocks();
+        setupInteractions();
+
+        draggingBlock = null;
+
+        // Check path after move
+        checkPath();
+      });
+
+      // Click to rotate block
+      block.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const x = +block.dataset.x;
+        const y = +block.dataset.y;
+        rotateBlock(x, y);
+      });
+
+      // Keyboard rotate on Enter or Space
+      block.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const x = +block.dataset.x;
+          const y = +block.dataset.y;
+          rotateBlock(x, y);
+        }
+      });
+
+      // Hover highlight
+      block.addEventListener('mouseenter', () => {
+        block.classList.add('block-hover');
+        showRotateHint(block);
+      });
+      block.addEventListener('mouseleave', () => {
+        block.classList.remove('block-hover');
+        hideRotateHint();
+      });
+    });
+  }
+
+  // Highlight a cell by adding a translucent overlay rect
+  function highlightCell(x, y, highlight) {
+    if(x == null || y == null) return;
+    const svg = boardEl.querySelector('svg');
+    const cellGroup = svg.querySelector(`g.cell[data-x="${x}"][data-y="${y}"]`);
+    if(!cellGroup) return;
+    if(highlight) {
+      if(!cellGroup.querySelector('rect.highlight')) {
+        const highlightRect = document.createElementNS(svgNS, 'rect');
+        highlightRect.setAttribute('width', CELL_SIZE);
+        highlightRect.setAttribute('height', CELL_SIZE);
+        highlightRect.setAttribute('fill', '#7fdb7f44');
+        highlightRect.setAttribute('rx', 10);
+        highlightRect.setAttribute('ry', 10);
+        highlightRect.classList.add('highlight');
+        cellGroup.appendChild(highlightRect);
+      }
+    } else {
+      const highlightRect = cellGroup.querySelector('rect.highlight');
+      if(highlightRect) {
+        highlightRect.remove();
+      }
+    }
+  }
+
+  // Rotate a block at (x,y) if rotatable
+  function rotateBlock(x, y) {
+    const block = boardGrid[y][x];
+    if(!BLOCK_TYPES[block.type].rotatable) return;
+    block.rotation = (block.rotation + 1) % 4;
+    renderBlocks();
+    setupInteractions();
+    checkPath();
+  }
+
+  // Check if there is a valid path from start to end
+  // Returns true if path exists, false otherwise
+  // Also visually highlights the path if found
+  function checkPath() {
+    const level = LEVELS[currentLevelIndex];
+    const width = level.width;
+    const height = level.height;
+    const start = level.start;
+    const end = level.end;
+
+    // Clear previous path highlights
+    clearPathHighlight();
+
+    // BFS or DFS to find path from start to end following connections
+    // We consider connections bidirectional and must match between adjacent blocks
+
+    // Helper: get connections of a block at rotation
+    function getConnections(block) {
+      if(!block) return [];
+      const baseConns = BLOCK_TYPES[block.type]?.connections || [];
+      return baseConns.map(d => (d + block.rotation) % 4);
+    }
+
+    // Check if two blocks connect in given directions
+    function blocksConnect(blockA, dirA, blockB) {
+      if(!blockA || !blockB) return false;
+      const connsA = getConnections(blockA);
+      const connsB = getConnections(blockB);
+      return connsA.includes(dirA) && connsB.includes(oppositeDir(dirA));
+    }
+
+    // BFS search
+    const queue = [];
+    const visited = new Array(height).fill(0).map(() => new Array(width).fill(false));
+    const parent = new Array(height).fill(0).map(() => new Array(width).fill(null));
+
+    queue.push(start);
+    visited[start.y][start.x] = true;
+
+    while(queue.length > 0) {
+      const current = queue.shift();
+      if(current.x === end.x && current.y === end.y) {
+        // Found path
+        const path = [];
+        let cur = current;
+        while(cur) {
+          path.push(cur);
+          cur = parent[cur.y][cur.x];
+        }
+        path.reverse();
+        highlightPath(path);
+        messageEl.textContent = 'Success! Cub reached the Star!';
+        return true;
+      }
+      const currentBlock = boardGrid[current.y][current.x];
+      const conns = getConnections(currentBlock);
+      for(const dir of conns) {
+        const nx = current.x + DIR_VECTORS[dir].x;
+        const ny = current.y + DIR_VECTORS[dir].y;
+        if(nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+        if(visited[ny][nx]) continue;
+        const nextBlock = boardGrid[ny][nx];
+        if(nextBlock.type === 'empty' || nextBlock.type === 'obstacle') continue;
+        if(blocksConnect(currentBlock, dir, nextBlock)) {
+          visited[ny][nx] = true;
+          parent[ny][nx] = current;
+          queue.push({x: nx, y: ny});
+        }
+      }
+    }
+    messageEl.textContent = 'No valid path yet. Keep trying!';
+    return false;
+  }
+
+  // Highlight the path visually on the board
+  function highlightPath(path) {
+    if(path.length < 2) return;
+    const svg = boardEl.querySelector('svg');
+    // Create a path element connecting centers of cells
+    const pathEl = document.createElementNS(svgNS, 'path');
+    const points = path.map(p => `${p.x * CELL_SIZE + CELL_SIZE/2},${p.y * CELL_SIZE + CELL_SIZE/2}`);
+    const d = 'M' + points.join(' L');
+    pathEl.setAttribute('d', d);
+    pathEl.classList.add('path-highlight');
+    pathEl.setAttribute('aria-hidden', 'true');
+    pathEl.dataset.pathHighlight = 'true';
+    svg.appendChild(pathEl);
+  }
+
+  // Remove previous path highlight
+  function clearPathHighlight() {
+    const svg = boardEl.querySelector('svg');
+    if(!svg) return;
+    const oldPath = svg.querySelector('path.path-highlight');
+    if(oldPath) oldPath.remove();
+  }
+
+  // Show rotate hint tooltip near block
+  function showRotateHint(block) {
+    if(!rotateHintEl) {
+      rotateHintEl = document.createElement('div');
+      rotateHintEl.className = 'rotate-hint';
+      rotateHintEl.textContent = 'Click or press R to rotate';
+      document.body.appendChild(rotateHintEl);
+    }
+    const rect = block.getBoundingClientRect();
+    rotateHintEl.style.top = (rect.top - 28) + 'px';
+    rotateHintEl.style.left = (rect.left + rect.width/2 - rotateHintEl.offsetWidth/2) + 'px';
+    rotateHintEl.style.opacity = '1';
+  }
+  function hideRotateHint() {
+    if(rotateHintEl) {
+      rotateHintEl.style.opacity = '0';
+    }
+  }
+
+  // Initialize game on DOM ready
+  window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>

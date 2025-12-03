@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cub n Pup - Puzzle Game Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    color: #eee;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  header {
+    background: #2a2a44;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #444466;
+  }
+  #game-container {
+    max-width: 600px;
+    margin: 1rem auto 3rem;
+    background: #2a2a44;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #000a;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    grid-template-rows: repeat(7, 60px);
+    gap: 6px;
+    background: #1a1a2e;
+    padding: 10px;
+    border-radius: 10px;
+    user-select: none;
+    touch-action: none;
+    position: relative;
+  }
+  .cell {
+    width: 60px;
+    height: 60px;
+    background: #222244;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 0 6px #0008;
+  }
+  .cell.highlight {
+    background: #3a3a6a;
+    box-shadow: 0 0 10px #88aaffcc;
+  }
+  .block {
+    width: 56px;
+    height: 56px;
+    margin: 2px;
+    background: #4a90e2;
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 8px #a0c4ff,
+      0 3px 6px #0008;
+    cursor: grab;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: box-shadow 0.2s ease;
+    user-select: none;
+    touch-action: none;
+  }
+  .block:active {
+    cursor: grabbing;
+    box-shadow:
+      inset 0 0 12px #c0e0ff,
+      0 6px 12px #000c;
+  }
+  .block.rotatable {
+    cursor: pointer;
+  }
+  .block svg {
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+  }
+  #info-panel {
+    margin-top: 1rem;
+    max-width: 600px;
+    background: #2a2a44;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 0 20px #000a;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  #level-info {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  #controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  button {
+    background: #4a90e2;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+    margin: 0 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px #0008;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #6aa0ff;
+  }
+  button:disabled {
+    background: #3a3a6a;
+    cursor: default;
+    box-shadow: none;
+  }
+  #message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #a0ffa0;
+    text-align: center;
+    min-height: 1.5em;
+  }
+  /* Tooltip for rotate hint */
+  .rotate-hint {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 12px;
+    color: #a0aaffcc;
+    user-select: none;
+    pointer-events: none;
+  }
+  /* Cub and Star icons */
+  .icon-cub, .icon-star {
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+  }
+  .icon-cub path {
+    fill: #f0c040;
+    stroke: #b08010;
+    stroke-width: 1.2;
+  }
+  .icon-star path {
+    fill: #ffd93b;
+    stroke: #bfae1a;
+    stroke-width: 1.2;
+  }
+  /* Block connection lines */
+  .conn-line {
+    stroke: #a0c4ff;
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .conn-line.active {
+    stroke: #ffd93b;
+    stroke-width: 8;
+    filter: drop-shadow(0 0 3px #ffd93baa);
+  }
+  /* Drag ghost */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 1000;
+    user-select: none;
+  }
+  /* Visual path preview styles */
+  .path-preview-line {
+    position: absolute;
+    pointer-events: none;
+    stroke: #ffd93bcc;
+    stroke-width: 6;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px #ffd93baa);
+  }
+  .path-preview-circle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #ffd93bcc;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #ffd93baa;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<header>Cub n Pup - Puzzle Game Demo</header>
+<div id="game-container" aria-label="Cub n Pup puzzle game">
+  <div id="grid" role="grid" aria-readonly="true" aria-label="Puzzle grid"></div>
+  <div id="message" aria-live="polite" aria-atomic="true"></div>
+  <div id="controls" role="region" aria-label="Game controls">
+    <button id="btn-prev" aria-label="Previous level">← Prev</button>
+    <button id="btn-reset" aria-label="Reset level">Reset</button>
+    <button id="btn-next" aria-label="Next level">Next →</button>
+  </div>
+  <div id="info-panel" role="region" aria-label="Game information">
+    <div id="level-info"></div>
+    <div>
+      <strong>Gameplay:</strong> Drag and rotate blocks to form paths that guide Cub to the Star.<br />
+      <strong>Tips:</strong> Plan your moves and rotations in advance. Observe obstacles and adapt your strategy.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // Constants for directions
+  const DIRS = {
+    UP: 0,
+    RIGHT: 1,
+    DOWN: 2,
+    LEFT: 3,
+  };
+  const DIR_VECTORS = [
+    {x: 0, y: -1}, // UP
+    {x: 1, y: 0},  // RIGHT
+    {x: 0, y: 1},  // DOWN
+    {x: -1, y: 0}, // LEFT
+  ];
+
+  // Block types and their connection patterns (directions they connect)
+  const BLOCK_TYPES = {
+    EMPTY: 'empty',
+    STRAIGHT: 'straight',
+    CURVE: 'curve',
+    TEE: 'tee',
+    CROSS: 'cross',
+    START: 'start',
+    END: 'end',
+    OBSTACLE: 'obstacle',
+  };
+
+  // Base connections for each block type (before rotation)
+  const BLOCK_CONNECTIONS = {
+    [BLOCK_TYPES.EMPTY]: [],
+    [BLOCK_TYPES.STRAIGHT]: [DIRS.UP, DIRS.DOWN],
+    [BLOCK_TYPES.CURVE]: [DIRS.UP, DIRS.RIGHT],
+    [BLOCK_TYPES.TEE]: [DIRS.UP, DIRS.RIGHT, DIRS.LEFT],
+    [BLOCK_TYPES.CROSS]: [DIRS.UP, DIRS.RIGHT, DIRS.DOWN, DIRS.LEFT],
+    [BLOCK_TYPES.START]: [DIRS.RIGHT],
+    [BLOCK_TYPES.END]: [DIRS.LEFT],
+    [BLOCK_TYPES.OBSTACLE]: [],
+  };
+
+  const GRID_SIZE = 7;
+
+  const LEVELS = [
+    [
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+    [
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'obstacle', fixed: true}, {type: 'curve', rotation: 2}, {type: 'straight', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'tee', rotation: 3}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+    [
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'obstacle', fixed: true}, {type: 'curve', rotation: 3}, {type: 'tee', rotation: 0}, {type: 'obstacle', fixed: true}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'start', rotation: 1, fixed: true}, {type: 'straight', rotation: 1}, {type: 'cross', rotation: 0}, {type: 'curve', rotation: 1}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'straight', rotation: 0}, {type: 'end', rotation: 3, fixed: true}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+      [{type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}, {type: 'empty'}],
+    ],
+  ];
+
+  function rotateDir(dir, rotation) {
+    return (dir + rotation) % 4;
+  }
+
+  function rotateConnections(conns, rotation) {
+    return conns.map(d => rotateDir(d, rotation));
+  }
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function createSVGElement(tag, attrs = {}) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const [k,v] of Object.entries(attrs)) {
+      el.setAttribute(k, v);
+    }
+    return el;
+  }
+
+  function createBlockSVG(type, rotation) {
+    const size = 56;
+    const center = size/2;
+    const lineLength = 20;
+    const lineWidth = 6;
+    const connColor = '#a0c4ff';
+
+    const svg = createSVGElement('svg', {
+      width: size,
+      height: size,
+      viewBox: `0 0 ${size} ${size}`,
+      'aria-hidden': 'true',
+      focusable: 'false',
+    });
+
+    const bg = createSVGElement('rect', {
+      x: 0,
+      y: 0,
+      width: size,
+      height: size,
+      rx: 10,
+      ry: 10,
+      fill: 'none',
+    });
+    svg.appendChild(bg);
+
+    const baseConns = BLOCK_CONNECTIONS[type] || [];
+    const conns = rotateConnections(baseConns, rotation);
+
+    for (const dir of conns) {
+      let x1 = center;
+      let y1 = center;
+      let x2 = center;
+      let y2 = center;
+      switch(dir) {
+        case DIRS.UP: y2 = center - lineLength; break;
+        case DIRS.RIGHT: x2 = center + lineLength; break;
+        case DIRS.DOWN: y2 = center + lineLength; break;
+        case DIRS.LEFT: x2 = center - lineLength; break;
+      }
+      const line = createSVGElement('line', {
+        x1, y1, x2, y2,
+        stroke: connColor,
+        'stroke-width': lineWidth,
+        'stroke-linecap': 'round',
+      });
+      svg.appendChild(line);
+    }
+
+    const centerCircle = createSVGElement('circle', {
+      cx: center,
+      cy: center,
+      r: lineWidth/2 + 1,
+      fill: connColor,
+    });
+    svg.appendChild(centerCircle);
+
+    if (type === BLOCK_TYPES.START) {
+      const cubGroup = createCubIcon(center, center);
+      svg.appendChild(cubGroup);
+    } else if (type === BLOCK_TYPES.END) {
+      const starGroup = createStarIcon(center, center);
+      svg.appendChild(starGroup);
+    } else if (type === BLOCK_TYPES.OBSTACLE) {
+      const rect = createSVGElement('rect', {
+        x: 8,
+        y: 8,
+        width: size - 16,
+        height: size - 16,
+        fill: '#552222',
+        rx: 8,
+        ry: 8,
+      });
+      svg.appendChild(rect);
+      const line1 = createSVGElement('line', {
+        x1: 12,
+        y1: 12,
+        x2: size - 12,
+        y2: size - 12,
+        stroke: '#aa4444',
+        'stroke-width': 6,
+        'stroke-linecap': 'round',
+      });
+      const line2 = createSVGElement('line', {
+        x1: size - 12,
+        y1: 12,
+        x2: 12,
+        y2: size - 12,
+        stroke: '#aa4444',
+        'stroke-width': 6,
+        'stroke-linecap': 'round',
+      });
+      svg.appendChild(line1);
+      svg.appendChild(line2);
+    }
+
+    return svg;
+  }
+
+  function createCubIcon(cx, cy) {
+    const g = createSVGElement('g', {class: 'icon-cub'});
+    const face = createSVGElement('circle', {
+      cx, cy,
+      r: 14,
+      fill: '#f0c040',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(face);
+    const earL = createSVGElement('path', {
+      d: `M${cx-12},${cy-8} Q${cx-16},${cy-20} ${cx-6},${cy-12}`,
+      fill: '#d9a520',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    const earR = createSVGElement('path', {
+      d: `M${cx+12},${cy-8} Q${cx+16},${cy-20} ${cx+6},${cy-12}`,
+      fill: '#d9a520',
+      stroke: '#b08010',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(earL);
+    g.appendChild(earR);
+    const eyeL = createSVGElement('circle', {
+      cx: cx - 6,
+      cy: cy - 2,
+      r: 3,
+      fill: '#603000',
+    });
+    const eyeR = createSVGElement('circle', {
+      cx: cx + 6,
+      cy: cy - 2,
+      r: 3,
+      fill: '#603000',
+    });
+    g.appendChild(eyeL);
+    g.appendChild(eyeR);
+    const nose = createSVGElement('path', {
+      d: `M${cx},${cy+4} l-3,4 l6,0 l-3,-4 z`,
+      fill: '#603000',
+    });
+    g.appendChild(nose);
+    return g;
+  }
+
+  function createStarIcon(cx, cy) {
+    const g = createSVGElement('g', {class: 'icon-star'});
+    const starPath = createSVGElement('path', {
+      d: 'M12 2 L15 9 L22 9 L16 14 L18 21 L12 17 L6 21 L8 14 L2 9 L9 9 Z',
+      transform: `translate(${cx-12},${cy-12}) scale(1)`,
+      fill: '#ffd93b',
+      stroke: '#bfae1a',
+      'stroke-width': 1.2,
+    });
+    g.appendChild(starPath);
+    return g;
+  }
+
+  // Game state
+  let currentLevelIndex = 0;
+  let gridData = [];
+  let blocksMap = new Map();
+  let dragState = null;
+  let gridEl, messageEl, levelInfoEl, btnPrev, btnNext, btnReset;
+
+  // For path preview
+  let previewElements = [];
+
+  function init() {
+    gridEl = document.getElementById('grid');
+    messageEl = document.getElementById('message');
+    levelInfoEl = document.getElementById('level-info');
+    btnPrev = document.getElementById('btn-prev');
+    btnNext = document.getElementById('btn-next');
+    btnReset = document.getElementById('btn-reset');
+
+    btnPrev.addEventListener('click', () => {
+      if (currentLevelIndex > 0) {
+        currentLevelIndex--;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnNext.addEventListener('click', () => {
+      if (currentLevelIndex < LEVELS.length - 1) {
+        currentLevelIndex++;
+        loadLevel(currentLevelIndex);
+      }
+    });
+    btnReset.addEventListener('click', () => {
+      loadLevel(currentLevelIndex);
+    });
+
+    loadLevel(currentLevelIndex);
+  }
+
+  function loadLevel(index) {
+    clearMessage();
+    gridEl.innerHTML = '';
+    blocksMap.clear();
+    gridData = [];
+
+    const level = LEVELS[index];
+    for (let y = 0; y < GRID_SIZE; y++) {
+      gridData[y] = [];
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const cellData = level[y][x] || {type: BLOCK_TYPES.EMPTY};
+        const type = cellData.type || BLOCK_TYPES.EMPTY;
+        const rotation = cellData.rotation || 0;
+        const fixed = !!cellData.fixed;
+        gridData[y][x] = {type, rotation, fixed};
+      }
+    }
+
+    renderGrid();
+    updateLevelInfo();
+    updateControls();
+    checkWinCondition();
+  }
+
+  function renderGrid() {
+    gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 60px)`;
+    gridEl.style.gridTemplateRows = `repeat(${GRID_SIZE}, 60px)`;
+    gridEl.innerHTML = '';
+
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `Cell ${x + 1},${y + 1}`);
+
+        const blockData = gridData[y][x];
+        if (blockData.type !== BLOCK_TYPES.EMPTY) {
+          const blockEl = createBlockElement(blockData, x, y);
+          cell.appendChild(blockEl);
+          blocksMap.set(blockEl, {x, y, ...blockData});
+        }
+
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  function createBlockElement(blockData, x, y) {
+    const blockEl = document.createElement('div');
+    blockEl.className = 'block';
+    if (!blockData.fixed) {
+      blockEl.classList.add('rotatable');
+      blockEl.setAttribute('tabindex', '0');
+      blockEl.setAttribute('role', 'button');
+      blockEl.setAttribute('aria-label', `Block type ${blockData.type}, rotation ${blockData.rotation * 90} degrees. Click to rotate. Drag to move.`);
+    } else {
+      blockEl.setAttribute('aria-label', `Fixed block type ${blockData.type}`);
+    }
+    blockEl.style.transform = `rotate(${blockData.rotation * 90}deg)`;
+    blockEl.style.position = 'absolute';
+    blockEl.style.top = '2px';
+    blockEl.style.left = '2px';
+
+    const svg = createBlockSVG(blockData.type, 0);
+    blockEl.appendChild(svg);
+
+    if (!blockData.fixed) {
+      const hint = document.createElement('div');
+      hint.className = 'rotate-hint';
+      hint.textContent = '⟳';
+      blockEl.appendChild(hint);
+    }
+
+    if (!blockData.fixed) {
+      blockEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        rotateBlock(blockEl);
+      });
+      blockEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          rotateBlock(blockEl);
+        }
+      });
+      blockEl.addEventListener('pointerdown', onPointerDown);
+      blockEl.style.touchAction = 'none';
+
+      // Add hover listeners for path preview
+      blockEl.addEventListener('pointerenter', onBlockHover);
+      blockEl.addEventListener('pointerleave', onBlockHoverOut);
+    }
+
+    return blockEl;
+  }
+
+  function rotateBlock(blockEl) {
+    const data = blocksMap.get(blockEl);
+    if (!data || data.fixed) return;
+    data.rotation = (data.rotation + 1) % 4;
+    gridData[data.y][data.x].rotation = data.rotation;
+    blockEl.style.transform = `rotate(${data.rotation * 90}deg)`;
+    checkWinCondition();
+  }
+
+  function onPointerDown(e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const blockEl = e.currentTarget;
+    const data = blocksMap.get(blockEl);
+    if (!data || data.fixed) return;
+
+    const rect = blockEl.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    dragState = {
+      blockEl,
+      offsetX,
+      offsetY,
+      originX: rect.left,
+      originY: rect.top,
+      originCellX: data.x,
+      originCellY: data.y,
+    };
+
+    dragState.ghost = blockEl.cloneNode(true);
+    dragState.ghost.classList.add('drag-ghost');
+    dragState.ghost.style.width = rect.width + 'px';
+    dragState.ghost.style.height = rect.height + 'px';
+    dragState.ghost.style.transform = blockEl.style.transform;
+    document.body.appendChild(dragState.ghost);
+
+    moveDragGhost(e.clientX, e.clientY);
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    e.preventDefault();
+    if (!dragState) return;
+    moveDragGhost(e.clientX, e.clientY);
+
+    const cell = getCellFromPoint(e.clientX, e.clientY);
+    highlightCell(cell);
+  }
+
+  function onPointerUp(e) {
+    e.preventDefault();
+    if (!dragState) return;
+
+    if (dragState.ghost && dragState.ghost.parentNode) {
+      dragState.ghost.parentNode.removeChild(dragState.ghost);
+    }
+
+    const dropCell = getCellFromPoint(e.clientX, e.clientY);
+    if (dropCell) {
+      const {x: dropX, y: dropY} = dropCell;
+      const {blockEl, originCellX, originCellY} = dragState;
+      const data = blocksMap.get(blockEl);
+
+      if (dropX !== originCellX || dropY !== originCellY) {
+        if (gridData[dropY][dropX].type === BLOCK_TYPES.EMPTY) {
+          gridData[originCellY][originCellX] = {type: BLOCK_TYPES.EMPTY};
+          gridData[dropY][dropX] = {type: data.type, rotation: data.rotation, fixed: false};
+          blocksMap.delete(blockEl);
+          blocksMap.set(blockEl, {x: dropX, y: dropY, type: data.type, rotation: data.rotation, fixed: false});
+          const originCellEl = getCellElement(originCellX, originCellY);
+          const dropCellEl = getCellElement(dropX, dropY);
+          if (originCellEl && dropCellEl) {
+            originCellEl.innerHTML = '';
+            dropCellEl.innerHTML = '';
+            dropCellEl.appendChild(blockEl);
+          }
+          data.x = dropX;
+          data.y = dropY;
+          checkWinCondition();
+        }
+      }
+    }
+
+    clearHighlight();
+    dragState = null;
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+  }
+
+  function moveDragGhost(clientX, clientY) {
+    if (!dragState || !dragState.ghost) return;
+    dragState.ghost.style.left = (clientX - dragState.offsetX) + 'px';
+    dragState.ghost.style.top = (clientY - dragState.offsetY) + 'px';
+  }
+
+  function getCellFromPoint(clientX, clientY) {
+    const rect = gridEl.getBoundingClientRect();
+    const x = Math.floor((clientX - rect.left) / (rect.width / GRID_SIZE));
+    const y = Math.floor((clientY - rect.top) / (rect.height / GRID_SIZE));
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+      return {x, y};
+    }
+    return null;
+  }
+
+  function highlightCell(cell) {
+    clearHighlight();
+    if (!cell) return;
+    const cellEl = getCellElement(cell.x, cell.y);
+    if (!cellEl) return;
+    if (gridData[cell.y][cell.x].type === BLOCK_TYPES.EMPTY) {
+      cellEl.classList.add('highlight');
+    }
+  }
+
+  function clearHighlight() {
+    const highlighted = gridEl.querySelectorAll('.highlight');
+    highlighted.forEach(el => el.classList.remove('highlight'));
+  }
+
+  function getCellElement(x, y) {
+    return gridEl.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+  }
+
+  function updateLevelInfo() {
+    levelInfoEl.textContent = `Level ${currentLevelIndex + 1} of ${LEVELS.length}`;
+  }
+
+  function updateControls() {
+    btnPrev.disabled = currentLevelIndex === 0;
+    btnNext.disabled = currentLevelIndex === LEVELS.length - 1;
+  }
+
+  function clearMessage() {
+    messageEl.textContent = '';
+  }
+
+  function showMessage(text) {
+    messageEl.textContent = text;
+  }
+
+  // Check if the path from start to end is connected properly
+  function checkWinCondition() {
+    let startPos = null;
+    let endPos = null;
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const b = gridData[y][x];
+        if (b.type === BLOCK_TYPES.START) startPos = {x, y, rotation: b.rotation};
+        if (b.type === BLOCK_TYPES.END) endPos = {x, y, rotation: b.rotation};
+      }
+    }
+    if (!startPos || !endPos) return false;
+
+    const visited = new Set();
+    const stack = [];
+
+    const startConns = rotateConnections(BLOCK_CONNECTIONS[BLOCK_TYPES.START], startPos.rotation);
+    if (startConns.length !== 1) return false;
+    const startOutDir = startConns[0];
+    const startInDir = (startOutDir + 2) % 4;
+
+    stack.push({x: startPos.x, y: startPos.y, cameFrom: startInDir});
+
+    while (stack.length > 0) {
+      const {x, y, cameFrom} = stack.pop();
+      const key = `${x},${y},${cameFrom}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      const block = gridData[y][x];
+      if (!block) continue;
+      const conns = rotateConnections(BLOCK_CONNECTIONS[block.type], block.rotation);
+
+      if (!conns.includes(cameFrom)) continue;
+
+      if (block.type === BLOCK_TYPES.END) {
+        const endConns = rotateConnections(BLOCK_CONNECTIONS[BLOCK_TYPES.END], block.rotation);
+        if (endConns.length === 1 && endConns[0] === cameFrom) {
+          showMessage('🎉 Cub reached the Star! You solved the puzzle!');
+          return true;
+        }
+        continue;
+      }
+
+      for (const dir of conns) {
+        if (dir === cameFrom) continue;
+        const vec = DIR_VECTORS[dir];
+        const nx = x + vec.x;
+        const ny = y + vec.y;
+        if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+        const neighbor = gridData[ny][nx];
+        if (!neighbor) continue;
+        if (neighbor.type === BLOCK_TYPES.EMPTY || neighbor.type === BLOCK_TYPES.OBSTACLE) continue;
+        const neighborConns = rotateConnections(BLOCK_CONNECTIONS[neighbor.type], neighbor.rotation);
+        const neighborInDir = (dir + 2) % 4;
+        if (!neighborConns.includes(neighborInDir)) continue;
+        stack.push({x: nx, y: ny, cameFrom: neighborInDir});
+      }
+    }
+
+    clearMessage();
+    return false;
+  }
+
+  // --- New Feature: Visual Path Preview on Hover ---
+
+  // Clear existing preview elements
+  function clearPathPreview() {
+    for (const el of previewElements) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
+    previewElements = [];
+  }
+
+  // Draw a line SVG element for path preview
+  function createPreviewLine(x1, y1, x2, y2) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('stroke', '#ffd93bcc');
+    line.setAttribute('stroke-width', '6');
+    line.setAttribute('stroke-linecap', 'round');
+    line.style.position = 'absolute';
+    line.style.pointerEvents = 'none';
+    line.classList.add('path-preview-line');
+    return line;
+  }
+
+  // Draw a circle SVG element for path preview nodes
+  function createPreviewCircle(cx, cy) {
+    const circle = document.createElementNS(SVG_NS, 'circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', 6);
+    circle.setAttribute('fill', '#ffd93bcc');
+    circle.style.position = 'absolute';
+    circle.style.pointerEvents = 'none';
+    circle.classList.add('path-preview-circle');
+    return circle;
+  }
+
+  // On block hover, show visual path preview from that block
+  function onBlockHover(e) {
+    const blockEl = e.currentTarget;
+    const data = blocksMap.get(blockEl);
+    if (!data) return;
+
+    clearPathPreview();
+
+    // Compute path from hovered block to end if possible
+    // We'll do a BFS from hovered block, entering from any connection side (simulate Cub starting there)
+    // For preview, we show the path if it leads to the end block
+
+    // We'll find all possible start directions (connections) for this block
+    const conns = rotateConnections(BLOCK_CONNECTIONS[data.type], data.rotation);
+    if (conns.length === 0) return;
+
+    // For each connection side, try to find path to end
+    // We'll pick the first successful path found
+
+    let foundPath = null;
+
+    for (const startDir of conns) {
+      const cameFrom = (startDir + 2) % 4;
+      const path = findPath(data.x, data.y, cameFrom);
+      if (path) {
+        foundPath = path;
+        break;
+      }
+    }
+
+    if (!foundPath) return;
+
+    // Draw the path preview on grid
+    drawPathPreview(foundPath);
+  }
+
+  // On block hover out, clear preview
+  function onBlockHoverOut() {
+    clearPathPreview();
+  }
+
+  // Find path from (x,y) entering from cameFrom direction to end block
+  // Returns array of {x,y} positions in path order or null if no path
+  function findPath(startX, startY, cameFrom) {
+    const visited = new Set();
+    const stack = [];
+    const parentMap = new Map();
+
+    stack.push({x: startX, y: startY, cameFrom});
+
+    while (stack.length > 0) {
+      const {x, y, cameFrom} = stack.pop();
+      const key = `${x},${y},${cameFrom}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      const block = gridData[y][x];
+      if (!block) continue;
+      const conns = rotateConnections(BLOCK_CONNECTIONS[block.type], block.rotation);
+
+      if (!conns.includes(cameFrom)) continue;
+
+      if (block.type === BLOCK_TYPES.END) {
+        const endConns = rotateConnections(BLOCK_CONNECTIONS[BLOCK_TYPES.END], block.rotation);
+        if (endConns.length === 1 && endConns[0] === cameFrom) {
+          // Reconstruct path
+          const path = [];
+          let curKey = key;
+          while (curKey) {
+            const [cx, cy] = curKey.split(',').map(Number);
+            path.push({x: cx, y: cy});
+            curKey = parentMap.get(curKey);
+          }
+          path.reverse();
+          return path;
+        }
+        continue;
+      }
+
+      for (const dir of conns) {
+        if (dir === cameFrom) continue;
+        const vec = DIR_VECTORS[dir];
+        const nx = x + vec.x;
+        const ny = y + vec.y;
+        if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+        const neighbor = gridData[ny][nx];
+        if (!neighbor) continue;
+        if (neighbor.type === BLOCK_TYPES.EMPTY || neighbor.type === BLOCK_TYPES.OBSTACLE) continue;
+        const neighborConns = rotateConnections(BLOCK_CONNECTIONS[neighbor.type], neighbor.rotation);
+        const neighborInDir = (dir + 2) % 4;
+        if (!neighborConns.includes(neighborInDir)) continue;
+        const nextKey = `${nx},${ny},${neighborInDir}`;
+        if (!visited.has(nextKey)) {
+          parentMap.set(nextKey, key);
+          stack.push({x: nx, y: ny, cameFrom: neighborInDir});
+        }
+      }
+    }
+    return null;
+  }
+
+  // Draw path preview lines and circles on grid
+  function drawPathPreview(path) {
+    if (!path || path.length < 2) return;
+
+    const cellSize = 60;
+    const offset = 10; // grid padding
+
+    for (let i = 0; i < path.length; i++) {
+      const {x, y} = path[i];
+      const cellEl = getCellElement(x, y);
+      if (!cellEl) continue;
+      const rect = cellEl.getBoundingClientRect();
+      const gridRect = gridEl.getBoundingClientRect();
+
+      // Calculate center relative to grid container
+      const cx = (x * cellSize) + cellSize / 2 + offset;
+      const cy = (y * cellSize) + cellSize / 2 + offset;
+
+      // Draw circle at each node
+      const circle = createSVGElement('circle', {
+        cx,
+        cy,
+        r: 6,
+        fill: '#ffd93bcc',
+      });
+      circle.style.position = 'absolute';
+      circle.style.pointerEvents = 'none';
+      circle.classList.add('path-preview-circle');
+      gridEl.appendChild(circle);
+      previewElements.push(circle);
+    }
+
+    // Draw lines between nodes
+    for (let i = 0; i < path.length - 1; i++) {
+      const p1 = path[i];
+      const p2 = path[i + 1];
+      const cx1 = (p1.x * cellSize) + cellSize / 2 + offset;
+      const cy1 = (p1.y * cellSize) + cellSize / 2 + offset;
+      const cx2 = (p2.x * cellSize) + cellSize / 2 + offset;
+      const cy2 = (p2.y * cellSize) + cellSize / 2 + offset;
+
+      const line = createSVGElement('line', {
+        x1: cx1,
+        y1: cy1,
+        x2: cx2,
+        y2: cy2,
+        stroke: '#ffd93bcc',
+        'stroke-width': 6,
+        'stroke-linecap': 'round',
+      });
+      line.style.position = 'absolute';
+      line.style.pointerEvents = 'none';
+      line.classList.add('path-preview-line');
+      gridEl.appendChild(line);
+      previewElements.push(line);
+    }
+  }
+
+  window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>

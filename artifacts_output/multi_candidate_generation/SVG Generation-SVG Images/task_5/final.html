@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cleaning Up a Mess with a Wet Mop - SVG Animation</title>
+<style>
+  body {
+    margin: 0;
+    background: #e0f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  svg {
+    width: 400px;
+    height: 400px;
+    background: #a7d8de;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  /* Water droplet styles */
+  .droplet {
+    fill: #4fc3f7;
+    fill-opacity: 0.8;
+    filter: url(#droplet-shadow);
+    transform-origin: center bottom;
+    animation-timing-function: ease-in-out;
+  }
+  /* Reflection gradient */
+  .puddle-reflection {
+    fill: url(#reflection-gradient);
+    mix-blend-mode: screen;
+    opacity: 0.3;
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 400 400" aria-label="Cleaning up a mess with a wet mop" role="img" >
+  <defs>
+    <radialGradient id="reflection-gradient" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#a0d8ff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#4fc3f7" stop-opacity="0" />
+    </radialGradient>
+    <filter id="droplet-shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#2196f3" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Floor -->
+  <rect width="400" height="400" fill="#cce7e8" />
+
+  <!-- Mess: irregular puddle shape -->
+  <path id="puddle" fill="#4fc3f7" fill-opacity="0.7" d="
+    M120 280
+    Q130 270 150 275
+    Q170 280 180 265
+    Q190 250 210 260
+    Q230 270 240 255
+    Q250 240 270 245
+    Q290 250 300 270
+    Q310 290 280 300
+    Q250 310 220 305
+    Q190 300 160 310
+    Q130 320 120 300
+    Z
+  " />
+  <!-- Puddle reflection overlay -->
+  <path class="puddle-reflection" d="
+    M120 280
+    Q130 270 150 275
+    Q170 280 180 265
+    Q190 250 210 260
+    Q230 270 240 255
+    Q250 240 270 245
+    Q290 250 300 270
+    Q310 290 280 300
+    Q250 310 220 305
+    Q190 300 160 310
+    Q130 320 120 300
+    Z
+  " />
+
+  <!-- Mop handle -->
+  <rect id="mop-handle" x="190" y="50" width="12" height="150" rx="4" ry="4" fill="#8d6e63" transform-origin="196 200" />
+
+  <!-- Mop head -->
+  <g id="mop-head" transform="translate(196, 200)">
+    <rect x="-30" y="0" width="60" height="20" rx="8" ry="8" fill="#b3e5fc" />
+    <rect x="-28" y="5" width="56" height="10" rx="5" ry="5" fill="#81d4fa" />
+    <line x1="-20" y1="0" x2="-20" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="-10" y1="0" x2="-10" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="0" y1="0" x2="0" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="10" y1="0" x2="10" y2="20" stroke="#4fc3f7" stroke-width="2" />
+    <line x1="20" y1="0" x2="20" y2="20" stroke="#4fc3f7" stroke-width="2" />
+  </g>
+
+  <!-- Water droplets group -->
+  <g id="droplets"></g>
+
+  <!-- Wipe cloth -->
+  <rect id="wipe-cloth" x="140" y="320" width="120" height="40" rx="12" ry="12" fill="#ffccbc" opacity="0" />
+
+  <!-- Text label -->
+  <text x="200" y="30" text-anchor="middle" fill="#004d40" font-weight="700" font-size="20" font-family="Segoe UI, Tahoma, Geneva, Verdana, sans-serif">
+    Cleaning Up a Mess
+  </text>
+</svg>
+
+<script>
+  const svg = document.querySelector('svg');
+  const mopHandle = document.getElementById('mop-handle');
+  const mopHead = document.getElementById('mop-head');
+  const puddle = document.getElementById('puddle');
+  const wipeCloth = document.getElementById('wipe-cloth');
+  const dropletsGroup = document.getElementById('droplets');
+
+  // Animation parameters
+  const mopStartAngle = -40;
+  const mopEndAngle = 40;
+  const mopCenterX = 196;
+  const mopCenterY = 200;
+
+  // Puddle initial opacity
+  puddle.style.opacity = '0.7';
+
+  // Water droplet physics parameters
+  const dropletCount = 12;
+  const dropletRadius = 5;
+  const gravity = 0.15;
+  const bounceFactor = 0.5;
+  const floorY = 310; // approximate floor level for droplets to bounce
+
+  // Droplet objects array
+  let droplets = [];
+
+  // Create droplets at random positions on puddle
+  function createDroplets() {
+    dropletsGroup.innerHTML = '';
+    droplets = [];
+    for (let i = 0; i < dropletCount; i++) {
+      const cx = 140 + Math.random() * 140;
+      const cy = 270 + Math.random() * 20;
+      const droplet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      droplet.setAttribute('class', 'droplet');
+      droplet.setAttribute('r', dropletRadius);
+      droplet.setAttribute('cx', cx);
+      droplet.setAttribute('cy', cy);
+      dropletsGroup.appendChild(droplet);
+      droplets.push({
+        element: droplet,
+        x: cx,
+        y: cy,
+        vy: 0,
+        bounceCount: 0,
+        scale: 1,
+        scaleDir: 1,
+      });
+    }
+  }
+
+  // Animate droplets falling and bouncing with subtle scale pulsation
+  function animateDroplets() {
+    droplets.forEach(d => {
+      d.vy += gravity;
+      d.y += d.vy;
+
+      if (d.y > floorY) {
+        d.y = floorY;
+        d.vy = -d.vy * bounceFactor;
+        d.bounceCount++;
+      }
+
+      // Scale pulsation to simulate water surface tension
+      if (d.bounceCount < 3) {
+        d.scale += 0.02 * d.scaleDir;
+        if (d.scale > 1.15) d.scaleDir = -1;
+        if (d.scale < 0.85) d.scaleDir = 1;
+      } else {
+        // After 3 bounces, fade out droplet by scaling down
+        d.scale *= 0.95;
+        if (d.scale < 0.05) d.scale = 0;
+      }
+
+      d.element.setAttribute('cx', d.x);
+      d.element.setAttribute('cy', d.y);
+      d.element.setAttribute('transform', `scale(${d.scale}) translate(${d.x*(1-1/d.scale)},${d.y*(1-1/d.scale)})`);
+      d.element.style.opacity = d.scale > 0 ? 1 : 0;
+    });
+
+    // Remove droplets that have disappeared
+    droplets = droplets.filter(d => d.scale > 0);
+
+    if (droplets.length > 0) {
+      requestAnimationFrame(animateDroplets);
+    }
+  }
+
+  // Animation timing
+  const mopSweepDuration = 4000; // 4 seconds for mop sweeping
+  const wipeDuration = 3000; // 3 seconds for wiping cloth
+
+  // Animate mop sweeping back and forth over the puddle
+  function runAnimationSequence() {
+    // Mop sweep animation (back and forth)
+    let cycles = 0;
+    let maxCycles = 2;
+    let direction = 1;
+    let start = null;
+
+    function mopStep(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = elapsed / mopSweepDuration;
+
+      let angle;
+      if (direction === 1) {
+        angle = mopStartAngle + (mopEndAngle - mopStartAngle) * progress;
+      } else {
+        angle = mopEndAngle - (mopEndAngle - mopStartAngle) * progress;
+      }
+
+      mopHandle.setAttribute('transform', `rotate(${angle} ${mopCenterX} ${mopCenterY})`);
+      mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(${angle})`);
+
+      if (elapsed >= mopSweepDuration) {
+        direction *= -1;
+        start = timestamp;
+        cycles++;
+      }
+
+      if (cycles < maxCycles * 2) {
+        requestAnimationFrame(mopStep);
+      } else {
+        // Mop sweep finished
+        mopHandle.setAttribute('transform', `rotate(0 ${mopCenterX} ${mopCenterY})`);
+        mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(0)`);
+        // Start puddle fade out and wipe cloth animation
+        puddle.style.transition = `opacity 2000ms ease-out`;
+        puddle.style.opacity = '0';
+
+        // Start droplets falling as puddle fades
+        createDroplets();
+        animateDroplets();
+
+        setTimeout(() => {
+          animateWipeCloth();
+        }, 500);
+      }
+    }
+
+    // Start mop sweeping and puddle fade simultaneously
+    puddle.style.opacity = '0.7';
+    requestAnimationFrame(mopStep);
+  }
+
+  // Animate wipe cloth sliding over remaining wet area
+  function animateWipeCloth() {
+    wipeCloth.style.opacity = '1';
+    wipeCloth.style.transition = 'none';
+    wipeCloth.setAttribute('x', '140');
+    let start = null;
+    const startX = 140;
+    const endX = 140 + 120;
+
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = Math.min(elapsed / wipeDuration, 1);
+      const currentX = startX + (endX - startX) * progress;
+      wipeCloth.setAttribute('x', currentX);
+
+      // Add subtle shimmer effect on wipe cloth during slide
+      const shimmer = 0.3 + 0.7 * Math.abs(Math.sin(progress * Math.PI * 6));
+      wipeCloth.style.fill = `rgba(255,204,188,${shimmer})`;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        // After wiping, fade out the cloth
+        wipeCloth.style.transition = 'opacity 1.5s ease-out';
+        wipeCloth.style.opacity = '0';
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Sound synchronization: subtle water splash sound on mop sweep start and wipe start
+  // Using Web Audio API for simple splash sound
+  function playSplashSound() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+      oscillator.stop(audioCtx.currentTime + 0.15);
+    } catch (e) {
+      // AudioContext not supported or user gesture required
+    }
+  }
+
+  // Modified runAnimationSequence to play sound on mop sweep start and wipe start
+  function runAnimationSequenceWithSound() {
+    // Mop sweep animation (back and forth)
+    let cycles = 0;
+    let maxCycles = 2;
+    let direction = 1;
+    let start = null;
+
+    playSplashSound(); // splash sound at mop sweep start
+
+    function mopStep(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = elapsed / mopSweepDuration;
+
+      let angle;
+      if (direction === 1) {
+        angle = mopStartAngle + (mopEndAngle - mopStartAngle) * progress;
+      } else {
+        angle = mopEndAngle - (mopEndAngle - mopStartAngle) * progress;
+      }
+
+      mopHandle.setAttribute('transform', `rotate(${angle} ${mopCenterX} ${mopCenterY})`);
+      mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(${angle})`);
+
+      if (elapsed >= mopSweepDuration) {
+        direction *= -1;
+        start = timestamp;
+        cycles++;
+      }
+
+      if (cycles < maxCycles * 2) {
+        requestAnimationFrame(mopStep);
+      } else {
+        // Mop sweep finished
+        mopHandle.setAttribute('transform', `rotate(0 ${mopCenterX} ${mopCenterY})`);
+        mopHead.setAttribute('transform', `translate(${mopCenterX}, ${mopCenterY}) rotate(0)`);
+        // Start puddle fade out and wipe cloth animation
+        puddle.style.transition = `opacity 2000ms ease-out`;
+        puddle.style.opacity = '0';
+
+        // Start droplets falling as puddle fades
+        createDroplets();
+        animateDroplets();
+
+        setTimeout(() => {
+          playSplashSound(); // splash sound at wipe start
+          animateWipeCloth();
+        }, 500);
+      }
+    }
+
+    // Start mop sweeping and puddle fade simultaneously
+    puddle.style.opacity = '0.7';
+    requestAnimationFrame(mopStep);
+  }
+
+  // Start animation on load
+  window.onload = () => {
+    runAnimationSequenceWithSound();
+  };
+</script>
+</body>
+</html>

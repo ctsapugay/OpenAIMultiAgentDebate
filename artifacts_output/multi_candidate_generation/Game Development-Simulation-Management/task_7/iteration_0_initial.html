@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Capture and Collection Game</title>
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #a0d8f7, #f0f9ff);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  header {
+    background-color: #0077cc;
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    user-select: none;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  /* Game area styles */
+  #game-area {
+    flex: 3;
+    background: #d0f0ff;
+    border: 3px solid #0077cc;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  /* Creature styles */
+  .creature {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+  /* Net styles */
+  #net {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    opacity: 0.8;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 10;
+  }
+  /* Collection panel styles */
+  #collection-panel {
+    flex: 1;
+    background: #ffffffcc;
+    border: 3px solid #0077cc;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  #collection-panel h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #004a80;
+    text-align: center;
+  }
+  #collection-list {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+    padding: 0.25rem;
+  }
+  .collected-item {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #0077cc;
+    border-radius: 8px;
+    background-color: #e0f4ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #004a80;
+    user-select: none;
+    position: relative;
+  }
+  .collected-item img {
+    max-width: 40px;
+    max-height: 40px;
+    pointer-events: none;
+  }
+  .collected-count {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    background: #0077cc;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0 4px;
+    user-select: none;
+  }
+  /* Controls panel */
+  #controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  #throw-net-btn {
+    background-color: #0077cc;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #throw-net-btn:disabled {
+    background-color: #a0c8f7;
+    cursor: not-allowed;
+  }
+  #throw-net-btn:hover:not(:disabled) {
+    background-color: #005fa3;
+  }
+  /* Tooltip for creatures */
+  .tooltip {
+    position: absolute;
+    background: #004a80cc;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    transform: translate(-50%, -120%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .creature:hover .tooltip {
+    opacity: 1;
+  }
+  /* Responsive adjustments */
+  @media (max-width: 700px) {
+    main {
+      flex-direction: column;
+    }
+    #game-area {
+      flex: none;
+      height: 300px;
+      margin-bottom: 1rem;
+    }
+    #collection-panel {
+      flex: none;
+      height: 200px;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Capture and Collection Game</header>
+<main>
+  <section id="game-area" aria-label="Game area where creatures appear and can be captured" tabindex="0">
+    <!-- Creatures will be dynamically added here -->
+    <!-- Net visual -->
+    <img id="net" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNSIgc3Ryb2tlPSIjMDA3N2NjIiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9IiNmZmYiLz4KICA8bGluZSB4MT0iMTUiIHkxPSIxNSIgeDI9IjY1IiB5Mj0iNjUiIHN0cm9rZT0iIzAwNzdjYyIgc3Ryb2tlLXdpZHRoPSIzIi8+Cjwvc3ZnPgo=" alt="Net icon" />
+  </section>
+  <aside id="collection-panel" aria-label="Player's collection panel">
+    <h2>Your Collection</h2>
+    <div id="collection-list" aria-live="polite" aria-relevant="additions"></div>
+    <div id="controls">
+      <button id="throw-net-btn" aria-pressed="false" aria-label="Throw net to capture creatures">Throw Net</button>
+    </div>
+  </aside>
+</main>
+
+<script>
+/**
+ * Capture and Collection Game
+ * 
+ * Players can throw nets to capture creatures appearing randomly in the game area.
+ * Captured creatures are added to the player's collection.
+ * 
+ * Implementation details:
+ * - Creatures spawn randomly and move slowly.
+ * - Player clicks "Throw Net" button to activate net mode.
+ * - In net mode, clicking on the game area throws a net at that position.
+ * - If any creatures are inside the net radius, they are captured.
+ * - Captured creatures are removed from the game area and added to the collection.
+ * - Collection shows counts of each creature type.
+ */
+
+// Game configuration constants
+const CREATURE_TYPES = [
+  {
+    id: 'butterfly',
+    name: 'Butterfly',
+    color: '#ff6f91',
+    svgPath: 'M10 10c5 0 5 10 0 10s-5-10 0-10z', // simplified wing shape
+  },
+  {
+    id: 'frog',
+    name: 'Frog',
+    color: '#4caf50',
+    svgPath: 'M5 15c5-10 15-10 10 0s-10 10-10 0z', // simplified frog shape
+  },
+  {
+    id: 'bird',
+    name: 'Bird',
+    color: '#2196f3',
+    svgPath: 'M10 10l10 5-10 5z', // simplified bird shape
+  },
+  {
+    id: 'ladybug',
+    name: 'Ladybug',
+    color: '#e91e63',
+    svgPath: 'M10 10a10 10 0 1 1 0 20a10 10 0 1 1 0-20z', // circle shape
+  }
+];
+const CREATURE_SIZE = 50; // px width and height
+const SPAWN_INTERVAL = 2500; // ms between spawns
+const MAX_CREATURES = 12; // max creatures on screen
+const NET_RADIUS = 40; // radius of net capture area in px
+const NET_THROW_COOLDOWN = 1500; // ms cooldown between net throws
+
+// DOM references
+const gameArea = document.getElementById('game-area');
+const collectionList = document.getElementById('collection-list');
+const throwNetBtn = document.getElementById('throw-net-btn');
+const netVisual = document.getElementById('net');
+
+// Game state
+let creatures = []; // array of creature objects currently on screen
+let collection = {}; // map of creatureId -> count
+let netMode = false; // whether player is currently throwing a net
+let lastNetThrowTime = 0; // timestamp of last net throw
+
+// Utility function to create SVG element for a creature
+function createCreatureSVG(type) {
+  const xmlns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(xmlns, "svg");
+  svg.setAttribute("width", CREATURE_SIZE);
+  svg.setAttribute("height", CREATURE_SIZE);
+  svg.setAttribute("viewBox", "0 0 30 30");
+  svg.setAttribute("aria-label", type.name);
+  svg.setAttribute("role", "img");
+  svg.style.userSelect = "none";
+
+  // Background circle for ladybug or base shape
+  if (type.id === 'ladybug') {
+    const circle = document.createElementNS(xmlns, "circle");
+    circle.setAttribute("cx", "15");
+    circle.setAttribute("cy", "15");
+    circle.setAttribute("r", "14");
+    circle.setAttribute("fill", type.color);
+    circle.setAttribute("stroke", "#880e4f");
+    circle.setAttribute("stroke-width", "2");
+    svg.appendChild(circle);
+
+    // Black spots
+    for (let i = 0; i < 5; i++) {
+      const spot = document.createElementNS(xmlns, "circle");
+      const angle = (i * 72) * Math.PI / 180;
+      const r = 6;
+      const cx = 15 + Math.cos(angle) * 7;
+      const cy = 15 + Math.sin(angle) * 7;
+      spot.setAttribute("cx", cx);
+      spot.setAttribute("cy", cy);
+      spot.setAttribute("r", r);
+      spot.setAttribute("fill", "#000");
+      svg.appendChild(spot);
+    }
+  } else {
+    // For other creatures, create a path with fill color
+    const path = document.createElementNS(xmlns, "path");
+    path.setAttribute("d", type.svgPath);
+    path.setAttribute("fill", type.color);
+    path.setAttribute("stroke", "#333");
+    path.setAttribute("stroke-width", "1");
+    svg.appendChild(path);
+  }
+
+  return svg;
+}
+
+// Creature class to manage individual creatures
+class Creature {
+  constructor(type, x, y) {
+    this.type = type;
+    this.x = x; // top-left x in px relative to game area
+    this.y = y; // top-left y in px relative to game area
+    this.speedX = (Math.random() * 0.6 + 0.2) * (Math.random() < 0.5 ? -1 : 1); // horizontal speed px/frame
+    this.speedY = (Math.random() * 0.4 + 0.1) * (Math.random() < 0.5 ? -1 : 1); // vertical speed px/frame
+    this.element = document.createElement('div');
+    this.element.classList.add('creature');
+    this.element.style.width = CREATURE_SIZE + 'px';
+    this.element.style.height = CREATURE_SIZE + 'px';
+    this.element.style.left = this.x + 'px';
+    this.element.style.top = this.y + 'px';
+    this.element.setAttribute('tabindex', '-1');
+    this.element.setAttribute('aria-label', this.type.name + ' creature');
+    this.element.setAttribute('role', 'img');
+    this.element.style.position = 'absolute';
+    this.element.style.userSelect = 'none';
+
+    // Append SVG inside creature div
+    const svg = createCreatureSVG(type);
+    this.element.appendChild(svg);
+
+    // Tooltip
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('tooltip');
+    tooltip.textContent = type.name;
+    this.element.appendChild(tooltip);
+
+    // Add to game area
+    gameArea.appendChild(this.element);
+  }
+
+  // Update position based on speed and bounce off edges
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // Bounce horizontally
+    if (this.x <= 0) {
+      this.x = 0;
+      this.speedX = -this.speedX;
+    } else if (this.x + CREATURE_SIZE >= gameArea.clientWidth) {
+      this.x = gameArea.clientWidth - CREATURE_SIZE;
+      this.speedX = -this.speedX;
+    }
+    // Bounce vertically
+    if (this.y <= 0) {
+      this.y = 0;
+      this.speedY = -this.speedY;
+    } else if (this.y + CREATURE_SIZE >= gameArea.clientHeight) {
+      this.y = gameArea.clientHeight - CREATURE_SIZE;
+      this.speedY = -this.speedY;
+    }
+
+    this.element.style.left = this.x + 'px';
+    this.element.style.top = this.y + 'px';
+  }
+
+  // Get center coordinates of creature for collision detection
+  getCenter() {
+    return {
+      x: this.x + CREATURE_SIZE / 2,
+      y: this.y + CREATURE_SIZE / 2
+    };
+  }
+
+  // Remove creature from DOM
+  remove() {
+    if (this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
+    }
+  }
+}
+
+// Spawn a new creature at a random position inside the game area
+function spawnCreature() {
+  if (creatures.length >= MAX_CREATURES) return;
+
+  const type = CREATURE_TYPES[Math.floor(Math.random() * CREATURE_TYPES.length)];
+  const maxX = gameArea.clientWidth - CREATURE_SIZE;
+  const maxY = gameArea.clientHeight - CREATURE_SIZE;
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  const creature = new Creature(type, x, y);
+  creatures.push(creature);
+}
+
+// Update all creatures positions
+function updateCreatures() {
+  creatures.forEach(creature => creature.update());
+}
+
+// Capture creatures inside net radius at given coordinates
+function captureCreaturesAt(x, y) {
+  // Find creatures within NET_RADIUS of (x,y)
+  const captured = [];
+  creatures.forEach(creature => {
+    const center = creature.getCenter();
+    const dx = center.x - x;
+    const dy = center.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance <= NET_RADIUS) {
+      captured.push(creature);
+    }
+  });
+
+  if (captured.length === 0) {
+    return false; // no capture
+  }
+
+  // Remove captured creatures from game and add to collection
+  captured.forEach(creature => {
+    creature.remove();
+    creatures = creatures.filter(c => c !== creature);
+    addToCollection(creature.type.id);
+  });
+
+  return true;
+}
+
+// Add a creature type to the player's collection
+function addToCollection(creatureId) {
+  if (!collection[creatureId]) {
+    collection[creatureId] = 0;
+  }
+  collection[creatureId]++;
+  renderCollection();
+}
+
+// Render the collection panel
+function renderCollection() {
+  collectionList.innerHTML = '';
+  // Sort by name alphabetically
+  const sortedTypes = CREATURE_TYPES.slice().sort((a, b) => a.name.localeCompare(b.name));
+  sortedTypes.forEach(type => {
+    if (collection[type.id]) {
+      const count = collection[type.id];
+      const item = document.createElement('div');
+      item.classList.add('collected-item');
+      item.setAttribute('aria-label', `${type.name} x${count}`);
+
+      // Create SVG icon for collection item (smaller)
+      const svg = createCreatureSVG(type);
+      svg.setAttribute('width', '40');
+      svg.setAttribute('height', '40');
+      item.appendChild(svg);
+
+      // Count badge
+      const countBadge = document.createElement('div');
+      countBadge.classList.add('collected-count');
+      countBadge.textContent = count;
+      item.appendChild(countBadge);
+
+      collectionList.appendChild(item);
+    }
+  });
+}
+
+// Handle net throw button toggle
+function toggleNetMode() {
+  netMode = !netMode;
+  throwNetBtn.setAttribute('aria-pressed', netMode.toString());
+  throwNetBtn.textContent = netMode ? 'Cancel Net' : 'Throw Net';
+  if (!netMode) {
+    netVisual.style.display = 'none';
+  }
+}
+
+// Handle game area click when in net mode
+function onGameAreaClick(event) {
+  if (!netMode) return;
+
+  const now = Date.now();
+  if (now - lastNetThrowTime < NET_THROW_COOLDOWN) {
+    // Cooldown active, ignore throw
+    return;
+  }
+  lastNetThrowTime = now;
+
+  // Get click coordinates relative to game area
+  const rect = gameArea.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  // Show net visual at click position
+  netVisual.style.left = clickX + 'px';
+  netVisual.style.top = clickY + 'px';
+  netVisual.style.display = 'block';
+
+  // Animate net throw (scale up and fade out)
+  netVisual.style.transition = 'none';
+  netVisual.style.transform = 'translate(-50%, -50%) scale(0.5)';
+  netVisual.style.opacity = '0.8';
+  requestAnimationFrame(() => {
+    netVisual.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+    netVisual.style.transform = 'translate(-50%, -50%) scale(1.2)';
+    netVisual.style.opacity = '0';
+  });
+
+  // After animation, hide net visual
+  setTimeout(() => {
+    netVisual.style.display = 'none';
+    netVisual.style.opacity = '0.8';
+    netVisual.style.transform = 'translate(-50%, -50%) scale(1)';
+  }, 400);
+
+  // Check for captures
+  const captured = captureCreaturesAt(clickX, clickY);
+
+  // Provide feedback
+  if (captured) {
+    // Flash game area green briefly
+    flashGameArea('#a0f7a0');
+  } else {
+    // Flash game area red briefly
+    flashGameArea('#f7a0a0');
+  }
+
+  // Exit net mode after throw
+  toggleNetMode();
+}
+
+// Flash the game area background color briefly for feedback
+function flashGameArea(color) {
+  const original = gameArea.style.backgroundColor || '#d0f0ff';
+  gameArea.style.backgroundColor = color;
+  setTimeout(() => {
+    gameArea.style.backgroundColor = original;
+  }, 300);
+}
+
+// Game loop for updating creatures
+function gameLoop() {
+  updateCreatures();
+  requestAnimationFrame(gameLoop);
+}
+
+// Spawn creatures periodically
+setInterval(spawnCreature, SPAWN_INTERVAL);
+
+// Event listeners
+throwNetBtn.addEventListener('click', () => {
+  toggleNetMode();
+});
+
+gameArea.addEventListener('click', onGameAreaClick);
+
+// Keyboard accessibility: allow space/enter to toggle net mode when button focused
+throwNetBtn.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    toggleNetMode();
+  }
+});
+
+// Initialize game
+function init() {
+  renderCollection();
+  gameLoop();
+  // Spawn initial creatures
+  for (let i = 0; i < 5; i++) {
+    spawnCreature();
+  }
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{
+  "summary": {
+    "total_requests": 12,
+    "total_input_tokens": 111798,
+    "total_output_tokens": 47285,
+    "total_tokens": 159083,
+    "operations": [
+      "initial_code_generation",
+      "code_improvement_iteration_1",
+      "evaluation",
+      "code_generation"
+    ],
+    "models": [
+      "gpt-4.1-mini"
+    ]
+  },
+  "operation_summary": {
+    "code_generation": {
+      "count": 1,
+      "input_tokens": 390,
+      "output_tokens": 9166,
+      "total_tokens": 9556
+    },
+    "evaluation": {
+      "count": 7,
+      "input_tokens": 96776,
+      "output_tokens": 8039,
+      "total_tokens": 104815
+    },
+    "initial_code_generation": {
+      "count": 2,
+      "input_tokens": 688,
+      "output_tokens": 12648,
+      "total_tokens": 13336
+    },
+    "code_improvement_iteration_1": {
+      "count": 2,
+      "input_tokens": 13944,
+      "output_tokens": 17432,
+      "total_tokens": 31376
+    }
+  },
+  "detailed_records": [
+    {
+      "operation": "code_generation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 390,
+      "output_tokens": 9166,
+      "total_tokens": 9556,
+      "timestamp": "2025-11-30 19:18:01"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 15084,
+      "output_tokens": 1042,
+      "total_tokens": 16126,
+      "timestamp": "2025-11-30 19:18:25"
+    },
+    {
+      "operation": "initial_code_generation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 390,
+      "output_tokens": 8083,
+      "total_tokens": 8473,
+      "timestamp": "2025-11-30 19:20:07"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14972,
+      "output_tokens": 1050,
+      "total_tokens": 16022,
+      "timestamp": "2025-11-30 19:20:30"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 14972,
+      "output_tokens": 1104,
+      "total_tokens": 16076,
+      "timestamp": "2025-11-30 19:20:55"
+    },
+    {
+      "operation": "code_improvement_iteration_1",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 8674,
+      "output_tokens": 11545,
+      "total_tokens": 20219,
+      "timestamp": "2025-11-30 19:22:47"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 18431,
+      "output_tokens": 1169,
+      "total_tokens": 19600,
+      "timestamp": "2025-11-30 19:23:14"
+    },
+    {
+      "operation": "initial_code_generation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 298,
+      "output_tokens": 4565,
+      "total_tokens": 4863,
+      "timestamp": "2025-11-30 19:24:07"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 10665,
+      "output_tokens": 1215,
+      "total_tokens": 11880,
+      "timestamp": "2025-11-30 19:24:34"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 10665,
+      "output_tokens": 1284,
+      "total_tokens": 11949,
+      "timestamp": "2025-11-30 19:24:59"
+    },
+    {
+      "operation": "code_improvement_iteration_1",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 5270,
+      "output_tokens": 5887,
+      "total_tokens": 11157,
+      "timestamp": "2025-11-30 19:26:01"
+    },
+    {
+      "operation": "evaluation",
+      "model": "gpt-4.1-mini",
+      "input_tokens": 11987,
+      "output_tokens": 1175,
+      "total_tokens": 13162,
+      "timestamp": "2025-11-30 19:26:22"
+    }
+  ]
+}
