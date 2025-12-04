@@ -1,135 +1,112 @@
-#!/usr/bin/env python3
 """
 Multi-Agent Debate System - CLI Entry Point
-
-This script provides a command-line interface for running multi-agent debates
-using the OpenAI Agents SDK.
 """
 
 import argparse
 import os
 import sys
 from debate_system import DebateSystem
-
+from dotenv import load_dotenv
+load_dotenv()
 
 def parse_arguments():
-    """
-    Parse command-line arguments.
-    
-    Returns:
-        Parsed arguments namespace
-    """
     parser = argparse.ArgumentParser(
-        description="Run a multi-agent debate on a specified topic",
+        description="Run a multi-agent creative writing judge system",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Example usage:
-  python main.py --topic "Should AI systems be open source?"
-  python main.py --topic "Climate change solutions" --agents 5 --rounds 3
-  python main.py --topic "Future of work" --model gpt-4o-mini
+  python main.py --topic "Story A: ... Story B: ..."
+  python main.py --topic "..." --agents 5 --rounds 2
+  python main.py --topic "..." --model gpt-4o-mini --output run1.json
         """
     )
-    
+
     parser.add_argument(
         "--topic",
         type=str,
         required=True,
-        help="The debate topic (required)"
+        help="The story pair or writing task to evaluate"
     )
-    
+
     parser.add_argument(
         "--agents",
         type=int,
         default=3,
-        help="Number of agents to participate in the debate (default: 3)"
+        help="Number of agents (default 3)"
     )
-    
+
     parser.add_argument(
         "--rounds",
         type=int,
-        default=2,
-        help="Number of debate rounds (default: 2)"
+        default=1,
+        help="Number of rounds (default 1)"
     )
-    
+
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-4",
-        help="OpenAI model to use (default: gpt-4)"
+        default="gpt-4o-mini",
+        help="OpenAI model to use"
     )
-    
+
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="debate_output.json",
+        help="Where to save results"
+    )
+
     return parser.parse_args()
 
 
 def main():
-    """Main execution function for the debate system CLI."""
     try:
-        # Validate OPENAI_API_KEY environment variable
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             print("Error: OPENAI_API_KEY environment variable is not set.", file=sys.stderr)
-            print("Please set your OpenAI API key:", file=sys.stderr)
-            print("  export OPENAI_API_KEY='your-api-key-here'", file=sys.stderr)
             sys.exit(1)
-        
-        # Parse command-line arguments
+
         args = parse_arguments()
-        
-        # Validate inputs
+
         if not args.topic.strip():
             print("Error: Topic cannot be empty.", file=sys.stderr)
             sys.exit(1)
-        
-        if args.agents < 2:
-            print(f"Error: Number of agents must be at least 2 (got {args.agents}).", file=sys.stderr)
+
+        if args.agents < 1:
+            print("Error: Must have at least 1 agent.", file=sys.stderr)
             sys.exit(1)
-        
+
         if args.rounds < 1:
-            print(f"Error: Number of rounds must be at least 1 (got {args.rounds}).", file=sys.stderr)
+            print("Error: Must have at least 1 round.", file=sys.stderr)
             sys.exit(1)
-        
-        # Display configuration
+
         print("=" * 80)
-        print("MULTI-AGENT DEBATE SYSTEM")
+        print("MULTI-AGENT LITERARY JUDGE SYSTEM")
         print("=" * 80)
         print(f"Topic: {args.topic}")
         print(f"Agents: {args.agents}")
         print(f"Rounds: {args.rounds}")
         print(f"Model: {args.model}")
+        print(f"Saving output to: {args.output}")
         print("=" * 80)
-        print()
-        
-        # Instantiate DebateSystem with parsed configuration
-        print("Initializing debate system...")
+        print("\nInitializing...\n")
+
         debate_system = DebateSystem(num_agents=args.agents, model=args.model)
-        print(f"Created {args.agents} agents successfully.")
-        print()
-        
-        # Display progress indicators during execution
-        print("Starting debate...")
-        print()
-        
-        # Call run_debate with topic and rounds
-        transcript = debate_system.run_debate(topic=args.topic, num_rounds=args.rounds)
-        
-        # Print final transcript to console
-        print()
-        print(transcript)
-        
-    except ValueError as e:
-        # Handle validation errors
-        print(f"Error: {str(e)}", file=sys.stderr)
-        sys.exit(1)
-    
+
+        print("Starting evaluation...\n")
+
+        results = debate_system.run_debate(
+            topic=args.topic,
+            num_rounds=args.rounds,
+            output_path=args.output
+        )
+
+        print("Evaluation complete!")
+        print(f"Total tokens used: {results['total_tokens']}")
+        print(f"Saved to: {args.output}")
+
     except KeyboardInterrupt:
-        # Handle user interruption gracefully
-        print("\n\nDebate interrupted by user.", file=sys.stderr)
-        sys.exit(130)
-    
-    except Exception as e:
-        # Handle API errors and other unexpected errors
-        print(f"Error: An unexpected error occurred: {str(e)}", file=sys.stderr)
-        print("Please check your API key and network connection.", file=sys.stderr)
+        print("\nInterrupted by user, exiting.")
         sys.exit(1)
 
 
