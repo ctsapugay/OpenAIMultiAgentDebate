@@ -1,269 +1,72 @@
-# Multi-Agent Debate System
+# 📘 Multi-Agent Debate System for Creative Writing Evaluation  
+**Branch:** `litbench`  
+**Last Updated:** November 30, 2025
+**Author:** Angela Yu  
 
-A Python application that leverages the OpenAI Agents SDK to orchestrate structured debates between multiple AI agents. The system implements a flat organizational structure where all agents are peers, enabling diverse perspectives on any given topic.
+---
 
-Perfect for collaborative problem-solving, coding tasks, and exploring complex topics from multiple angles!
+# Creative Writing Evaluation via Multi-Agent Debate
 
-## Features
+This branch contains experiments exploring how a **multi-agent debate system** can be used to judge **creative writing quality**, drawing inspiration from evaluation approaches such as **LitBench**, **EQ-Bench**, and recent work on literary reasoning in LLMs.
 
-- 🤖 Configure multiple AI agents to debate any topic
-- 💬 Execute multiple rounds of debate with sequential agent responses
-- 🧠 Automatic conversation history management across rounds
-- 📝 Generate formatted debate transcripts
-- 💻 Handle coding tasks with collaborative agent solutions
-- 🎯 Simple command-line interface
-- ✅ Comprehensive test suite included
+## Purpose
 
-## Prerequisites
+The objective of this work is to evaluate paired creative writing responses (**Story A** vs. **Story B**) using a structured rubric that focuses on five key dimensions:
 
-- Python 3.9 or higher
-- OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
+- **Originality** – uniqueness of ideas and creative risk-taking  
+- **Imagery** – sensory detail and descriptive richness  
+- **Emotional Impact** – how strongly the writing affects the reader  
+- **Coherence** – clarity, flow, and narrative structure  
+- **Technical Skill** – style, language control, and overall craft  
 
-## Quick Start
+Each agent participating in the debate is instructed to output in the following format:
 
-### 1. Clone the repository
+```text
+Reasoning: [your evaluation]
+Preferred: [A or B]
 
-```bash
-git clone https://github.com/ctsapugay/OpenAIMultiAgentDebate.git
-cd OpenAIMultiAgentDebate
-```
+---
 
-### 2. Set up virtual environment
+## ✨ Key Findings (Summary)
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+1. **Multi-round debate > more agents.**  
+   Adding rounds improved stability more than adding additional agents.
 
-### 3. Install dependencies
+2. **Emotionally rich stories consistently win.**  
+   Across all experiments, agents preferred stories with relational tension, introspection, or implied conflict — strongly aligning with EQ-Bench patterns.
 
-```bash
-pip install -r requirements.txt
-```
+3. **Medium-length prompts work best.**  
+   One-sentence prompts were too shallow for discussion; medium prompts triggered deeper reasoning; huge prompts were too big
 
-### 4. Configure your API key
+4. **System behavior is consistent and interpretable.**  
+   Despite variations in agents/rounds, the final results converged almost every time.
 
-Create a `.env` file in the project root:
+---
 
-```bash
-cp .env.example .env
-```
+## 🧪 Experimental Configurations
 
-Edit `.env` and add your OpenAI API key:
+### Story Pairs  
+We tested three categories of prompts:
 
-```
-OPENAI_API_KEY=your-actual-api-key-here
-```
+| Category | Purpose | Benchmark Connection |
+|---------|----------|---------------------|
+| **One-line hooks** | Test basic debate behavior | LitBench minimal prompts |
+| **Medium mystery & introspection** | Evaluate narrative reasoning | LitBench opening-lines |
+| **Emotion-driven family & identity prompts** | Evaluate empathy, subtlety | EQ-Bench-style scenarios |
 
-Alternatively, set it as an environment variable:
+### Debate System Settings
 
-```bash
-export OPENAI_API_KEY='your-api-key-here'
-```
+The following configurations were tested:
 
-## Usage
+| Experiment | Prompt Size | Agents | Rounds | Purpose |
+|-----------|-------------|--------|--------|---------|
+| 1 | Small | 5 | 1 | Validate working pipeline |
+| 2 | Medium | 3 | 3 | Compare stability over debate |
+| 3 | Medium EQ-style | 2 | 5 | Test emotional sensitivity |
 
-### Command-Line Interface
+All experiments used **gpt-4o-mini**.
 
-Run a debate using the CLI:
+---
 
-```bash
-python main.py --topic "Your debate topic here"
-```
+## 📂 File Structure
 
-#### Command-Line Arguments
-
-- `--topic` (required): The debate topic for agents to discuss
-- `--agents` (optional): Number of agents to participate (default: 3)
-- `--rounds` (optional): Number of debate rounds (default: 2)
-- `--model` (optional): OpenAI model to use (default: gpt-4)
-
-#### Examples
-
-**Basic debate** with default settings (3 agents, 2 rounds):
-```bash
-python main.py --topic "Should AI systems be open source?"
-```
-
-**Coding task** - agents collaborate on writing code:
-```bash
-python main.py --topic "Write a function in Python to test if a number is prime"
-```
-
-**Custom configuration** with more agents and rounds:
-```bash
-python main.py --topic "What is the future of renewable energy?" --agents 5 --rounds 3
-```
-
-**Use a cheaper model** for faster/cheaper responses:
-```bash
-python main.py --topic "How can we improve education?" --model gpt-4o-mini
-```
-
-### Test Scripts
-
-Try the included test scripts to see the system in action:
-
-**Live debate test:**
-```bash
-python test_live.py
-```
-
-**Coding task test:**
-```bash
-python test_coding.py
-```
-
-### Running Tests
-
-Run the full test suite:
-
-```bash
-pytest tests/ -v
-```
-
-## Sample Output
-
-### Debate Example
-
-```
-================================================================================
-MULTI-AGENT DEBATE SYSTEM
-================================================================================
-Topic: Should AI systems be open source?
-Agents: 3
-Rounds: 2
-Model: gpt-4o-mini
-================================================================================
-
-Initializing debate system...
-Created 3 agents successfully.
-
-Starting debate...
-
-================================================================================
-DEBATE TRANSCRIPT
-================================================================================
-
-[Round 1] Agent_1:
---------------------------------------------------------------------------------
-The debate over whether AI systems should be open source involves multiple 
-factors, including innovation, ethical considerations, accessibility, and 
-security...
-
-[Agent provides detailed analysis with multiple perspectives]
-
-[Round 1] Agent_2:
---------------------------------------------------------------------------------
-Building on the previous discussion, it's important to delve deeper into the 
-implications of the chosen approach...
-
-[Agent builds on Agent_1's points and adds new perspectives]
-
-[Round 1] Agent_3:
---------------------------------------------------------------------------------
-Continuing this debate, let's consider some broader implications and 
-applications...
-
-[Agent synthesizes previous arguments and proposes solutions]
-
-[Round 2] Agent_1:
---------------------------------------------------------------------------------
-In this second round, I'd like to broaden the scope to encompass algorithmic 
-complexity and community engagement...
-
-[Agents continue iterating and refining their positions]
-
-================================================================================
-END OF DEBATE
-================================================================================
-```
-
-### Coding Task Example
-
-When given a coding task like "Write a function in Python to test if a number is prime", the agents will:
-
-1. **Agent_1**: Provide an initial efficient implementation
-2. **Agent_2**: Enhance it with error handling and optimizations
-3. **Agent_3**: Add caching, benchmarking, and documentation
-
-The result is a collaborative, well-thought-out solution with multiple iterations and improvements!
-
-## Project Structure
-
-```
-OpenAIMultiAgentDebate/
-├── main.py                    # CLI entry point
-├── debate_system.py           # Core DebateSystem class
-├── test_live.py              # Live API test script
-├── test_coding.py            # Coding task test script
-├── requirements.txt          # Python dependencies
-├── .env.example              # Example environment configuration
-├── README.md                 # This file
-└── tests/                    # Test suite
-    ├── __init__.py
-    ├── test_debate_system.py # Unit tests
-    └── test_integration.py   # Integration tests
-```
-
-## How It Works
-
-1. **Initialization**: The system creates multiple AI agents using the OpenAI Agents SDK
-2. **Debate Rounds**: Each round, agents respond sequentially to the topic
-3. **Context Sharing**: All agents receive the complete conversation history before responding
-4. **Transcript Generation**: After all rounds complete, a formatted transcript is generated
-
-## Architecture
-
-The system uses three key primitives from the OpenAI Agents SDK:
-
-- **Agent**: Individual debate participants with specific instructions
-- **Runner**: Executes agent interactions synchronously
-- **Session**: Maintains conversation history across agent turns
-
-## Use Cases
-
-This system is perfect for:
-
-- 🎓 **Educational discussions** - Explore complex topics from multiple angles
-- 💻 **Collaborative coding** - Get multiple AI perspectives on code solutions
-- 🔬 **Research brainstorming** - Generate diverse ideas and approaches
-- 🤔 **Problem-solving** - Break down complex problems with multi-agent analysis
-- 📊 **Decision-making** - Evaluate options from different viewpoints
-
-## Future Enhancements
-
-This baseline implementation can be extended with:
-
-- 🔧 Tool integration for agents to access external resources
-- 👥 Specialized roles and expertise for different agents
-- 🗳️ Voting and consensus mechanisms
-- 📈 Debate quality evaluation metrics
-- 🎯 Moderator agents using handoff primitives
-- 💾 Persistent session storage (SQLite/Redis)
-- 🌐 Web interface for easier interaction
-
-## Contributing
-
-Contributions are welcome! Feel free to:
-
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
-
-## License
-
-This project is provided as-is for educational and development purposes.
-
-## Acknowledgments
-
-Built with the [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) - a lightweight framework for building multi-agent workflows.
-
-## Support
-
-If you encounter any issues or have questions:
-
-1. Check the [OpenAI Agents SDK documentation](https://openai.github.io/openai-agents-python/)
-2. Review the test files for usage examples
-3. Open an issue on GitHub
